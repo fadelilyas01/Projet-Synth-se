@@ -140,20 +140,20 @@ class ShieldApiEndpointsTest(APITestCase):
     def test_google_login_auto_provision_and_repeat(self):
         url = reverse('auth-google')
         google_data = {
-            'email': 'ilyas.google@gmail.com',
-            'name': 'Ilyas Google'
+            'email': 'google.user@shieldnet.app',
+            'name': 'Google Test User'
         }
         # 1. Premier appel : compte inexistant -> création auto
         resp1 = self.client.post(url, google_data, format='json')
         self.assertEqual(resp1.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp1.data['user']['email'], 'ilyas.google@gmail.com')
+        self.assertEqual(resp1.data['user']['email'], 'google.user@shieldnet.app')
         self.assertIn('tokens', resp1.data)
         self.assertIsNotNone(resp1.data['tokens']['access'])
 
         # 2. Deuxième appel : compte existant -> connexion directe immédiate
         resp2 = self.client.post(url, google_data, format='json')
         self.assertEqual(resp2.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp2.data['user']['email'], 'ilyas.google@gmail.com')
+        self.assertEqual(resp2.data['user']['email'], 'google.user@shieldnet.app')
         self.assertIn('tokens', resp2.data)
 
     def test_admin_stats_and_moderation(self):

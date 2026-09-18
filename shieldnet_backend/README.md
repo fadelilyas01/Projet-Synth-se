@@ -3,7 +3,7 @@
 [![Django](https://img.shields.io/badge/Django-5.x-092E20?logo=django)](https://www.djangoproject.com)
 [![DRF](https://img.shields.io/badge/Django%20REST-Framework-red)](https://www.django-rest-framework.org)
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0%20(Swagger)-85EA2D?logo=swagger)](http://127.0.0.1:8000/api/v1/docs/)
-[![Tests](https://img.shields.io/badge/Tests-20%2F20%20Pass-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-23%2F23%20Pass-success.svg)]()
 
 Backend officiel du **Projet de Synthèse ShieldNet** — Université du Québec en Outaouais (UQO).  
 Conçu et développé avec **Django**, **Django REST Framework (DRF)**, **SimpleJWT**, et documentation interactive **OpenAPI 3.0 (drf-spectacular)**.
@@ -93,26 +93,26 @@ Tous les points d'accès mobiles sont protégés par le contrôle d'en-tête `X-
 ## 🚀 Guide de Démarrage Rapide
 
 ### 1. Installation des dépendances
-`ash
+```bash
 pip install -r requirements.txt
-`
+```
 
 ### 2. Exécution des migrations de base de données
-`ash
+```bash
 python manage.py migrate
-`
+```
 
 ### 3. Compte Administrateur par défaut
 Un compte administrateur dédié est configuré :
-- **Courriel** : dmin@shieldnet.app (ou identifiant dmin)
-- **Mot de passe** : dmin123 *(configurable via la variable ADMIN_PASSWORD)*
+- **Courriel** : admin@shieldnet.app (ou identifiant admin)
+- **Mot de passe** : admin123 *(configurable via la variable ADMIN_PASSWORD)*
 
 ### 4. Lancement des tests automatisés (100% de réussite)
-`ash
+```bash
 python manage.py test shield_api
-`
+```
 
 ### 5. Démarrage du serveur local
-`ash
+```bash
 python manage.py runserver 0.0.0.0:8000
-`
+```

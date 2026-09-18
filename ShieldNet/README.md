@@ -4,7 +4,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20(Prêt)-green.svg)]()
 [![License](https://img.shields.io/badge/License-Propriétaire%20%2F%20UQO-blue.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-13%2F13%20Pass-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-31%2F31%20Pass-success.svg)]()
 
 **ShieldNet** est une solution mobile et cloud de pointe dédiée à l'interception, au filtrage et à la signalisation communautaire d'appels et SMS indésirables (spam commercial agressif, hameçonnage / phishing, arnaques financières et robocalls).  
 Conçu et développé dans le cadre du **Projet Synthèse (Université du Québec en Outaouais - UQO)**, le système cible en priorité le plan de numérotation nord-américain (**indicatif `+1` pour le Canada et les États-Unis**).
@@ -61,15 +61,20 @@ lib/
 ---
 
 ## ✨ Fonctionnalités Majeures
-
+ 
 * **Tableau de bord "Zen" & Dynamique** : Visualisation en temps réel du statut de protection, pulsation lumineuse réactive et recherche rapide de numéros suspects.
-* **Mode « Bouclier Strict (Contacts Uniquement) » (VIP Allowlist)** : Filtrage automatisé rejetant ou réduisant au silence tout appel de numéro inconnu absent du carnet d'adresses (idéal contre le démarchage agressif et pour la protection des aînés).
+* **Score de Sérénité & Impact Citoyen** : Mesure concrète de la tranquillité préservée (appels bloqués, minutes gagnées) et valorisation de la participation citoyenne au bouclier collectif.
+* **Liste Blanche d'Urgence (Emergency Whitelist)** : Immunité garantie pour les services de secours (911, 811) et les contacts prioritaires, même sous bouclier actif.
+* **Mode « Bouclier Strict (Contacts Uniquement) »** : Rejet automatique de tout appel hors carnet d'adresses pour une protection maximale des personnes vulnérables.
+* **Bouclier Nocturne Programmé (Night Shield)** : Activation silencieuse planifiée pendant les heures de repos avec exception pour les proches.
+* **Inspecteur de Phishing SMS** : Analyse heuristique sur l'appareil détectant les messages frauduleux (faux colis, fausses banques, liens suspects).
 * **Journal d'Activité à Double Volet** : Historique des appels récents enrichi avec pastille de sécurité (Reçu / Bloqué) et liste noire locale consultable.
 * **Signalement Communautaire en 1 Clic** : Formulaire intuitif avec classification par motif (Fraude, Démarchage, Phishing, Robocall).
 * **Console d'Administration Complète** : Accès réservé aux modérateurs (JWT) pour inspecter les métriques globales, auditer la liste noire avec défilement infini paginé, approuver/blanchir des numéros et purger les données obsolètes.
+* **Ergonomie Responsive & Zéro Débordement** : Architecture d'interface testée et certifiée sans `RenderFlex overflow` sur toutes largeurs d'écran (dès 320 px).
 * **Diagnostics Développeur Intégrés** : Outil d'auto-test en temps réel (ping API, inspection de la base SQLite, vérification des permissions système).
 * **Support Bilingue (i18n)** : Prise en charge native du Français (`fr`) et de l'Anglais (`en`).
-* **Monitoring & Observabilité** : Intégration de **Sentry** pour la traçabilité des anomalies en temps réel et journalisation unifiée via `AppLogger`.
+* **Monitoring & Observabilité** : Intégration de **Sentry** (configuré via `.env`) et journalisation unifiée via `AppLogger`.
 
 ---
 
@@ -79,12 +84,15 @@ lib/
 Un fichier `.env` à la racine de `ShieldNet/` configure les paramètres réseau et de sécurité :
 
 ```env
-API_BASE_URL=http://10.0.2.2:8000/api/v1  # 10.0.2.2 pour l'émulateur Android, ou IP locale pour appareil réel
+API_BASE_URL=http://127.0.0.1:8000/api/v1  # 10.0.2.2 pour émulateur Android, ou 127.0.0.1 avec adb reverse
 API_KEY=ShieldNet_Secret_Token_UQO_2026
 HASH_SALT=ShieldNet_Secure_Salt_2026_UQO
 CRYPTO_SALT=ShieldNet_Secure_Salt_2026_UQO
 OFFLINE_CACHE_TTL_HOURS=24
 ENABLE_AUTO_BLOCKING=true
+
+# Optionnel : DSN Sentry pour le monitoring des erreurs
+# SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
 ```
 
 ### 2. Installation & Exécution
