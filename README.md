@@ -172,6 +172,7 @@ python manage.py runserver 0.0.0.0:8000
 > * **Courriel Administrateur Dédié** : `admin@shieldnet.app` (ou identifiant `admin`)
 > * **Mot de passe par défaut** : `admin123` (paramétrable via `ADMIN_PASSWORD` dans `.env`)
 > * **Console Web Django Admin** : [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
+> * **Console Mobile ShieldNet** : Onglet *Paramètres* ➔ *Compte Utilisateur* ➔ Connexion avec `admin@shieldnet.app` ➔ Déverrouillage automatique de la section *Administration*.
 > * **Documentation OpenAPI / Swagger** : [http://127.0.0.1:8000/api/v1/docs/](http://127.0.0.1:8000/api/v1/docs/)
 
 #### Déploiement Alternatif : Conteneurisation (Docker Compose)
@@ -203,9 +204,9 @@ flutter run
 
 | Domaine | Utilisateur Grand Public | Administrateur Système |
 | :--- | :--- | :--- |
-| **Objectif Principal** | Protection silencieuse et consultation simplifiée de l'état du bouclier. | Supervision, analyse de risque, gouvernance de la liste noire et audit. |
-| **Fonctionnalités Clés** | • Activation / désactivation en 1 geste.<br>• Vérification rapide de réputation d'un numéro.<br>• Historique des appels récents avec signalement direct.<br>• Personnalisation des préférences (thème, langue). | • Console dédiée paritaire Web / Mobile (4 onglets).<br>• Gestion CRUD de la liste noire (ajout, suppression, forçage).<br>• Traitement des signalements avec décision de blanchiment.<br>• Outils de diagnostic système (pont natif, checkpoint WAL). |
-| **Surface d'Accès** | Interface allégée sans jargon technique. | Accès restreint via jeton JWT (`is_staff=True`). |
+| **Objectif Principal** | Protection silencieuse et consultation simplifiée de l'état du bouclier. | Supervision globale, analyse de risque, gouvernance de la liste noire et audit. |
+| **Fonctionnalités Clés** | • Activation / désactivation en 1 geste.<br>• Vérification rapide de réputation d'un numéro.<br>• Historique des appels récents avec signalement direct.<br>• Personnalisation des préférences (thème, langue). | • Console paritaire Web / Mobile (5 onglets dédiés).<br>• Gestion CRUD de la liste noire (ajout, suppression, forçage).<br>• Traitement des signalements avec décision de blanchiment.<br>• Supervision des utilisateurs et journaux d'audit inaltérables.<br>• Outils de diagnostic système (pont natif, checkpoint WAL). |
+| **Surface d'Accès** | Interface allégée sans jargon technique. | • **Web** : Panneau d'administration Django ([/admin/](http://127.0.0.1:8000/admin/)).<br>• **Mobile** : Console d'Administration intégrée débloquée via JWT (`is_staff=True`). |
 
 ---
 

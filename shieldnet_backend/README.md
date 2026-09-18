@@ -102,10 +102,16 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-### 3. Compte Administrateur par défaut
-Un compte administrateur dédié est configuré :
-- **Courriel** : admin@shieldnet.app (ou identifiant admin)
-- **Mot de passe** : admin123 *(configurable via la variable ADMIN_PASSWORD)*
+### 3. Initialisation du Compte Administrateur Unifié (Web & Mobile)
+Un compte administrateur dédié est configuré automatiquement via la commande `ensure_admin` (intégrée au démarrage de `start-dev.ps1` et du conteneur Docker) :
+```bash
+python manage.py ensure_admin
+```
+- **Courriel** : `admin@shieldnet.app`
+- **Identifiant alternatif** : `admin`
+- **Mot de passe par défaut** : `admin123` *(personnalisable via la variable `ADMIN_PASSWORD` dans `.env`)*
+- **Accès Web (Django Admin)** : [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) (authentification transparente par courriel ou identifiant)
+- **Accès Mobile (API REST)** : `POST /api/v1/auth/login/` (délivre un jeton JWT avec les privilèges `is_staff` et `is_superuser`)
 
 ### 4. Lancement des tests automatisés (100% de réussite)
 ```bash

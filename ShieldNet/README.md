@@ -78,6 +78,26 @@ lib/
 
 ---
 
+## 🔐 Accès & Console d'Administration Mobile
+
+L'application mobile ShieldNet embarque une console d'administration native permettant aux opérateurs et modérateurs de superviser le système directement depuis leur téléphone :
+
+1. **Procédure de Connexion Administrateur** :
+   - Accéder à l'onglet **Paramètres** de l'application.
+   - Sélectionner la carte **Compte Utilisateur** (*« Se connecter ou s'inscrire »*).
+   - Renseigner le courriel `admin@shieldnet.app` et le mot de passe `admin123` *(ou cliquer directement sur le bouton d'assistance rapide `🔑 Identifiants Démo Admin (admin@shieldnet.app)`)*.
+   - Cliquer sur **Se connecter** : un badge **`ADMIN`** s'active sur votre profil et déverrouille l'accès à la **Console d'Administration**.
+
+2. **Outils d'Administration Intégrés (5 Onglets)** :
+   - **1. Vue d'Ensemble & Métriques** : Suivi en direct du total des numéros bloqués/blanchis, du nombre de signalements citoyens et de la santé globale.
+   - **2. Gestion de la Liste Noire (Blacklist)** : Recherche instantanée par numéro masqué ou haché, ajout manuel direct, et modération en 1 clic (*blanchiment / blocage*).
+   - **3. Modération des Signalements** : Examen qualitatif des rapports soumis par les utilisateurs mobiles avec motifs et horodatages.
+   - **4. Supervision des Utilisateurs** : Consultation des comptes utilisateurs et attribution des privilèges administrateur.
+   - **5. Journaux d'Audit** : Historique inaltérable traçant les actions de sécurité exécutées.
+   - **Outils & Diagnostic Développeur** : Forçage manuel de la synchronisation WAL (complète ou différentielle) et auto-tests matériels.
+
+---
+
 ## 🚀 Guide de Démarrage Rapide
 
 ### 1. Configuration de l'environnement (`.env`)
