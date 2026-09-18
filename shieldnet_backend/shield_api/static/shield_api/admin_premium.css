@@ -1,0 +1,131 @@
+/* ShieldNet Corporate Admin Dashboard Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #1E3A8A;
+  --primary-dark: #0F172A;
+  --accent: #3B82F6;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --bg-dark: #0B0F19;
+  --card-bg: #111827;
+  --border-color: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  background-color: var(--bg-dark) !important;
+  color: #E2E8F0 !important;
+}
+
+/* Header & Navbar */
+#header {
+  background: #0F172A !important;
+  color: #FFFFFF !important;
+  padding: 16px 24px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#header #site-name a {
+  font-weight: 700 !important;
+  font-size: 20px !important;
+  letter-spacing: -0.3px;
+  color: #FFFFFF !important;
+  text-decoration: none;
+}
+
+/* Containers */
+.module, #changelist {
+  background: var(--card-bg) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden;
+  margin-bottom: 24px !important;
+}
+
+.module h2, .module caption {
+  background: #1F2937 !important;
+  color: #F3F4F6 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  padding: 12px 18px !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Tables */
+#changelist table {
+  background-color: transparent !important;
+}
+
+#changelist table thead th {
+  background: #111827 !important;
+  color: #9CA3AF !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+#changelist table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+#changelist table tbody td, #changelist table tbody th {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  color: #E2E8F0 !important;
+  font-size: 13px;
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease !important;
+}
+
+.button:hover, input[type=submit]:hover {
+  background: #1D4ED8 !important;
+}
+
+/* Status Badges */
+.badge-critical {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.badge-safe {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+}

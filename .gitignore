@@ -1,0 +1,81 @@
+# =====================================================================
+# ShieldNet — Unified Root .gitignore (Django, Flutter, Android, iOS)
+# =====================================================================
+
+# Environnement et Secrets (CRITIQUE : Ne jamais commiter !)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Base de données locale de développement
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+
+# Python & Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+staticfiles/
+media/
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Flutter & Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+app.*.symbols
+app.*.map.json
+
+# Android
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/GeneratedPluginRegistrant.java
+**/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+*.keystore
+*.jks
+
+# iOS / macOS
+**/ios/.symlinks/
+**/ios/Pods/
+**/ios/Podfile.lock
+**/ios/.symlinks/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editeurs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.antigravity/
+
+# Logs & Scripts temporaires
+*.log
+scratch/
+/ShieldNet/*.png

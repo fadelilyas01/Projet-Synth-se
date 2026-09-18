@@ -1,0 +1,64 @@
+services:
+  # -------------------------------------------------------------
+  # Base de données relationnelle PostgreSQL 16
+  # -------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: shieldnet_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shieldnet_db
+      POSTGRES_USER: shieldnet_user
+      POSTGRES_PASSWORD: shieldnet_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shieldnet_user -d shieldnet_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------------------------------------
+  # Serveur de cache & files d'attente Redis 7
+  # -------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: shieldnet_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  # -------------------------------------------------------------
+  # API REST Django (Gunicorn + DRF + Swagger)
+  # -------------------------------------------------------------
+  backend:
+    build:
+      context: ./shieldnet_backend
+      dockerfile: Dockerfile
+    container_name: shieldnet_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DJANGO_DEBUG: "True"
+      SECRET_KEY: "django-insecure-shieldnet-docker-secret-key-2026"
+      API_KEY: "ShieldNet_Secret_Token_UQO_2026"
+      HASH_SALT: "ShieldNet_Secure_Salt_2026_UQO"
+      POSTGRES_DB: "shieldnet_db"
+      POSTGRES_USER: "shieldnet_user"
+      POSTGRES_PASSWORD: "shieldnet_password_2026"
+      POSTGRES_HOST: "db"
+      POSTGRES_PORT: "5432"
+      ALLOWED_HOSTS: "*"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./shieldnet_backend:/app
+
+volumes:
+  postgres_data:

@@ -1,0 +1,74 @@
+name: ShieldNet CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  backend-tests:
+    name: Backend Tests & Quality (Django)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r shieldnet_backend/requirements.txt
+
+      - name: Check Django migrations
+        working-directory: shieldnet_backend
+        run: |
+          python manage.py makemigrations --check --dry-run
+
+      - name: Run Django unit & integration tests
+        working-directory: shieldnet_backend
+        env:
+          SECRET_KEY: 'ci-secret-key-for-testing-only'
+          DEBUG: 'True'
+        run: |
+          python manage.py test
+
+  mobile-tests:
+    name: Mobile Tests & Quality (Flutter)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: ShieldNet
+        run: flutter pub get
+
+      - name: Flutter code analysis (linting)
+        working-directory: ShieldNet
+        run: flutter analyze
+
+      - name: Run Flutter unit & security tests
+        working-directory: ShieldNet
+        run: flutter test --coverage
