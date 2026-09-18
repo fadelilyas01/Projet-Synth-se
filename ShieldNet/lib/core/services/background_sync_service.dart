@@ -33,7 +33,7 @@ void callbackDispatcher() {
       await prefs.setString('last_sync_status', 'SUCCESS');
 
       AppLogger.log("[BackgroundSync] Succès: $count numéros synchronisés et WAL vérifié.");
-      return Future.value(true);
+      return true;
     } catch (e) {
       AppLogger.log("[BackgroundSync] Erreur d'exécution: $e");
       try {
@@ -42,7 +42,7 @@ void callbackDispatcher() {
       } catch (err) {
         AppLogger.log("[BackgroundSync] Échec de l'enregistrement du statut d'erreur: $err");
       }
-      return Future.value(false);
+      return false;
     }
   });
 }
