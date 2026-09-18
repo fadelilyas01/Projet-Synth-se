@@ -3,7 +3,7 @@
 [![Django](https://img.shields.io/badge/Django-5.x-092E20?logo=django)](https://www.djangoproject.com)
 [![DRF](https://img.shields.io/badge/Django%20REST-Framework-red)](https://www.django-rest-framework.org)
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0%20(Swagger)-85EA2D?logo=swagger)](http://127.0.0.1:8000/api/v1/docs/)
-[![Tests](https://img.shields.io/badge/Tests-23%2F23%20Pass-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-25%2F25%20Pass-success.svg)]()
 
 Backend officiel du **Projet de Synthèse ShieldNet** — Université du Québec en Outaouais (UQO).  
 Conçu et développé avec **Django**, **Django REST Framework (DRF)**, **SimpleJWT**, et documentation interactive **OpenAPI 3.0 (drf-spectacular)**.

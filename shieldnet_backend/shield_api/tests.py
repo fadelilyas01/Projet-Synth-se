@@ -540,31 +540,40 @@ class ConsensusFalsePositiveServiceTest(APITestCase):
         self.assertGreaterEqual(logs_resp.data['total'], 1)
 
     def test_sha256_hex_validator_rejects_invalid_hash(self):
+        """
+        Validation stricte du format hexadécimal SHA-256 (64 caractères).
+        Rejette les empreintes trop courtes, trop longues ou contenant des caractères invalides.
+        """
         from django.core.exceptions import ValidationError
         from .models import sha256_validator
 
-        # Valid SHA-256 hash (64 hex characters)
+        # Empreinte SHA-256 valide (64 caractères hexadécimaux)
         valid_hash = "a" * 64
         sha256_validator(valid_hash)  # Ne doit lever aucune exception
 
-        # Invalid hashes: too short, bad characters, too long
+        # Empreintes invalides : longueur incorrecte ou caractères non hexadécimaux
         with self.assertRaises(ValidationError):
-            sha256_validator("too_short")
+            sha256_validator("trop_court")
         with self.assertRaises(ValidationError):
-            sha256_validator("g" * 64)  # 'g' n'est pas hexadécimal
+            sha256_validator("g" * 64)  # 'g' n'est pas un caractère hexadécimal
         with self.assertRaises(ValidationError):
             sha256_validator("a" * 65)
 
     def test_composite_indexes_present_on_models(self):
-        # Vérification de la présence des index composites créés pour optimiser les requêtes
+        """
+        Vérifie la présence et la configuration des index composites pour accélérer les requêtes SQL.
+        """
+        # Index sur la liste noire globale
         bl_indexes = [idx.name for idx in BlacklistedNumber._meta.indexes]
         self.assertIn('idx_bl_active_filter', bl_indexes)
         self.assertIn('idx_bl_updated_at', bl_indexes)
         self.assertIn('idx_bl_hash_blocked', bl_indexes)
 
+        # Index sur les avis de légitimité
         safe_indexes = [idx.name for idx in SafeReport._meta.indexes]
         self.assertIn('idx_safe_hash_created', safe_indexes)
 
+        # Index sur les signalements de spam
         spam_indexes = [idx.name for idx in SpamReport._meta.indexes]
         self.assertIn('idx_spam_hash_created', spam_indexes)
 

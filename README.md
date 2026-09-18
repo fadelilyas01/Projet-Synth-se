@@ -213,7 +213,7 @@ flutter run
 
 Le projet applique une couverture de tests automatisée rigoureuse sur les deux couches logicielles :
 
-### Tests Backend Django (`python manage.py test shield_api`) — 23/23 Succès (100%)
+### Tests Backend Django (`python manage.py test shield_api`) — 25/25 Succès (100%)
 * **Moteur de Réputation & Modération** :
   * `test_process_new_report_creation` : Initialisation du score de risque lors d'un premier signalement.
   * `test_repetition_increases_risk_score` : Augmentation dynamique et plafonnement du score lors de signalements récurrents.
@@ -238,10 +238,12 @@ Le projet applique une couverture de tests automatisée rigoureuse sur les deux 
   * `test_submit_safe_report_api` : Endpoint de vote communautaire pour numéros légitimes.
   * `test_consensus_status_and_check_endpoints` : Consultation d'état et vérification du consensus.
   * `test_admin_consensus_audit_api` : Supervision administrative de la matrice de consensus.
-* **Maintenance & Intégrité Système** :
+* **Maintenance, Intégrité & Optimisation Système** :
   * `test_health_check_endpoint` : Sonde de santé système (`/api/v1/health/`).
   * `test_delta_sync_with_since_parameter` : Synchronisation différentielle efficace par horodatage.
   * `test_audit_logs_recorded_and_listed` : Enregistrement immuable des actions d'audit (`AuditLog`).
+  * `test_sha256_hex_validator_rejects_invalid_hash` : Validation stricte du format hexadécimal SHA-256 (64 caractères).
+  * `test_composite_indexes_present_on_models` : Vérification des index composites accélérant les requêtes de filtrage.
 
 ### Tests Frontend Flutter (`flutter test`) — 31/31 Succès (100% — 0 avertissement linter)
 * **Cryptographie & Filtrage Télécom** :
