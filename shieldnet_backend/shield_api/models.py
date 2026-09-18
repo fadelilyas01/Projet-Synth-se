@@ -1,6 +1,12 @@
 import uuid
 from django.db import models
+from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
+
+sha256_validator = RegexValidator(
+    regex=r'^[a-fA-F0-9]{64}$',
+    message="L'empreinte phone_hash doit être un hash SHA-256 hexadécimal valide de 64 caractères."
+)
 
 class CategoryChoices(models.TextChoices):
     FRAUD = 'fraud', 'Fraude / Arnaque'
@@ -18,6 +24,7 @@ class BlacklistedNumber(models.Model):
         max_length=64,
         unique=True,
         db_index=True,
+        validators=[sha256_validator],
         help_text="Empreinte SHA-256 anonymisée du numéro de téléphone"
     )
     masked_number = models.CharField(
@@ -69,6 +76,11 @@ class BlacklistedNumber(models.Model):
         verbose_name = "Numéro Indésirable"
         verbose_name_plural = "Liste Noire Globale"
         ordering = ['-risk_score', '-reports_count']
+        indexes = [
+            models.Index(fields=['is_blocked', 'is_whitelisted', 'risk_score'], name='idx_bl_active_filter'),
+            models.Index(fields=['updated_at'], name='idx_bl_updated_at'),
+            models.Index(fields=['phone_hash', 'is_blocked'], name='idx_bl_hash_blocked'),
+        ]
 
     def __str__(self):
         return f"{self.masked_number or self.phone_hash[:12]} (Score: {self.risk_score})"
@@ -85,7 +97,12 @@ class SpamReport(models.Model):
         blank=True,
         related_name='spam_reports'
     )
-    phone_hash = models.CharField(max_length=64, db_index=True)
+    phone_hash = models.CharField(
+        max_length=64,
+        db_index=True,
+        validators=[sha256_validator],
+        help_text="Empreinte SHA-256 du numéro signalé"
+    )
     category = models.CharField(max_length=30, choices=CategoryChoices.choices)
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -94,6 +111,10 @@ class SpamReport(models.Model):
         verbose_name = "Signalement utilisateur"
         verbose_name_plural = "Signalements communautaires"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['phone_hash', 'created_at'], name='idx_spam_hash_created'),
+            models.Index(fields=['category', 'created_at'], name='idx_spam_cat_created'),
+        ]
 
     def __str__(self):
         return f"Signalement {self.category} -> {self.phone_hash[:10]}"
@@ -119,7 +140,12 @@ class SafeReport(models.Model):
         blank=True,
         related_name='safe_reports'
     )
-    phone_hash = models.CharField(max_length=64, db_index=True)
+    phone_hash = models.CharField(
+        max_length=64,
+        db_index=True,
+        validators=[sha256_validator],
+        help_text="Empreinte SHA-256 du numéro contesté"
+    )
     reason = models.CharField(
         max_length=30,
         choices=SafeReasonChoices.choices,
@@ -133,6 +159,10 @@ class SafeReport(models.Model):
         verbose_name = "Avis de légitimité"
         verbose_name_plural = "Avis de légitimité (Consensualité)"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['phone_hash', 'created_at'], name='idx_safe_hash_created'),
+            models.Index(fields=['reason', 'created_at'], name='idx_safe_reason_created'),
+        ]
 
     def __str__(self):
         return f"Avis légitime {self.reason} -> {self.phone_hash[:10]}"
@@ -159,6 +189,10 @@ class AuditLog(models.Model):
         verbose_name = "Journal d'Audit"
         verbose_name_plural = "Journaux d'Audit"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['action', 'created_at'], name='idx_audit_action_created'),
+            models.Index(fields=['target_hash', 'created_at'], name='idx_audit_hash_created'),
+        ]
 
     def __str__(self):
         return f"[{self.source}] {self.action} par {self.user or 'Système'} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"

@@ -358,7 +358,7 @@ class AdminStatsView(APIView):
         total_users = User.objects.count()
 
         recent_reports = []
-        for r in SpamReport.objects.order_by('-created_at')[:15]:
+        for r in SpamReport.objects.select_related('reporter').order_by('-created_at')[:15]:
             num_obj = BlacklistedNumber.objects.filter(phone_hash=r.phone_hash).first()
             recent_reports.append({
                 'id': str(r.id),
@@ -536,7 +536,7 @@ class AdminReportsListView(APIView):
     permission_classes = [IsAdminStaffUser]
 
     def get(self, request):
-        reports = SpamReport.objects.all().order_by('-created_at')[:50]
+        reports = SpamReport.objects.all().select_related('reporter').order_by('-created_at')[:50]
         data = []
         for r in reports:
             num = BlacklistedNumber.objects.filter(phone_hash=r.phone_hash).first()
@@ -665,7 +665,7 @@ class AdminSafeReportsListView(APIView):
     permission_classes = [IsAdminStaffUser]
 
     def get(self, request):
-        reports = SafeReport.objects.all().order_by('-created_at')[:50]
+        reports = SafeReport.objects.all().select_related('reporter').order_by('-created_at')[:50]
         data = []
         for r in reports:
             num = BlacklistedNumber.objects.filter(phone_hash=r.phone_hash).first()

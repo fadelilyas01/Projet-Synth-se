@@ -127,8 +127,8 @@ class FalsePositiveConsensusService:
         Retourne les métriques détaillées et le verdict de détection de faux positif.
         """
         number_obj = BlacklistedNumber.objects.filter(phone_hash=phone_hash).first()
-        spam_reports = list(SpamReport.objects.filter(phone_hash=phone_hash))
-        safe_reports = list(SafeReport.objects.filter(phone_hash=phone_hash))
+        spam_reports = list(SpamReport.objects.filter(phone_hash=phone_hash).select_related('reporter'))
+        safe_reports = list(SafeReport.objects.filter(phone_hash=phone_hash).select_related('reporter'))
 
         # 1. Masse de signalements spam (M_spam)
         m_spam = 0.0
