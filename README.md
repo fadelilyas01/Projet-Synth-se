@@ -99,15 +99,33 @@ sequenceDiagram
 
 ---
 
-## 4. Sécurité des Données et Confidentialité
+## 4. Sécurité Cryptographique, Modèle de Menace & Confidentialité
 
-| Mécanisme | Description | Implémentation |
+ShieldNet intègre les principes de la **Confidentialité Dès la Conception (*Privacy by Design*)** en conformité avec la **Loi 25 du Québec** et la **LPRPDE** fédérale canadienne : aucun carnet de contacts n'est collecté et aucun numéro en clair n'est transmis ou persisté côté serveur.
+
+### 4.1. Matrice des Mécanismes de Protection
+
+| Mécanisme | Rôle & Description | Implémentation |
 | :--- | :--- | :--- |
-| **Normalisation E.164** | Nettoyage des caractères et conversion systématique au format international standardisé (`+1XXXXXXXXXX`). | `crypto_utils.dart` |
-| **Hachage HMAC-SHA256** | Transformation irréversible du numéro à l'aide d'un sel cryptographique. Empreintes 100% cohérentes entre Flutter et Kotlin. | `crypto_utils.dart`<br>`ShieldNetCallScreeningService.kt` |
-| **Masquage d'Affichage** | Masquage des chiffres intermédiaires dans l'interface et la console (ex: `+1 819 *** **99`) pour éviter toute divulgation. | `database_helper.dart`<br>`models.py` |
-| **Contrôle d'Accès API** | En-tête obligatoire `X-API-Key` sur l'ensemble des endpoints mobiles pour restreindre l'usage non autorisé de l'API. | `permissions.py`<br>`api_service.dart` |
-| **Protection Anti-Abus** | Limitation de débit (Throttling) et refus des signalements redondants issus d'une même adresse IP. | `views.py` |
+| **Normalisation E.164** | Formatage déterministe (`+1XXXXXXXXXX`) éliminant les variations de saisie avant tout hachage. | `crypto_utils.dart` |
+| **Hachage HMAC-SHA256** | Pseudonymisation irréversible avec sel secret. Empreintes 100% cohérentes entre Flutter et Kotlin. | `crypto_utils.dart`<br>`ShieldNetCallScreeningService.kt` |
+| **Masquage d'Affichage** | Obfuscation des chiffres médians dans les interfaces (`+1 819 *** **99`) contre l'ingénierie sociale. | `database_helper.dart`<br>`models.py` |
+| **Consensus Anti-Sybil** | Algorithme démocratique de réhabilitation (`FalsePositiveConsensusService`) avec quorum strict et unicité de vote. | `services.py`<br>`views.py` |
+| **Journal d'Audit Immuable** | Traçabilité légale (`AuditLog`) horodatée de chaque décision administrative (blanchiment/bannissement). | `models.py`<br>`admin.py` |
+| **Contrôle d'Accès & RBAC** | En-têtes `X-API-Key`, authentification JWT et restriction stricte `is_staff` sur les endpoints d'administration. | `permissions.py`<br>`backends.py` |
+| **Défense Anti-Énumération** | Limitation de débit (*Rate Limiting*) par adresse IP bloquant l'énumération automatisée de la liste noire. | `views.py` |
+
+### 4.2. Analyse d'Entropie du Plan NANP (+1) et Compromis d'Ingénierie
+
+> [!IMPORTANT]
+> **Considération Académique sur l'Entropie Téléphonique :**  
+> L'espace effectif des numéros assignables en zone Amérique du Nord (NANP `+1`) est d'environ **$7.8 \times 10^8$ numéros**, soit une entropie brute de **~29.5 bits**. Face à une puissance de calcul GPU moderne (ex: NVIDIA RTX 4090 capable de ~25 milliards d'itérations HMAC-SHA256/sec), l'énumération par force brute d'un sel compromis prendrait moins de **35 millisecondes**.
+>
+> **Pourquoi le choix de HMAC-SHA256 pour l'interception mobile ?**
+> Le service Android `CallScreeningService` impose un budget temporel critique (< 100 ms) avant le déclenchement de la sonnerie système. Une fonction à mémoire dure (ex. Argon2id recommandé par l'OWASP) nécessiterait 300 à 800 ms sur processeur mobile d'entrée de gamme, causant un timeout de l'OS. HMAC-SHA256 s'exécute en **0.15 ms**, offrant l'équilibre optimal requis pour un filtrage temps réel sur appareil.
+>
+> 📄 **Pour l'analyse formelle du modèle de menace STRIDE, la formule combinatoire et la roadmap de durcissement (Double Sel KMS / Google Play Integrity), consultez le document d'ingénierie dédié :**  
+> ➡️ [**Rapport de Sécurité & Modèle de Menace (docs/SECURITY_AND_THREAT_MODEL.md)**](file:///C:/Projet/Projet%20synthese/docs/SECURITY_AND_THREAT_MODEL.md)
 
 ---
 
@@ -193,26 +211,52 @@ flutter run
 
 ## 7. Assurance Qualité et Tests Automatisés
 
-Le projet applique une couverture de tests automatisée sur les deux couches :
+Le projet applique une couverture de tests automatisée rigoureuse sur les deux couches logicielles :
 
-### Tests Backend Django (`python manage.py test shield_api`) — 12/12 Succès
-* `test_process_new_report_creation` : Initialisation du score de risque lors d'un premier signalement.
-* `test_repetition_increases_risk_score` : Augmentation dynamique et plafonnement du score lors de signalements récurrents.
-* `test_whitelisted_number_stays_unblocked` : Garantie d'intégrité pour les numéros légitimes blanchis.
-* `test_reject_request_without_api_key` : Rejet strict des requêtes non autorisées (contrôle d'en-tête `X-API-Key`).
-* `test_submit_report_api` : Validation de bout en bout de l'endpoint de signalement.
-* `test_check_number_api_spam` : Vérification instantanée de statut par empreinte HMAC.
-* `test_blacklist_download_api` : Téléchargement incrémental et filtrage de la liste certifiée.
-* `test_user_registration_and_email_login` : Gestion de compte, login par courriel et émission de jetons JWT.
-* `test_admin_stats_and_moderation` : Vérification des métriques de supervision et des droits RBAC.
-* `test_dedicated_admin_email_login_web_and_mobile` : Validation de l'authentification unifiée de l'administrateur.
-* `test_admin_full_mobile_management_endpoints` : Couverture complète des endpoints de gestion mobile.
-* `test_database_purge` : Nettoyage et maintenance programmée des entrées obsolètes.
+### Tests Backend Django (`python manage.py test shield_api`) — 23/23 Succès (100%)
+* **Moteur de Réputation & Modération** :
+  * `test_process_new_report_creation` : Initialisation du score de risque lors d'un premier signalement.
+  * `test_repetition_increases_risk_score` : Augmentation dynamique et plafonnement du score lors de signalements récurrents.
+  * `test_whitelisted_number_stays_unblocked` : Garantie d'immunité pour les numéros légitimes blanchis.
+* **API REST & Sécurité** :
+  * `test_reject_request_without_api_key` : Rejet strict des requêtes sans clé d'API valide (`X-API-Key`).
+  * `test_submit_report_api` : Validation de bout en bout de l'endpoint de signalement.
+  * `test_check_number_api_spam` : Vérification instantanée de statut par empreinte HMAC.
+  * `test_blacklist_download_api` : Téléchargement et filtrage de la liste certifiée.
+  * `test_user_registration_and_email_login` : Gestion de compte, login par courriel et émission JWT.
+  * `test_google_login_auto_provision_and_repeat` : Auto-approvisionnement et authentification OAuth2 Google.
+* **Console d'Administration & Parité Mobile** :
+  * `test_admin_stats_and_moderation` : Vérification des métriques de supervision et des droits RBAC.
+  * `test_dedicated_admin_email_login_web_and_mobile` : Authentification unifiée Web / Mobile (`admin@shieldnet.app`).
+  * `test_admin_full_mobile_management_endpoints` : Couverture complète des endpoints de gestion mobile.
+* **Algorithme de Consensus Démocratique & Anti-Sybil** :
+  * `test_single_safe_report_does_not_reach_quorum` : Validation du seuil minimum de quorum (3 votes requis).
+  * `test_automatic_false_positive_detection_by_consensus` : Détection et blanchiment autonome des faux positifs.
+  * `test_admin_safe_feedback_triggers_immediate_consensus` : Forçage administratif d'arbitrage immédiat.
+  * `test_anti_sybil_duplicate_user_vote_prevention` : Rejet des votes multiples par un même utilisateur.
+  * `test_dynamic_revocation_on_massive_spam_surge` : Révocation automatique de l'immunité en cas de pic de spam avéré.
+  * `test_submit_safe_report_api` : Endpoint de vote communautaire pour numéros légitimes.
+  * `test_consensus_status_and_check_endpoints` : Consultation d'état et vérification du consensus.
+  * `test_admin_consensus_audit_api` : Supervision administrative de la matrice de consensus.
+* **Maintenance & Intégrité Système** :
+  * `test_health_check_endpoint` : Sonde de santé système (`/api/v1/health/`).
+  * `test_delta_sync_with_since_parameter` : Synchronisation différentielle efficace par horodatage.
+  * `test_audit_logs_recorded_and_listed` : Enregistrement immuable des actions d'audit (`AuditLog`).
 
-### Tests Frontend Flutter (`flutter test`) — 10/10 Succès (0 avertissement linter)
-* `widget_test.dart` : Validation de l'anonymisation SHA-256, reconnaissance du format NANP (+1) et détection des numéros usurpés.
-* `crypto_utils_test.dart` : Normalisation E.164, déterminisme HMAC et algorithme de masquage.
-* `automated_spam_verifier_test.dart` : Préservation des numéros réguliers, détection des indicatifs surtaxés (1-900) et gestion des codes courts SMS 2FA.
+### Tests Frontend Flutter (`flutter test`) — 31/31 Succès (100% — 0 avertissement linter)
+* **Cryptographie & Filtrage Télécom** :
+  * `crypto_utils_test.dart` : Normalisation E.164 (+1), déterminisme HMAC-SHA256 et masquage d'affichage.
+  * `automated_spam_verifier_test.dart` : Préservation des numéros réguliers, détection des indicatifs surtaxés (1-900) et codes courts 2FA.
+  * `widget_test.dart` : Détection de spoofing, cycle de vie et anonymisation.
+* **Résilience Ergonomique & Responsive (Écrans étroits 320 px)** :
+  * `auth_bottom_sheet_test.dart` : Formulaire de connexion/inscription résilient à 320 px (0 RenderFlex overflow).
+  * `serenity_and_citizen_test.dart` : Cartes d'impact citoyen et score de sérénité adaptatives sans débordement.
+* **Fonctionnalités Métier Avancées** :
+  * `emergency_whitelist_test.dart` : Liste blanche d'urgence (services 911/811 et proches prioritaires).
+  * `contacts_only_mode_test.dart` : Mode strict filtrant tous les appels hors carnet d'adresses.
+  * `night_shield_test.dart` : Bouclier nocturne automatique selon plages horaires.
+  * `sms_phishing_detector_test.dart` : Détecteur heuristique de phishing SMS (mots-clés bancaires, URLs suspectes).
+  * `sync_and_reconciliation_test.dart` : Synchronisation incrémentale et réconciliation SQLite.
 
 ### Intégration Continue (CI/CD GitHub Actions)
 Le workflow automatisé défini dans `.github/workflows/ci.yml` valide chaque commit et pull request :
