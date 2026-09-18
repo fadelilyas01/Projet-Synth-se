@@ -13,9 +13,14 @@ $backendPath = Join-Path $rootPath "shieldnet_backend"
 Write-Host "1. Application des migrations Django..." -ForegroundColor Yellow
 Start-Process python -ArgumentList "manage.py migrate" -WorkingDirectory $backendPath -NoNewWindow -Wait
 
-# 2. Configuration automatique du tunnel USB Android (adb reverse)
+# 2. Initialisation du compte administrateur unifie (Web & Mobile)
 Write-Host ""
-Write-Host "2. Detection et liaison des appareils Android (USB)..." -ForegroundColor Yellow
+Write-Host "2. Verification et initialisation du compte administrateur..." -ForegroundColor Yellow
+Start-Process python -ArgumentList "manage.py ensure_admin" -WorkingDirectory $backendPath -NoNewWindow -Wait
+
+# 3. Configuration automatique du tunnel USB Android (adb reverse)
+Write-Host ""
+Write-Host "3. Detection et liaison des appareils Android (USB)..." -ForegroundColor Yellow
 try {
     $adbCheck = adb devices 2>$null
     if ($adbCheck -match "\bdevice\b") {
@@ -28,12 +33,14 @@ try {
     Write-Host "   [INFO] ADB non detecte dans le PATH." -ForegroundColor Gray
 }
 
-# 3. Lancement du serveur Django
+# 4. Lancement du serveur Django
 Write-Host ""
-Write-Host "3. Demarrage du serveur de developpement Django..." -ForegroundColor Yellow
+Write-Host "4. Demarrage du serveur de developpement Django..." -ForegroundColor Yellow
 Write-Host "   - API REST:   http://127.0.0.1:8000/api/v1/" -ForegroundColor Green
 Write-Host "   - Swagger UI: http://127.0.0.1:8000/api/v1/docs/" -ForegroundColor Green
-Write-Host "   - Admin:      http://127.0.0.1:8000/admin/" -ForegroundColor Green
+Write-Host "   - Admin Web:  http://127.0.0.1:8000/admin/" -ForegroundColor Green
+Write-Host "     * Identifiant / Courriel: admin@shieldnet.app (ou admin)" -ForegroundColor Cyan
+Write-Host "     * Mot de passe admin:     admin123" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Appuyez sur Ctrl+C pour arreter le serveur." -ForegroundColor DarkGray
 

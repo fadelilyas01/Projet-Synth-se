@@ -55,6 +55,8 @@ services:
       POSTGRES_HOST: "db"
       POSTGRES_PORT: "5432"
       ALLOWED_HOSTS: "*"
+      ADMIN_EMAIL: "admin@shieldnet.app"
+      ADMIN_PASSWORD: "admin123"
     ports:
       - "8000:8000"
     volumes:

@@ -522,17 +522,23 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
             gradient: AppTheme.brandGradient,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.shield_rounded, color: Colors.white, size: 36),
-              SizedBox(width: 14),
+              const Icon(Icons.shield_rounded, color: Colors.white, size: 36),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Contrôle Administrateur Total', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                    SizedBox(height: 2),
-                    Text('Connecté en tant que admin@shieldnet.app avec privilèges complets (Web & Mobile).', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    const Text('Contrôle Administrateur Total', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 2),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final currentAdminEmail = ref.watch(authNotifierProvider)?.email;
+                        final displayEmail = (currentAdminEmail != null && currentAdminEmail.isNotEmpty) ? currentAdminEmail : 'admin@shieldnet.app';
+                        return Text('Connecté en tant que $displayEmail avec privilèges complets (Web & Mobile).', style: const TextStyle(color: Colors.white70, fontSize: 12));
+                      },
+                    ),
                   ],
                 ),
               ),

@@ -329,6 +329,38 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                 prefixIcon: Icon(Icons.lock_outline_rounded),
               ),
             ),
+            if (_isLogin) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _emailController.text = 'admin@shieldnet.app';
+                      _passwordController.text = 'admin123';
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.vpn_key_rounded, size: 14, color: AppTheme.accentOrange),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Identifiants Démo Admin (admin@shieldnet.app)',
+                            style: TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _loading ? null : _submit,

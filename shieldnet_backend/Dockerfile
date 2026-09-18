@@ -26,5 +26,5 @@ COPY . /app/
 # Port exposé
 EXPOSE 8000
 
-# Commande de démarrage par défaut (migrations automatiques + lancement Gunicorn)
-CMD ["sh", "-c", "python manage.py migrate && gunicorn shieldnet_backend.wsgi:application --bind 0.0.0.0:8000 --workers 3"]
+# Commande de démarrage par défaut (migrations automatiques + création admin + lancement Gunicorn)
+CMD ["sh", "-c", "python manage.py migrate && python manage.py ensure_admin && gunicorn shieldnet_backend.wsgi:application --bind 0.0.0.0:8000 --workers 3"]
