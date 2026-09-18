@@ -450,7 +450,13 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
           children: [
             Icon(Icons.admin_panel_settings_rounded, color: AppTheme.accentOrange),
             SizedBox(width: 8),
-            Text('Administration Totale', style: TextStyle(fontWeight: FontWeight.bold)),
+            Expanded(
+              child: Text(
+                'Administration Totale',
+                style: TextStyle(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         actions: [

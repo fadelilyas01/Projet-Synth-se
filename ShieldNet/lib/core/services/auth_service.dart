@@ -385,7 +385,12 @@ class AuthService {
       ),
     );
     if (response.statusCode == 200 && response.data != null) {
-      return (response.data as List).map((e) => e as Map<String, dynamic>).toList();
+      if (response.data is Map && response.data['results'] is List) {
+        return (response.data['results'] as List).map((e) => e as Map<String, dynamic>).toList();
+      }
+      if (response.data is List) {
+        return (response.data as List).map((e) => e as Map<String, dynamic>).toList();
+      }
     }
     throw Exception('Impossible de récupérer le journal d\'audit.');
   }
