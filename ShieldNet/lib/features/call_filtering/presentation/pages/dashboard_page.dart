@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:call_log/call_log.dart' as call_log;
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/database/database_helper.dart';
 import '../../../../core/security/crypto_utils.dart';
@@ -88,6 +89,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
 
   Future<void> _loadInterceptedMetrics() async {
     try {
+      final status = await Permission.phone.status;
+      if (!status.isGranted) return;
+
       final list = await DatabaseHelper.instance.getAllBlacklistedNumbers();
       final entries = await call_log.CallLog.get();
       final hashes = list.map((e) => e.phoneHash).toSet();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:call_log/call_log.dart' as call_log;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/security/crypto_utils.dart';
@@ -62,6 +63,14 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
   Future<void> _loadCallHistory() async {
     setState(() => _isLoadingCalls = true);
     try {
+      final status = await Permission.phone.status;
+      if (!status.isGranted) {
+        final req = await Permission.phone.request();
+        if (!req.isGranted) {
+          if (mounted) setState(() => _isLoadingCalls = false);
+          return;
+        }
+      }
       final entries = await call_log.CallLog.get();
       if (mounted) {
         setState(() {
