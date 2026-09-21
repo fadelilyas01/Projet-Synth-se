@@ -9,6 +9,9 @@ from shield_api.admin_views import (
     export_blacklist_csv_view,
     trigger_consensus_view,
     trigger_purge_view,
+    triage_action_view,
+    telemetry_live_view,
+    executive_report_view,
 )
 
 urlpatterns = [
@@ -18,6 +21,9 @@ urlpatterns = [
     path('admin/operations/export/csv/', export_blacklist_csv_view, name='admin-export-csv'),
     path('admin/operations/consensus/', trigger_consensus_view, name='admin-trigger-consensus'),
     path('admin/operations/purge/', trigger_purge_view, name='admin-trigger-purge'),
+    path('admin/operations/triage/action/', triage_action_view, name='admin-triage-action'),
+    path('admin/operations/telemetry/live/', telemetry_live_view, name='admin-telemetry-live'),
+    path('admin/operations/report/executive/', executive_report_view, name='admin-report-executive'),
 
     # Administration Django Admin
     path('admin/', admin.site.urls),

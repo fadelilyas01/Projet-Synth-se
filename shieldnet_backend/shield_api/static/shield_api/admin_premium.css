@@ -526,3 +526,310 @@ html.light-mode .object-tools li a:hover {
   background: #2563eb !important;
   color: #ffffff !important;
 }
+
+/* =====================================================================
+   NOUVEAUX COMPOSANTS SOC ULTRA-PREMIUM (CYBER DEFENSE 2026)
+   ===================================================================== */
+
+/* 1. Voyant Pulsant Live */
+.pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* 2. Jauge Circulaire de Résilience Réseau */
+.posture-widget {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.gauge-svg-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 8px auto 14px auto;
+}
+.gauge-svg {
+  transform: rotate(-90deg);
+}
+.gauge-bg {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 10;
+  fill: none;
+}
+.gauge-progress {
+  stroke: url(#gauge-gradient);
+  stroke-width: 10;
+  stroke-linecap: round;
+  fill: none;
+  transition: stroke-dashoffset 1s ease;
+}
+.gauge-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.gauge-percentage {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+.gauge-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* 3. Répartition Géospatiale / Indicatifs Canadiens */
+.area-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.area-code-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 190px;
+}
+.area-code-pill {
+  background: #1e293b;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+.area-bar-wrap {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  height: 7px;
+  border-radius: 4px;
+  margin: 0 14px;
+  overflow: hidden;
+}
+.area-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.area-code-stat {
+  width: 60px;
+  text-align: right;
+  font-weight: 700;
+  color: #e2e8f0;
+  font-size: 11px;
+}
+
+/* 4. Centre de Triage Rapide (Fast Triage Hub) */
+.triage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.triage-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.triage-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.triage-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #1e293b;
+  color: #cbd5e1;
+}
+.triage-action-btn:hover {
+  transform: translateY(-1px);
+}
+.triage-btn-block {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.triage-btn-block:hover {
+  background: #dc2626;
+  color: white;
+}
+.triage-btn-whitelist {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.triage-btn-whitelist:hover {
+  background: #059669;
+  color: white;
+}
+.triage-btn-watch {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.triage-btn-watch:hover {
+  background: #d97706;
+  color: white;
+}
+
+/* 5. Télémétrie en Direct & Live Ticker */
+.live-ticker-wrap {
+  background: #0b0f19;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 10px;
+  padding: 10px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  gap: 16px;
+}
+.ticker-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.live-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.live-toggle-btn.paused {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+/* 6. Toasts Flottants (Sonner / Tailwind Style) */
+#soc-toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.soc-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 440px;
+  padding: 14px 18px;
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
+}
+.soc-toast.success { border-left: 4px solid #10b981; }
+.soc-toast.error { border-left: 4px solid #ef4444; }
+.soc-toast.info { border-left: 4px solid #3b82f6; }
+@keyframes toastSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* 7. Bouton Copier le Hash */
+.copy-hash-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+.copy-hash-btn:hover {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* 8. Light Mode Overrides pour les Nouveaux Composants */
+html.light-mode .posture-widget,
+html.light-mode .live-ticker-wrap {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+html.light-mode .gauge-bg {
+  stroke: #f1f5f9 !important;
+}
+html.light-mode .gauge-percentage {
+  color: #0f172a !important;
+}
+html.light-mode .area-code-pill {
+  background: #f1f5f9 !important;
+  color: #2563eb !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode .area-bar-wrap {
+  background: #f1f5f9 !important;
+}
+html.light-mode .area-code-stat {
+  color: #1e293b !important;
+}
+html.light-mode .triage-table td {
+  border-bottom-color: #f1f5f9 !important;
+}
+html.light-mode .soc-toast {
+  background: rgba(255, 255, 255, 0.98) !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+

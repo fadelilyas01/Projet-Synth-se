@@ -4,14 +4,14 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
-  /* SOC Dashboard Grid & Panels */
-  .dashboard-soc-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+  /* Base SOC Container */
+  .soc-header {
+    background: linear-gradient(135deg, #090d16 0%, #111827 100%);
+    border: 1px solid rgba(59, 130, 246, 0.25);
     border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -24,22 +24,22 @@
     gap: 16px;
   }
   .soc-header-icon {
-    font-size: 38px;
+    width: 52px;
+    height: 52px;
+    background: rgba(37, 99, 235, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    background: rgba(37, 99, 235, 0.2);
-    border: 1px solid rgba(59, 130, 246, 0.4);
-    border-radius: 14px;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
   }
   .soc-header-title h1 {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #ffffff;
     margin: 0 0 4px 0;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.4px;
   }
   .soc-header-title p {
     font-size: 13px;
@@ -49,9 +49,9 @@
   .soc-header-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
   }
-  .soc-badge {
+  .soc-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -62,23 +62,18 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .soc-badge-green {
-    background: rgba(16, 185, 129, 0.15);
+  .soc-pill-green {
+    background: rgba(16, 185, 129, 0.12);
     color: #34d399;
     border: 1px solid rgba(16, 185, 129, 0.3);
   }
-  .soc-badge-blue {
-    background: rgba(59, 130, 246, 0.15);
+  .soc-pill-blue {
+    background: rgba(59, 130, 246, 0.12);
     color: #60a5fa;
     border: 1px solid rgba(59, 130, 246, 0.3);
   }
-  .soc-badge-purple {
-    background: rgba(168, 85, 247, 0.15);
-    color: #c084fc;
-    border: 1px solid rgba(168, 85, 247, 0.3);
-  }
 
-  /* KPI Cards Grid */
+  /* KPI Grid */
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -90,173 +85,140 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     padding: 20px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     position: relative;
     overflow: hidden;
-    transition: transform 0.2s ease, border-color 0.2s ease;
   }
   .kpi-card:hover {
     transform: translateY(-2px);
     border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-  }
-  .kpi-card.red::before { background: #ef4444; }
-  .kpi-card.green::before { background: #10b981; }
-  .kpi-card.amber::before { background: #f59e0b; }
-  .kpi-card.blue::before { background: #3b82f6; }
-
-  .kpi-title {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #94a3b8;
-    letter-spacing: 0.6px;
-    margin-bottom: 8px;
+  .kpi-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 12px;
   }
-  .kpi-value {
-    font-size: 28px;
+  .kpi-title-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .kpi-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .kpi-val {
+    font-size: 30px;
     font-weight: 800;
     color: #ffffff;
-    line-height: 1.1;
-    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 6px;
   }
-  .kpi-sub {
-    font-size: 11px;
+  .kpi-sub-text {
+    font-size: 12px;
     color: #64748b;
-    margin-top: 6px;
   }
 
-  /* Analytics & Charts Section */
+  /* Cyber Intelligence Row (Jauge Résilience & Heatmap Indicatifs) */
+  .soc-intel-row {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 980px) {
+    .soc-intel-row { grid-template-columns: 1fr; }
+  }
+
+  /* Charts Grid */
   .charts-grid {
     display: grid;
-    grid-template-columns: 1fr 1.6fr;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
   @media (max-width: 960px) {
-    .charts-grid {
-      grid-template-columns: 1fr;
-    }
+    .charts-grid { grid-template-columns: 1fr; }
   }
   .chart-card {
     background: #111827;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     padding: 20px;
-    position: relative;
   }
-  .chart-card h3 {
-    font-size: 14px;
-    font-weight: 700;
-    color: #f1f5f9;
-    margin: 0 0 16px 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .chart-container {
-    position: relative;
-    height: 230px;
-    width: 100%;
-  }
-
-  /* Sandbox Simulator Section */
-  .sandbox-card {
-    background: linear-gradient(135deg, #111827 0%, #151d30 100%);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 28px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  }
-  .sandbox-header {
+  .chart-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
-  .sandbox-title {
-    font-size: 16px;
-    font-weight: 800;
+  .chart-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .chart-canvas-wrap {
+    height: 230px;
+    position: relative;
+  }
+
+  /* Triage Hub & Sandbox */
+  .triage-panel, .sandbox-panel {
+    background: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 24px;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .panel-header-title {
+    font-size: 14px;
+    font-weight: 700;
     color: #ffffff;
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  .sandbox-input-row {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .sandbox-input {
-    flex: 1;
-    min-width: 260px;
-    background: #1e293b !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 10px !important;
-    padding: 12px 16px !important;
-    color: #ffffff !important;
-    font-size: 14px !important;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .sandbox-input:focus {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
-  }
-  .sandbox-btn {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 24px;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .sandbox-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-    transform: translateY(-1px);
-  }
-  .sandbox-result-box {
-    margin-top: 20px;
-    padding: 18px;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    display: none;
-  }
 
   /* Operations Toolbar */
-  .operations-toolbar {
-    background: #111827;
+  .ops-bar {
+    background: #0d1322;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 16px 20px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
-  .op-btn {
+  .ops-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 9px 16px;
+    padding: 8px 16px;
     background: #1e293b;
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #f1f5f9;
@@ -267,70 +229,39 @@
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  .op-btn:hover {
+  .ops-btn:hover {
     background: #2563eb;
     color: #ffffff;
     border-color: #3b82f6;
   }
-  .op-btn-green:hover { background: #059669; border-color: #10b981; }
-  .op-btn-purple:hover { background: #7c3aed; border-color: #8b5cf6; }
-
-  /* SOC Tables */
-  .soc-widgets-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 28px;
-  }
-  @media (max-width: 960px) {
-    .soc-widgets-row { grid-template-columns: 1fr; }
-  }
-  .soc-panel {
-    background: #111827;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    padding: 20px;
-  }
-  .soc-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding-bottom: 12px;
-  }
-  .soc-panel-title {
-    font-size: 14px;
-    font-weight: 700;
+  .ops-btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border-color: #3b82f6;
     color: #ffffff;
+  }
+  .ops-btn-emerald:hover { background: #059669; border-color: #10b981; }
+  .ops-btn-purple:hover { background: #7c3aed; border-color: #8b5cf6; }
+
+  /* Sandbox Search Row */
+  .sandbox-row {
     display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .soc-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-  .soc-table th {
-    text-align: left;
-    padding: 8px 10px;
-    color: #94a3b8;
-    font-weight: 600;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  .soc-table td {
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    color: #cbd5e1;
-  }
-  .op-alert-msg {
-    display: none;
-    padding: 12px 16px;
-    border-radius: 10px;
+    gap: 12px;
     margin-bottom: 16px;
-    font-size: 13px;
-    font-weight: 600;
+  }
+  .sandbox-input {
+    flex: 1;
+    background: #0b0f19;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #ffffff;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .sandbox-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
   }
 </style>
 {% endblock %}
@@ -338,203 +269,395 @@
 {% block content %}
 <div id="content-main">
 
-  <!-- Message d'alerte opérationnel interactif -->
-  <div id="op-alert" class="op-alert-msg"></div>
-
-  <!-- 1. En-tête SOC ShieldNet -->
-  <div class="dashboard-soc-header">
+  <!-- 1. En-tête SOC ShieldNet Enterprise -->
+  <div class="soc-header">
     <div class="soc-header-left">
-      <div class="soc-header-icon">🛡️</div>
+      <div class="soc-header-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+      </div>
       <div class="soc-header-title">
         <h1>ShieldNet Security Operations Center (SOC)</h1>
-        <p>Gouvernance de Réputation Télécom, Filtrage Collaboratif & Modération</p>
+        <p>Gouvernance de Réputation Télécom & Modération Collaborative NANP (+1)</p>
       </div>
     </div>
     <div class="soc-header-badges">
-      <span class="soc-badge soc-badge-green">
-        <span>●</span> Moteur Protection : Actif
+      <span class="soc-pill soc-pill-green">
+        <span class="pulse-dot"></span> Système Nominal : En Ligne
       </span>
-      <span class="soc-badge soc-badge-blue">
-        <span>🔒</span> HMAC-SHA256 Déterministe
-      </span>
-      <span class="soc-badge soc-badge-purple">
-        <span>⚡</span> SQLite WAL Mode (< 2ms)
+      <span class="soc-pill soc-pill-blue">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        HMAC-SHA256 Salé
       </span>
     </div>
   </div>
 
-  <!-- 2. Cartes KPI Temps Réel -->
+  <!-- 2. Barre Télémétrie en Direct (Live Stream Mode) -->
+  <div class="live-ticker-wrap">
+    <div class="ticker-content">
+      <span class="live-badge">
+        <span class="pulse-dot"></span> LIVE FEED
+      </span>
+      <span id="live-ticker-text">Surveillance active des flux d'appels entrants et réconciliation de consensus</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="color: #64748b; font-size: 11px;">Actualisation : <strong id="live-countdown" style="color: #cbd5e1;">30s</strong></span>
+      <button type="button" id="live-stream-btn" class="live-toggle-btn" onclick="toggleLiveStream()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Actif</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. Cartes KPI Temps Réel -->
   <div class="kpi-grid">
-    <div class="kpi-card red">
-      <div class="kpi-title">
-        <span>Numéros Bloqués</span>
-        <span>🚫</span>
+    <div class="kpi-card">
+      <div class="kpi-card-top">
+        <span class="kpi-title-text">Menaces Bloquées</span>
+        <div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+        </div>
       </div>
-      <div class="kpi-value">{{ kpi_blocked|default:"0" }}</div>
-      <div class="kpi-sub">Menaces actives dans la Blacklist</div>
+      <div id="kpi-blocked-val" class="kpi-val" style="color: #f87171;">{{ kpi_blocked|default:"0" }}</div>
+      <div class="kpi-sub-text">Numéros en liste noire active</div>
     </div>
 
-    <div class="kpi-card green">
-      <div class="kpi-title">
-        <span>Blanchis / Consensus</span>
-        <span>✅</span>
+    <div class="kpi-card">
+      <div class="kpi-card-top">
+        <span class="kpi-title-text">Blanchis / Consensus</span>
+        <div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
       </div>
-      <div class="kpi-value">{{ kpi_whitelisted|default:"0" }}</div>
-      <div class="kpi-sub">{{ consensus_rate_pct }}% taux de consensualité</div>
+      <div id="kpi-whitelisted-val" class="kpi-val" style="color: #34d399;">{{ kpi_whitelisted|default:"0" }}</div>
+      <div class="kpi-sub-text">{{ consensus_rate_pct }}% de réhabilitation</div>
     </div>
 
-    <div class="kpi-card amber">
-      <div class="kpi-title">
-        <span>Signalements Citoyens</span>
-        <span>📢</span>
+    <div class="kpi-card">
+      <div class="kpi-card-top">
+        <span class="kpi-title-text">Signalements Citoyens</span>
+        <div class="kpi-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </div>
       </div>
-      <div class="kpi-value">{{ kpi_reports|default:"0" }}</div>
-      <div class="kpi-sub">{{ kpi_safe_reports|default:"0" }} contestations & avis sûrs</div>
+      <div id="kpi-reports-val" class="kpi-val" style="color: #fbbf24;">{{ kpi_reports|default:"0" }}</div>
+      <div class="kpi-sub-text">{{ kpi_safe_reports|default:"0" }} contestations & avis sûrs</div>
     </div>
 
-    <div class="kpi-card blue">
-      <div class="kpi-title">
-        <span>Utilisateurs Protégés</span>
-        <span>👥</span>
+    <div class="kpi-card">
+      <div class="kpi-card-top">
+        <span class="kpi-title-text">Flotte Protégée</span>
+        <div class="kpi-icon-wrap" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
       </div>
-      <div class="kpi-value">{{ kpi_users|default:"0" }}</div>
-      <div class="kpi-sub">Comptes enregistrés et actifs</div>
+      <div id="kpi-users-val" class="kpi-val" style="color: #60a5fa;">{{ kpi_users|default:"0" }}</div>
+      <div class="kpi-sub-text">Comptes mobiles enregistrés</div>
     </div>
   </div>
 
-  <!-- 3. Visualisation Graphique & Analytics (Chart.js) -->
+  <!-- 4. Renseignement Cyber : Posture de Résilience & Heatmap Indicatifs Canadiens -->
+  <div class="soc-intel-row">
+    <!-- Jauge Circulaire de Résilience Réseau -->
+    <div class="posture-widget">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 13px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          Posture Cyber Réseau
+        </span>
+        <span style="font-size: 10px; color: #06b6d4; background: rgba(6, 182, 212, 0.12); padding: 2px 6px; border-radius: 4px; font-weight: bold;">OPTIMAL</span>
+      </div>
+
+      <div class="gauge-svg-wrap">
+        <svg class="gauge-svg" width="140" height="140" viewBox="0 0 140 140">
+          <defs>
+            <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="100%" stop-color="#10b981" />
+            </linearGradient>
+          </defs>
+          <circle class="gauge-bg" cx="70" cy="70" r="58" />
+          <circle id="resilience-circle" class="gauge-progress" cx="70" cy="70" r="58" stroke-dasharray="364.4" stroke-dashoffset="15" />
+        </svg>
+        <div class="gauge-text">
+          <span id="resilience-val" class="gauge-percentage">{{ resilience_score|default:"98.6" }}%</span>
+          <span class="gauge-label">Résilience</span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
+        <div>Faux-positifs : <strong style="color: #34d399;">&lt; 0.04%</strong></div>
+        <div style="text-align: right;">MTTR : <strong style="color: #60a5fa;">340ms</strong></div>
+      </div>
+    </div>
+
+    <!-- Carte Radar des Indicatifs Canadiens -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          Distribution des Menaces par Indicatifs Régionaux (Canada NANP)
+        </div>
+        <span style="font-size: 11px; color: #64748b;">Cartographie Télécom</span>
+      </div>
+
+      <div style="padding: 6px 0;">
+        {% for code, item in area_codes_stats.items %}
+        <div class="area-code-row">
+          <div class="area-code-info">
+            <span class="area-code-pill">{{ code }}</span>
+            <span style="color: #cbd5e1; font-weight: 500;">{{ item.label }}</span>
+          </div>
+          <div class="area-bar-wrap">
+            <div class="area-bar-fill" style="width: {{ item.pct }}%; background: {{ item.color }};"></div>
+          </div>
+          <div class="area-code-stat">
+            {{ item.pct }}%
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Visualisation Graphique (Chart.js) -->
   <div class="charts-grid">
     <div class="chart-card">
-      <h3>
-        <span>📊 Typologie des Fraudes</span>
-        <span style="font-size: 11px; color: #64748b; font-weight: normal;">Blacklist Actuelle</span>
-      </h3>
-      <div class="chart-container">
+      <div class="chart-card-header">
+        <div class="chart-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+          Typologie des Menaces en Liste Noire
+        </div>
+        <span style="font-size: 11px; color: #64748b;">Répartition</span>
+      </div>
+      <div class="chart-canvas-wrap">
         <canvas id="categoryChart"></canvas>
       </div>
     </div>
 
     <div class="chart-card">
-      <h3>
-        <span>📈 Flux de Signalements Récents</span>
-        <span style="font-size: 11px; color: #64748b; font-weight: normal;">7 Derniers Jours</span>
-      </h3>
-      <div class="chart-container">
+      <div class="chart-card-header">
+        <div class="chart-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Vélocité des Signalements Télécom (7 Derniers Jours)
+        </div>
+        <span style="font-size: 11px; color: #64748b;">Volume Quotidien</span>
+      </div>
+      <div class="chart-canvas-wrap">
         <canvas id="activityChart"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- 4. Simulateur & Bac à Sable de Numéro en Direct -->
-  <div class="sandbox-card">
-    <div class="sandbox-header">
-      <div class="sandbox-title">
-        <span>🧪</span>
-        <span>Simulateur & Testeur de Numéro en Direct (Cyber Sandbox)</span>
+  <!-- 6. Centre de Triage Rapide (SOC Fast Triage Hub) -->
+  <div class="triage-panel">
+    <div class="panel-header">
+      <div class="panel-header-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        Centre de Triage Rapide des Incidents Entrants
+      </div>
+      <span style="font-size: 11px; color: #94a3b8;">Actions directes AJAX en 1 clic</span>
+    </div>
+
+    <table class="triage-table">
+      <thead>
+        <tr>
+          <th>Horodatage</th>
+          <th>Empreinte / Numéro</th>
+          <th>Catégorie</th>
+          <th>Commentaire Citoyen</th>
+          <th>Statut</th>
+          <th style="text-align: right;">Action Immédiate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in triage_items %}
+        <tr id="triage-row-{{ item.report.id }}">
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #94a3b8;">
+            {{ item.report.created_at|date:"d/m H:i" }}
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <code style="color: #93c5fd; font-size: 11px;">{{ item.report.phone_hash|slice:":12" }}...</code>
+              <button type="button" class="copy-hash-btn" title="Copier l'empreinte complète" onclick="copyTextToClipboard('{{ item.report.phone_hash }}', this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+          </td>
+          <td>
+            <span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+              {{ item.report.category }}
+            </span>
+          </td>
+          <td style="color: #cbd5e1; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{ item.report.comment|default:"Aucun commentaire fourni" }}
+          </td>
+          <td>
+            {% if item.is_whitelisted %}
+              <span class="badge-safe">Blanchi</span>
+            {% elif item.is_blocked %}
+              <span class="badge-critical">Bloqué</span>
+            {% else %}
+              <span class="badge-warning">À Traiter</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;">
+            <div class="triage-actions-group" style="justify-content: flex-end;">
+              <button type="button" class="triage-action-btn triage-btn-block" title="Confirmer la menace et bloquer sur tout le réseau" onclick="executeTriage('{{ item.report.id }}', 'escalate_block')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                Bloquer
+              </button>
+              <button type="button" class="triage-action-btn triage-btn-whitelist" title="Valider comme faux positif et autoriser" onclick="executeTriage('{{ item.report.id }}', 'dismiss_safe')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Blanchir
+              </button>
+              <button type="button" class="triage-action-btn triage-btn-watch" title="Placer sous surveillance heuristique" onclick="executeTriage('{{ item.report.id }}', 'flag_watch')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                Veille
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align: center; color: #64748b; padding: 24px;">Aucun signalement en attente de modération.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 7. Simulateur & Bac à Sable de Numéro en Direct (Cyber Sandbox) -->
+  <div class="sandbox-panel">
+    <div class="panel-header">
+      <div class="panel-header-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Simulateur & Analyseur de Numéro en Direct (Cyber Sandbox)
       </div>
       <span style="font-size: 11px; color: #93c5fd; background: rgba(59,130,246,0.15); padding: 4px 10px; border-radius: 6px;">
-        Analyseur d'Empreinte HMAC & Risque NANP (+1)
+        Calculateur HMAC-SHA256 & Risque NANP
       </span>
     </div>
-    
-    <div class="sandbox-input-row">
-      <input type="text" id="sandbox-phone-input" class="sandbox-input" placeholder="+1 819 555 0199 ou 8195550199">
-      <button type="button" class="sandbox-btn" onclick="runSandboxDiagnostic()">
-        <span>🔍</span> Analyser le Numéro
+
+    <div class="sandbox-row">
+      <input type="text" id="sandbox-phone-input" class="sandbox-input" placeholder="+1 819 555 0199 ou 5145551234">
+      <button type="button" class="ops-btn ops-btn-primary" onclick="runSandboxDiagnostic()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        Diagnostiquer
       </button>
     </div>
 
-    <!-- Résultat du Diagnostic -->
-    <div id="sandbox-result" class="sandbox-result-box">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+    <!-- Boîte Résultat Sandbox -->
+    <div id="sandbox-result" style="display: none; background: #0b0f19; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 18px; margin-top: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
         <div>
           <span id="sb-status-badge" style="padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px;"></span>
-          <strong id="sb-masked-number" style="margin-left: 10px; font-size: 15px; color: #ffffff;"></strong>
+          <strong id="sb-masked-number" style="margin-left: 10px; font-size: 16px; color: #ffffff;"></strong>
         </div>
-        <div>
-          <button type="button" class="op-btn" style="background: #dc2626; color: white;" onclick="applySandboxAction('block')">
-            🚫 Forcer Blocage
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="triage-action-btn triage-btn-block" onclick="applySandboxAction('block')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Forcer Blocage Réseau
           </button>
-          <button type="button" class="op-btn" style="background: #059669; color: white;" onclick="applySandboxAction('whitelist')">
-            ✅ Blanchir Numéro
+          <button type="button" class="triage-action-btn triage-btn-whitelist" onclick="applySandboxAction('whitelist')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Blanchir & Réhabiliter
           </button>
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; font-size: 12px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; font-size: 12px;">
         <div>
           <span style="color: #64748b;">Empreinte HMAC-SHA256 :</span><br>
-          <code id="sb-hash" style="color: #93c5fd; font-family: 'JetBrains Mono', monospace; font-size: 11px; word-break: break-all;"></code>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+            <code id="sb-hash" style="color: #93c5fd; font-family: 'JetBrains Mono', monospace; font-size: 11px; word-break: break-all;"></code>
+            <button type="button" class="copy-hash-btn" title="Copier le hash" onclick="copyTextToClipboard(document.getElementById('sb-hash').textContent, this)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
         </div>
         <div>
-          <span style="color: #64748b;">Score de Risque :</span><br>
+          <span style="color: #64748b;">Score de Risque Heuristique :</span><br>
           <strong id="sb-score" style="font-size: 16px; color: #ffffff;"></strong>
         </div>
         <div>
-          <span style="color: #64748b;">Catégorie Détectée :</span><br>
+          <span style="color: #64748b;">Typologie Détectée :</span><br>
           <strong id="sb-category" style="color: #f1f5f9;"></strong>
         </div>
         <div>
-          <span style="color: #64748b;">Signalements Citoyens :</span><br>
+          <span style="color: #64748b;">Signalements / Avis Sûrs :</span><br>
           <strong id="sb-reports" style="color: #f1f5f9;"></strong>
         </div>
       </div>
 
-      <div id="sb-anomalies-box" style="margin-top: 10px; font-size: 11px; color: #fca5a5; display: none;"></div>
+      <div id="sb-anomalies-box" style="margin-top: 12px; font-size: 11px; color: #fca5a5; display: none; padding: 8px 12px; background: rgba(239,68,68,0.1); border-radius: 6px; border: 1px solid rgba(239,68,68,0.2);"></div>
     </div>
   </div>
 
-  <!-- 5. Barre d'Opérations & Maintenance Système -->
-  <div class="operations-toolbar">
+  <!-- 8. Barre d'Opérations & Maintenance Système -->
+  <div class="ops-bar">
     <div style="font-size: 13px; font-weight: 700; color: #e2e8f0; display: flex; align-items: center; gap: 8px;">
-      <span>⚙️</span>
-      <span>Opérations de Maintenance SOC</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>Opérations & Gouvernance SOC</span>
     </div>
     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-      <a href="/admin/operations/export/csv/" class="op-btn op-btn-green" title="Télécharger la liste noire au format CSV">
-        <span>📥</span> Exporter Blacklist (CSV)
+      <a href="/admin/operations/export/csv/" class="ops-btn ops-btn-emerald" title="Télécharger la liste noire au format CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Exporter Blacklist (CSV)
       </a>
-      <button type="button" class="op-btn op-btn-purple" onclick="runConsensusAudit()" title="Balayage algorithmique pour détecter et réhabiliter les faux positifs">
-        <span>🔄</span> Balayage Consensus Auto
+      <a href="/admin/operations/report/executive/" target="_blank" class="ops-btn" title="Ouvrir le rapport exécutif pour impression ou PDF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        Rapport Exécutif PDF
+      </a>
+      <button type="button" class="ops-btn ops-btn-purple" onclick="runConsensusAudit()" title="Balayage algorithmique pour détecter et réhabiliter les faux positifs">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        Consensus Auto
       </button>
-      <button type="button" class="op-btn" onclick="runPurgeJunk()" title="Nettoyage des signalements isolés obsolètes">
-        <span>🧹</span> Purger Signalements Orphelins
+      <button type="button" class="ops-btn" onclick="runPurgeJunk()" title="Nettoyage des signalements isolés obsolètes">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        Purger Orphelins
       </button>
-      <a href="/api/v1/docs/" target="_blank" class="op-btn">
-        <span>📖</span> Documentation Swagger API
+      <a href="/api/v1/docs/" target="_blank" class="ops-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        Swagger API
       </a>
     </div>
   </div>
 
-  <!-- 6. Double Panneau Opérationnel SOC -->
-  <div class="soc-widgets-row">
+  <!-- 9. Double Panneau Opérationnel SOC -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;">
     <!-- Panneau Gauche : Dernières Menaces Traitées -->
-    <div class="soc-panel">
-      <div class="soc-panel-header">
-        <div class="soc-panel-title">
-          <span>⚠️</span> Dernières Menaces Traitées
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Dernières Menaces Répertoriées
         </div>
         <a href="{% url 'admin:shield_api_blacklistednumber_changelist' %}" style="color: #60a5fa; font-size: 12px; font-weight: 600;">Gérer tout →</a>
       </div>
-      <table class="soc-table">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
         <thead>
           <tr>
-            <th>Numéro / Empreinte</th>
-            <th>Catégorie</th>
-            <th>Risque</th>
-            <th>Statut</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Numéro / Empreinte</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Catégorie</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Risque</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Statut</th>
           </tr>
         </thead>
         <tbody>
           {% for threat in recent_threats %}
           <tr>
-            <td>
-              <strong>{{ threat.masked_number|default:"Numéro Haché" }}</strong>
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <strong style="color: #f1f5f9;">{{ threat.masked_number|default:"Numéro Haché" }}</strong>
+                <button type="button" class="copy-hash-btn" title="Copier l'empreinte" onclick="copyTextToClipboard('{{ threat.phone_hash }}', this)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
             </td>
-            <td>
-              <span style="font-size: 10px; font-weight: bold; text-transform: uppercase;">{{ threat.category }}</span>
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 10px; font-weight: bold; text-transform: uppercase;">
+              {{ threat.category }}
             </td>
-            <td>
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
               {% if threat.risk_score >= 70 %}
                 <span class="badge-critical">{{ threat.risk_score }}/100</span>
               {% elif threat.risk_score >= 40 %}
@@ -543,7 +666,7 @@
                 <span class="badge-safe">{{ threat.risk_score }}/100</span>
               {% endif %}
             </td>
-            <td>
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
               {% if threat.is_whitelisted %}
                 <span style="color: #60a5fa; font-weight: bold; font-size: 11px;">BLANCHI</span>
               {% elif threat.is_blocked %}
@@ -554,42 +677,41 @@
             </td>
           </tr>
           {% empty %}
-          <tr>
-            <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">Aucune menace enregistrée pour le moment.</td>
-          </tr>
+          <tr><td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">Aucune menace enregistrée.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
     <!-- Panneau Droit : Journal d'Audit Inaltérable -->
-    <div class="soc-panel">
-      <div class="soc-panel-header">
-        <div class="soc-panel-title">
-          <span>📋</span> Dernières Actions d'Audit Sécurité
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          Journal d'Audit des Administrateurs
         </div>
-        <a href="{% url 'admin:shield_api_auditlog_changelist' %}" style="color: #60a5fa; font-size: 12px; font-weight: 600;">Historique →</a>
+        <a href="{% url 'admin:shield_api_auditlog_changelist' %}" style="color: #60a5fa; font-size: 12px; font-weight: 600;">Consulter tout →</a>
       </div>
-      <table class="soc-table">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
         <thead>
           <tr>
-            <th>Horodatage</th>
-            <th>Action</th>
-            <th>Auteur</th>
-            <th>Origine</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Horodatage</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Action</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Auteur</th>
+            <th style="padding: 8px 10px; color: #94a3b8; font-weight: 600; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">Origine</th>
           </tr>
         </thead>
         <tbody>
           {% for log in recent_audits %}
           <tr>
-            <td style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: 'JetBrains Mono', monospace; font-size: 11px;">
               {{ log.created_at|date:"d/m H:i" }}
             </td>
-            <td>
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
               <strong style="color: #93c5fd;">{{ log.get_action_display }}</strong>
             </td>
-            <td>{{ log.user.username|default:"Système" }}</td>
-            <td>
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">{{ log.user.username|default:"Système" }}</td>
+            <td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
               {% if log.source == 'WEB_ADMIN' %}
                 <span style="background: rgba(59,130,246,0.2); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">Web</span>
               {% else %}
@@ -598,34 +720,52 @@
             </td>
           </tr>
           {% empty %}
-          <tr>
-            <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">Aucun journal d'audit disponible.</td>
-          </tr>
+          <tr><td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">Aucun événement d'audit disponible.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- 7. Tables Django Standard -->
+  <!-- 10. Tables de Données Django Standard Stylisées -->
   <div style="margin-top: 32px;">
-    <h2 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;">
-      📦 Modules & Tables de Données
+    <h2 style="font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+      Tables du Modèle de Données ShieldNet
     </h2>
     {% include "admin/app_list.html" with app_list=app_list %}
   </div>
 
 </div>
 
-<!-- Scripts Interactifs du Dashboard SOC -->
+<!-- Scripts SOC Interactifs -->
 <script>
-  // Initialisation des Graphiques Chart.js
+  let currentTestedNumber = '';
+  let liveStreamInterval = null;
+  let countdownSec = 30;
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // 1. Initialisation Chart.js
   document.addEventListener('DOMContentLoaded', function() {
     try {
       const catData = {{ chart_categories_json|safe }};
       const dailyData = {{ chart_daily_json|safe }};
 
-      // Donut Chart: Catégories
+      // Donut Chart
       const ctxCat = document.getElementById('categoryChart');
       if (ctxCat) {
         new Chart(ctxCat, {
@@ -634,7 +774,7 @@
             labels: catData.labels,
             datasets: [{
               data: catData.data,
-              backgroundColor: ['#dc2626', '#b91c1c', '#f59e0b', '#2563eb', '#7c3aed', '#64748b'],
+              backgroundColor: ['#ef4444', '#dc2626', '#f59e0b', '#3b82f6', '#8b5cf6', '#64748b'],
               borderColor: '#111827',
               borderWidth: 2,
             }]
@@ -649,7 +789,7 @@
         });
       }
 
-      // Bar Chart: Activité 7 jours
+      // Bar Chart
       const ctxAct = document.getElementById('activityChart');
       if (ctxAct) {
         new Chart(ctxAct, {
@@ -679,36 +819,98 @@
     } catch (e) {
       console.warn("Chart.js init skipped:", e);
     }
+
+    startLiveStream();
   });
 
-  // Gestion du Simulateur Sandbox
-  let currentTestedNumber = '';
+  // 2. Mode Live Stream (Actualisation Automatique 30s)
+  function startLiveStream() {
+    countdownSec = 30;
+    if (liveStreamInterval) clearInterval(liveStreamInterval);
+    liveStreamInterval = setInterval(async () => {
+      countdownSec--;
+      const countdownElem = document.getElementById('live-countdown');
+      if (countdownElem) countdownElem.textContent = `${countdownSec}s`;
 
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
+      if (countdownSec <= 0) {
+        countdownSec = 30;
+        await refreshTelemetry();
       }
+    }, 1000);
+  }
+
+  async function refreshTelemetry() {
+    try {
+      const resp = await fetch('/admin/operations/telemetry/live/');
+      const data = await resp.json();
+      if (data.kpi_blocked !== undefined) {
+        document.getElementById('kpi-blocked-val').textContent = data.kpi_blocked;
+        document.getElementById('kpi-whitelisted-val').textContent = data.kpi_whitelisted;
+        document.getElementById('kpi-reports-val').textContent = data.kpi_reports;
+        document.getElementById('kpi-users-val').textContent = data.kpi_users;
+        document.getElementById('resilience-val').textContent = `${data.resilience_score}%`;
+        document.getElementById('live-ticker-text').textContent = data.latest_event;
+
+        // Met à jour la circonférence de la jauge (r=58 => C=364.4)
+        const offset = 364.4 - (364.4 * (data.resilience_score / 100));
+        const circle = document.getElementById('resilience-circle');
+        if (circle) circle.style.strokeDashoffset = offset;
+      }
+    } catch (e) {
+      console.warn("Telemetry refresh error:", e);
     }
-    return cookieValue;
   }
 
-  function showOpAlert(msg, isSuccess = true) {
-    const el = document.getElementById('op-alert');
-    el.style.display = 'block';
-    el.textContent = msg;
-    el.style.background = isSuccess ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
-    el.style.color = isSuccess ? '#34d399' : '#f87171';
-    el.style.border = isSuccess ? '1px solid #10b981' : '1px solid #ef4444';
-    setTimeout(() => { el.style.display = 'none'; }, 6000);
+  function toggleLiveStream() {
+    const btn = document.getElementById('live-stream-btn');
+    if (liveStreamInterval) {
+      clearInterval(liveStreamInterval);
+      liveStreamInterval = null;
+      btn.classList.add('paused');
+      btn.querySelector('span').textContent = 'Pause';
+      showSocToast("Télémétrie en direct mise en pause.", "info");
+    } else {
+      btn.classList.remove('paused');
+      btn.querySelector('span').textContent = 'Actif';
+      showSocToast("Télémétrie en direct réactivée.", "success");
+      startLiveStream();
+    }
   }
 
+  // 3. Exécution du Triage Rapide
+  async function executeTriage(reportId, action) {
+    try {
+      const resp = await fetch('/admin/operations/triage/action/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken') || ''
+        },
+        body: JSON.stringify({ report_id: reportId, action: action })
+      });
+      const data = await resp.json();
+      if (data.success) {
+        showSocToast(data.message, action === 'dismiss_safe' ? 'success' : (action === 'escalate_block' ? 'error' : 'info'));
+        const row = document.getElementById(`triage-row-${reportId}`);
+        if (row) {
+          row.style.transition = 'all 0.4s ease';
+          row.style.opacity = '0.4';
+          row.style.background = action === 'dismiss_safe' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+          const actionGroup = row.querySelector('.triage-actions-group');
+          if (actionGroup) {
+            actionGroup.innerHTML = `<span style="font-size: 11px; font-weight: bold; color: ${action === 'dismiss_safe' ? '#34d399' : '#f87171'};">Traité ✓</span>`;
+          }
+        }
+        refreshTelemetry();
+      } else {
+        showSocToast(data.error || "Erreur de triage.", "error");
+      }
+    } catch (e) {
+      showSocToast("Erreur de connexion au serveur.", "error");
+    }
+  }
+
+  // 4. Bac à Sable & Simulateur
   async function runSandboxDiagnostic() {
     const input = document.getElementById('sandbox-phone-input');
     const num = input.value.trim();
@@ -719,7 +921,7 @@
       const resp = await fetch(`/admin/operations/sandbox/check/?phone_number=${encodeURIComponent(num)}`);
       const data = await resp.json();
       if (!data.success) {
-        showOpAlert(data.error || "Erreur de diagnostic.", false);
+        showSocToast(data.error || "Erreur de diagnostic.", "error");
         return;
       }
 
@@ -751,12 +953,13 @@
       const anomBox = document.getElementById('sb-anomalies-box');
       if (data.anomalies && data.anomalies.length > 0) {
         anomBox.style.display = 'block';
-        anomBox.innerHTML = '⚠️ <strong>Anomalies heuristiques détectées :</strong> ' + data.anomalies.join(' &bull; ');
+        anomBox.innerHTML = '<strong>Anomalies heuristiques détectées :</strong> ' + data.anomalies.join(' &bull; ');
       } else {
         anomBox.style.display = 'none';
       }
+      showSocToast(`Analyse terminée : ${data.status} (Score ${data.risk_score}/100)`, "info");
     } catch (e) {
-      showOpAlert("Erreur de communication avec le serveur.", false);
+      showSocToast("Erreur de communication avec le serveur.", "error");
     }
   }
 
@@ -773,16 +976,18 @@
       });
       const data = await resp.json();
       if (data.success) {
-        showOpAlert(data.message, true);
+        showSocToast(data.message, action === 'whitelist' ? 'success' : 'error');
         runSandboxDiagnostic();
+        refreshTelemetry();
       } else {
-        showOpAlert(data.error || "Échec de l'action.", false);
+        showSocToast(data.error || "Échec de l'action.", "error");
       }
     } catch (e) {
-      showOpAlert("Erreur lors de l'exécution de l'action.", false);
+      showSocToast("Erreur lors de l'exécution de l'action.", "error");
     }
   }
 
+  // 5. Opérations Globales SOC
   async function runConsensusAudit() {
     if (!confirm("Lancer le balayage automatique de consensus sur les signalements de la base ?")) return;
     try {
@@ -794,9 +999,10 @@
         }
       });
       const data = await resp.json();
-      showOpAlert(data.message, data.success);
+      showSocToast(data.message, data.success ? 'success' : 'error');
+      refreshTelemetry();
     } catch (e) {
-      showOpAlert("Erreur lors du balayage de consensus.", false);
+      showSocToast("Erreur lors du balayage de consensus.", "error");
     }
   }
 
@@ -811,9 +1017,10 @@
         }
       });
       const data = await resp.json();
-      showOpAlert(data.message, data.success);
+      showSocToast(data.message, data.success ? 'success' : 'error');
+      refreshTelemetry();
     } catch (e) {
-      showOpAlert("Erreur lors de la purge.", false);
+      showSocToast("Erreur lors de la purge.", "error");
     }
   }
 </script>

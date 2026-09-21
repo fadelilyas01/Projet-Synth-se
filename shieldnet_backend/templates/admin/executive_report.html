@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapport Exécutif de Menaces — ShieldNet SOC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-cyan: #06b6d4;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .report-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Print / Action Bar */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #334155; color: white; }
+
+    /* Report Header */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-titles h1 {
+      margin: 0 0 4px 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .header-titles p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .classification-tag {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      text-align: right;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+      background: #0b0f19;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .meta-item label {
+      display: block;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-item span {
+      font-weight: 600;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* KPI Tiles */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-box {
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .kpi-val {
+      font-size: 30px;
+      font-weight: 900;
+      margin-bottom: 4px;
+      letter-spacing: -1px;
+    }
+
+    .kpi-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Tables */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 32px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 4px solid var(--primary);
+      padding-left: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 24px;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      background: #0b0f19;
+      color: var(--text-muted);
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      color: #93c5fd;
+      font-size: 11px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-red { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-green { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+    /* Sign-off Footer */
+    .signature-section {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 2px dashed var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .sig-box {
+      width: 45%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      background: #0b0f19;
+    }
+
+    .sig-line {
+      margin-top: 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+      }
+      .action-bar { display: none !important; }
+      .report-container {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        background: white !important;
+        color: black !important;
+        max-width: 100% !important;
+      }
+      .meta-grid, .kpi-box, th, .sig-box {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: black !important;
+      }
+      td { color: #1e293b !important; border-bottom-color: #e2e8f0 !important; }
+      .classification-tag {
+        border-color: black !important;
+        color: black !important;
+        background: #fee2e2 !important;
+      }
+      code { color: #1e40af !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="report-container">
+    <!-- Barre d'Action -->
+    <div class="action-bar">
+      <a href="javascript:history.back()" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Retour à la Console SOC
+      </a>
+      <button onclick="window.print()" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        Imprimer / Exporter en PDF
+      </button>
+    </div>
+
+    <!-- En-tête Officiel -->
+    <div class="report-header">
+      <div class="header-logo">
+        <div class="logo-badge">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <div class="header-titles">
+          <h1>ShieldNet Enterprise — Threat Intelligence Briefing</h1>
+          <p>Rapport Périodique de Sécurité Télécom, Analyse des Fraudes & Consensus</p>
+        </div>
+      </div>
+      <div class="classification-tag">
+        CONFIDENTIEL • SOC NIVEAU 2
+      </div>
+    </div>
+
+    <!-- Méta Données du Rapport -->
+    <div class="meta-grid">
+      <div class="meta-item">
+        <label>Date d'émission</label>
+        <span>{{ generated_at|date:"d/m/Y H:i" }} UTC</span>
+      </div>
+      <div class="meta-item">
+        <label>Opérateur Responsable</label>
+        <span>{{ admin_user.username }}</span>
+      </div>
+      <div class="meta-item">
+        <label>Algorithme Cryptographique</label>
+        <span>HMAC-SHA256 (NANP +1)</span>
+      </div>
+      <div class="meta-item">
+        <label>Moteur de Réputation</label>
+        <span>AutomatedSpamVerifier 2.0</span>
+      </div>
+    </div>
+
+    <!-- KPI Exécutifs -->
+    <div class="kpi-row">
+      <div class="kpi-box">
+        <div class="kpi-val" style="color: #ef4444;">{{ kpi_blocked }}</div>
+        <div class="kpi-lbl">Menaces Bloquées</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-val" style="color: #10b981;">{{ kpi_whitelisted }}</div>
+        <div class="kpi-lbl">Blanchis / Consensus ({{ consensus_pct }}%)</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-val" style="color: #f59e0b;">{{ kpi_reports }}</div>
+        <div class="kpi-lbl">Signalements Citoyens</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-val" style="color: #06b6d4;">{{ resilience_score }}%</div>
+        <div class="kpi-lbl">Résilience Globale Réseau</div>
+      </div>
+    </div>
+
+    <!-- Section 1 : Top 10 Menaces Actives -->
+    <div class="section-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      Matrice des Menaces Prioritaires Répertoriées
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Numéro Masqué</th>
+          <th>Empreinte Cryptographique HMAC</th>
+          <th>Typologie</th>
+          <th>Score Risque</th>
+          <th>Signalements</th>
+          <th>Statut Réseau</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in top_threats %}
+        <tr>
+          <td><strong>{{ item.masked_number|default:"Non Masqué" }}</strong></td>
+          <td><code>{{ item.phone_hash|slice:":18" }}...</code></td>
+          <td>{{ item.get_category_display }}</td>
+          <td>
+            {% if item.risk_score >= 70 %}
+              <span class="badge badge-red">{{ item.risk_score }}/100</span>
+            {% elif item.risk_score >= 40 %}
+              <span class="badge badge-amber">{{ item.risk_score }}/100</span>
+            {% else %}
+              <span class="badge badge-green">{{ item.risk_score }}/100</span>
+            {% endif %}
+          </td>
+          <td>{{ item.reports_count }} signalement(s)</td>
+          <td>
+            {% if item.is_blocked %}
+              <span class="badge badge-red">BLOQUÉ</span>
+            {% elif item.is_whitelisted %}
+              <span class="badge badge-green">BLANCHI</span>
+            {% else %}
+              <span class="badge badge-amber">SOUS VEILLE</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Aucune donnée de menace enregistrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Section 2 : Journal d'Audit & Décisions Récentes -->
+    <div class="section-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      Traçabilité & Journal d'Audit des Administrateurs (SOC Immuable)
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Horodatage</th>
+          <th>Action Exécutée</th>
+          <th>Opérateur</th>
+          <th>Origine</th>
+          <th>Détails & Justification</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for audit in recent_audits %}
+        <tr>
+          <td><code>{{ audit.created_at|date:"d/m/Y H:i:s" }}</code></td>
+          <td><strong>{{ audit.get_action_display }}</strong></td>
+          <td>{{ audit.user.username|default:"Système Automatisé" }}</td>
+          <td>{{ audit.get_source_display }}</td>
+          <td>{{ audit.details }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Aucun événement d'audit récent.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Signatures & Attestation -->
+    <div class="signature-section">
+      <div class="sig-box">
+        <strong>Attestation de Conformité Cryptographique</strong>
+        <p style="margin: 8px 0 0 0; font-size: 11px;">
+          L'ensemble des numéros bloqués ou blanchis est protégé par salage HMAC-SHA256 non réversible. Aucun numéro en clair n'est diffusé aux flottes mobiles sans autorisation expresse.
+        </p>
+        <div class="sig-line"></div>
+        <p style="font-size: 10px; margin-top: 6px;">Sceau d'Intégrité Télécom — UQO ShieldNet</p>
+      </div>
+
+      <div class="sig-box">
+        <strong>Validation de l'Officier de Sécurité (SOC Lead)</strong>
+        <p style="margin: 8px 0 0 0; font-size: 11px;">
+          Visa d'approbation des actions de consensus, purges de base de données et mises à jour de la réputation.
+        </p>
+        <div class="sig-line"></div>
+        <p style="font-size: 10px; margin-top: 6px;">Signature & Date : {{ admin_user.username }} — {{ generated_at|date:"d/m/Y" }}</p>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

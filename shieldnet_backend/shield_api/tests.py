@@ -1,3 +1,4 @@
+import json
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -576,6 +577,70 @@ class ConsensusFalsePositiveServiceTest(APITestCase):
         # Index sur les signalements de spam
         spam_indexes = [idx.name for idx in SpamReport._meta.indexes]
         self.assertIn('idx_spam_hash_created', spam_indexes)
+
+class UltraPremiumSOCTests(TestCase):
+    """
+    Tests des fonctionnalités avancées de la console SOC :
+    Triage rapide, télémétrie en direct et rapport exécutif PDF.
+    """
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.admin_user = User.objects.create_superuser('soc_admin', 'admin@shieldnet.app', 'pass123')
+        self.client.force_login(self.admin_user)
+
+    def test_triage_action_escalate_and_dismiss(self):
+        phone_hash = "c" * 64
+        report = SpamReport.objects.create(
+            phone_hash=phone_hash,
+            category='fraud',
+            comment='Appel agressif'
+        )
+
+        # 1. Escalader en blocage
+        triage_url = reverse('admin-triage-action')
+        resp = self.client.post(
+            triage_url,
+            data=json.dumps({'report_id': str(report.id), 'action': 'escalate_block'}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data['success'])
+        self.assertTrue(data['is_blocked'])
+
+        # Vérifie en BDD
+        bl = BlacklistedNumber.objects.get(phone_hash=phone_hash)
+        self.assertTrue(bl.is_blocked)
+        self.assertFalse(bl.is_whitelisted)
+
+        # 2. Blanchir en faux-positif
+        resp2 = self.client.post(
+            triage_url,
+            data=json.dumps({'report_id': str(report.id), 'action': 'dismiss_safe'}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp2.status_code, 200)
+        data2 = resp2.json()
+        self.assertTrue(data2['success'])
+        self.assertFalse(data2['is_blocked'])
+        self.assertTrue(data2['is_whitelisted'])
+
+    def test_telemetry_live_view(self):
+        url = reverse('admin-telemetry-live')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn('resilience_score', data)
+        self.assertIn('kpi_blocked', data)
+        self.assertIn('latest_event', data)
+
+    def test_executive_report_view(self):
+        url = reverse('admin-report-executive')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Threat Intelligence Briefing')
+        self.assertContains(resp, 'CONFIDENTIEL')
+
 
 
 
