@@ -1,131 +1,528 @@
-/* ShieldNet Corporate Admin Dashboard Theme */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* =====================================================================
+   ShieldNet Enterprise — High-Tech Dark Cyber Theme for Django Admin
+   ===================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  --primary: #1E3A8A;
-  --primary-dark: #0F172A;
-  --accent: #3B82F6;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --bg-dark: #0B0F19;
-  --card-bg: #111827;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-glow: rgba(37, 99, 235, 0.25);
+  --bg-dark: #0b0f19;
+  --bg-surface: #111827;
+  --bg-card: #151d30;
+  --bg-input: #1e293b;
   --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: #3b82f6;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
+  --accent-purple: #a855f7;
 }
 
+/* Global Reset & Base */
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   background-color: var(--bg-dark) !important;
-  color: #E2E8F0 !important;
+  color: var(--text-main) !important;
+  margin: 0;
+  padding: 0;
 }
 
-/* Header & Navbar */
+a:link, a:visited {
+  color: #60a5fa !important;
+  text-decoration: none;
+}
+a:hover {
+  color: #93c5fd !important;
+  text-decoration: underline;
+}
+
+/* Top Header */
 #header {
-  background: #0F172A !important;
-  color: #FFFFFF !important;
-  padding: 16px 24px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-  border-bottom: 1px solid var(--border-color);
+  background: #0f172a !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 14px 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
-#header #site-name a {
-  font-weight: 700 !important;
-  font-size: 20px !important;
+.shieldnet-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none !important;
+}
+
+.brand-shield-icon {
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff !important;
   letter-spacing: -0.3px;
-  color: #FFFFFF !important;
+}
+
+.brand-enterprise {
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.brand-sub-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+#user-tools {
+  font-size: 12px !important;
+  color: #94a3b8 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+#user-tools strong {
+  color: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#user-tools a {
+  color: #cbd5e1 !important;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+#user-tools a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff !important;
   text-decoration: none;
 }
 
-/* Containers */
-.module, #changelist {
-  background: var(--card-bg) !important;
-  border-radius: 12px !important;
+/* Breadcrumbs */
+div.breadcrumbs {
+  background: #111827 !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 12px 28px !important;
+  font-size: 12px !important;
+  color: #64748b !important;
+}
+
+div.breadcrumbs a {
+  color: #94a3b8 !important;
+}
+
+div.breadcrumbs a:hover {
+  color: #60a5fa !important;
+}
+
+/* Content Area */
+#content {
+  padding: 24px 28px !important;
+  background-color: var(--bg-dark) !important;
+}
+
+/* Modules & Tables */
+.module {
+  background: var(--bg-surface) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  overflow: hidden;
+  border-radius: 12px !important;
+  overflow: hidden !important;
   margin-bottom: 24px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
 .module h2, .module caption {
-  background: #1F2937 !important;
-  color: #F3F4F6 !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
   padding: 12px 18px !important;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color) !important;
+  letter-spacing: 0.3px;
 }
 
-/* Tables */
-#changelist table {
-  background-color: transparent !important;
+/* Tables in Changelist & Modules */
+table {
+  background: transparent !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
 }
 
-#changelist table thead th {
+thead th {
   background: #111827 !important;
-  color: #9CA3AF !important;
+  color: #94a3b8 !important;
   font-weight: 600 !important;
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.5px;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px !important;
   padding: 12px 16px !important;
   border-bottom: 1px solid var(--border-color) !important;
 }
 
-#changelist table tbody tr:hover {
+tbody tr {
+  transition: background-color 0.15s ease !important;
+}
+
+tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
-#changelist table tbody td, #changelist table tbody th {
+tbody td, tbody th {
   padding: 12px 16px !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-  color: #E2E8F0 !important;
-  font-size: 13px;
+  color: #e2e8f0 !important;
+  font-size: 13px !important;
 }
 
-/* Buttons */
-.button, input[type=submit], input[type=button], .submit-row input {
-  background: #2563EB !important;
-  color: #FFFFFF !important;
+/* Action Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
   border: none !important;
-  border-radius: 6px !important;
-  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  padding: 9px 18px !important;
   font-weight: 600 !important;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background-color 0.2s ease !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.2s ease !important;
 }
 
-.button:hover, input[type=submit]:hover {
-  background: #1D4ED8 !important;
+.button:hover, input[type=submit]:hover, a.button:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+}
+
+.button.default, input[type=submit].default {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+}
+
+/* Changelist Toolbar & Filters */
+#changelist {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 14px !important;
+  padding: 16px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+#toolbar {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 0 16px 0 !important;
+}
+
+#searchbar {
+  background: var(--bg-input) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
+  padding: 8px 14px !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+}
+
+#searchbar:focus {
+  outline: none !important;
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+#changelist-filter {
+  background: #0f172a !important;
+  border-left: 1px solid var(--border-color) !important;
+  border-radius: 0 12px 12px 0 !important;
+  padding: 16px !important;
+}
+
+#changelist-filter h2 {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+#changelist-filter h3 {
+  color: #94a3b8 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+#changelist-filter li.selected a {
+  color: #60a5fa !important;
+  font-weight: 700 !important;
 }
 
 /* Status Badges */
 .badge-critical {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #F87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 11px;
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
 }
 
 .badge-warning {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #FBBF24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 11px;
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
 }
 
 .badge-safe {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-weight: 600;
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
+/* Form Controls */
+input[type=text], input[type=password], input[type=email], select, textarea {
+  background: var(--bg-input) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+}
+
+input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+/* Messages & Alerts */
+ul.messagelist li {
+  border-radius: 8px !important;
+  padding: 12px 18px !important;
+  margin-bottom: 16px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+ul.messagelist li.success {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+
+ul.messagelist li.warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+ul.messagelist li.error {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Object Tools */
+.object-tools li a {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 8px 14px !important;
+  font-weight: 600 !important;
+  color: #cbd5e1 !important;
+}
+
+.object-tools li a:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+/* Paginator */
+.paginator {
+  background: #111827 !important;
+  border-top: 1px solid var(--border-color) !important;
+  color: #94a3b8 !important;
+  padding: 12px !important;
+  font-size: 12px !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Theme Toggle Button */
+.theme-switch-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f1f5f9;
   font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+.theme-switch-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Light Mode Overrides */
+html.light-mode body {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+}
+html.light-mode #header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+}
+html.light-mode .brand-main-title {
+  color: #0f172a !important;
+}
+html.light-mode #user-tools {
+  color: #64748b !important;
+}
+html.light-mode #user-tools strong {
+  color: #0f172a !important;
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+html.light-mode #user-tools a {
+  color: #475569 !important;
+}
+html.light-mode .theme-switch-btn {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+html.light-mode div.breadcrumbs {
+  background: #f1f5f9 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+html.light-mode #content {
+  background-color: #f8fafc !important;
+}
+html.light-mode .module,
+html.light-mode #changelist,
+html.light-mode .kpi-card,
+html.light-mode .chart-card,
+html.light-mode .sandbox-card,
+html.light-mode .soc-panel,
+html.light-mode .operations-toolbar {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+html.light-mode .dashboard-soc-header {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+  border-color: #cbd5e1 !important;
+}
+html.light-mode thead th {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+html.light-mode tbody td, html.light-mode tbody th {
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #334155 !important;
+}
+html.light-mode .module h2, html.light-mode .module caption {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+html.light-mode .kpi-value,
+html.light-mode .soc-panel-title,
+html.light-mode .sandbox-title {
+  color: #0f172a !important;
+}
+html.light-mode input[type=text],
+html.light-mode input[type=password],
+html.light-mode select,
+html.light-mode .sandbox-input {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html.light-mode .sandbox-result-box {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode #sb-masked-number {
+  color: #0f172a !important;
+}
+html.light-mode #changelist-filter {
+  background: #f8fafc !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+html.light-mode #changelist-filter h2 {
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode .paginator {
+  background: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+html.light-mode .op-btn,
+html.light-mode .object-tools li a {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode .op-btn:hover,
+html.light-mode .object-tools li a:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
 }

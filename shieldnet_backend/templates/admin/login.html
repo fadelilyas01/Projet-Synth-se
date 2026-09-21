@@ -1,0 +1,247 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  body.login {
+    background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b0f19 100%) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    color: #e2e8f0;
+  }
+  #container {
+    width: 100%;
+    max-width: 440px;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+  #header {
+    display: none !important;
+  }
+  .login-card {
+    background: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.15);
+    padding: 36px 32px;
+    box-sizing: border-box;
+  }
+  .login-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    border-radius: 16px;
+    font-size: 32px;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    margin-bottom: 16px;
+  }
+  .login-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+  }
+  .login-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+  }
+  .form-row {
+    margin-bottom: 18px;
+    padding: 0 !important;
+    border: none !important;
+  }
+  .form-row label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-row input[type="text"],
+  .form-row input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px;
+    color: #ffffff !important;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+  .form-row input:focus {
+    outline: none;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+    background: #0f172a !important;
+  }
+  .submit-row {
+    margin-top: 24px;
+    padding: 0;
+    text-align: center;
+  }
+  .submit-row input[type="submit"] {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    transition: all 0.2s ease;
+  }
+  .submit-row input[type="submit"]:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    transform: translateY(-1px);
+  }
+  .demo-credentials-box {
+    margin-top: 24px;
+    padding: 14px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px dashed rgba(59, 130, 246, 0.4);
+    border-radius: 12px;
+    text-align: center;
+  }
+  .demo-badge {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .demo-btn {
+    background: rgba(37, 99, 235, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #93c5fd;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .demo-btn:hover {
+    background: rgba(37, 99, 235, 0.3);
+    color: #ffffff;
+  }
+  .errornote {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid #ef4444 !important;
+    color: #fca5a5 !important;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .footer-copyright {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #64748b;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">🛡️</div>
+      <h1 class="login-title">ShieldNet Enterprise</h1>
+      <p class="login-subtitle">Console d'Administration & Modération Cyber</p>
+    </div>
+
+    {% if form.errors and not form.non_field_errors %}
+      <p class="errornote">{% translate "Veuillez corriger les erreurs ci-dessous." %}</p>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+      {% for error in form.non_field_errors %}
+        <p class="errornote">{{ error }}</p>
+      {% endfor %}
+    {% endif %}
+
+    <form action="{{ app_path }}" method="post" id="login-form">
+      {% csrf_token %}
+      
+      <div class="form-row">
+        <label for="id_username">Courriel ou Identifiant</label>
+        <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="id_username" placeholder="admin@shieldnet.app ou admin">
+      </div>
+
+      <div class="form-row">
+        <label for="id_password">Mot de passe</label>
+        <input type="password" name="password" autocomplete="current-password" required id="id_password" placeholder="••••••••">
+      </div>
+
+      {% url 'admin_password_reset' as password_reset_url %}
+      {% if password_reset_url %}
+        <div class="password-reset-link" style="text-align: right; margin-bottom: 12px;">
+          <a href="{{ password_reset_url }}" style="color: #60a5fa; font-size: 12px; text-decoration: none;">Mot de passe oublié ?</a>
+        </div>
+      {% endif %}
+
+      <div class="submit-row">
+        <input type="submit" value="Accéder à la Console SOC">
+      </div>
+
+      <input type="hidden" name="next" value="{% if next %}{{ next }}{% else %}{% url 'admin:index' %}{% endif %}">
+    </form>
+
+    <div class="demo-credentials-box">
+      <span class="demo-badge">Accès Démo Rapide</span>
+      <div style="font-size: 12px; color: #cbd5e1; margin-bottom: 4px;">
+        <strong>admin@shieldnet.app</strong> &bull; <code>admin123</code>
+      </div>
+      <button type="button" class="demo-btn" onclick="fillDemoCredentials()">
+        <span>🔑</span> Pré-remplir les identifiants
+      </button>
+    </div>
+  </div>
+
+  <div class="footer-copyright">
+    ShieldNet v1.0 &bull; Université du Québec en Outaouais (UQO) &bull; Tous droits réservés
+  </div>
+</div>
+
+<script>
+function fillDemoCredentials() {
+  const u = document.getElementById('id_username');
+  const p = document.getElementById('id_password');
+  if (u && p) {
+    u.value = 'admin@shieldnet.app';
+    p.value = 'admin123';
+    u.dispatchEvent(new Event('input', { bubbles: true }));
+    p.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+</script>
+{% endblock %}

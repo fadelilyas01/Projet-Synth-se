@@ -52,7 +52,7 @@ ROOT_URLCONF = 'shieldnet_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,6 +107,9 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/admin/'
+LOGIN_URL = '/admin/login/'
 
 # Configuration CORS pour autoriser l'application mobile Flutter et les tests locaux
 CORS_ALLOW_ALL_ORIGINS = DEBUG

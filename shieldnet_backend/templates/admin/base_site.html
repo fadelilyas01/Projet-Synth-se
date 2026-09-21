@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:"ShieldNet Console" }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'shield_api/admin_premium.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Chart.js pour les graphiques interactifs SOC -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  // Initialisation du thème sombre/clair mémorisé
+  (function() {
+    const savedTheme = localStorage.getItem('shieldnet_admin_theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light-mode');
+    }
+  })();
+  function toggleAdminTheme() {
+    const isLight = document.documentElement.classList.toggle('light-mode');
+    localStorage.setItem('shieldnet_admin_theme', isLight ? 'light' : 'dark');
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.textContent = isLight ? '🌙 Mode Sombre' : '☀️ Mode Clair';
+  }
+</script>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}" class="shieldnet-brand-header">
+        <span class="brand-shield-icon">🛡️</span>
+        <span class="brand-title-wrap">
+            <span class="brand-main-title">ShieldNet <span class="brand-enterprise">Enterprise</span></span>
+            <span class="brand-sub-badge">Security Operations Center • UQO</span>
+        </span>
+    </a>
+</div>
+{% endblock %}
+
+{% block userlinks %}
+<button type="button" id="theme-toggle-btn" onclick="toggleAdminTheme()" class="theme-switch-btn" title="Basculer entre le mode sombre et le mode clair">
+  ☀️ Mode Clair
+</button>
+<script>
+  if (localStorage.getItem('shieldnet_admin_theme') === 'light') {
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.textContent = '🌙 Mode Sombre';
+  }
+</script>
+{{ block.super }}
+{% endblock %}
