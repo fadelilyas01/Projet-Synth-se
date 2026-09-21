@@ -14,9 +14,11 @@ import '../controllers/blacklist_controller.dart';
 import '../../../../core/services/night_shield_service.dart';
 import '../../../../core/services/citizen_impact_service.dart';
 import '../../domain/services/serenity_score_calculator.dart';
-import '../widgets/pulse_radar_shield.dart';
+import '../widgets/clipboard_banner.dart';
+import '../widgets/action_hub_row.dart';
+import '../widgets/zen_shield_card.dart';
+import '../widgets/simple_metric_card.dart';
 import '../widgets/serenity_score_card.dart';
-import '../../../sms_inspector/presentation/pages/sms_inspector_page.dart';
 import '../../../community/presentation/widgets/citizen_impact_card.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 
@@ -183,7 +185,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
     final analysisEither = await checkUseCase(rawPhone);
 
     if (!mounted) return;
-    Navigator.pop(context); // Fermer le loader
+    Navigator.pop(context);
 
     analysisEither.fold(
       (failure) {
@@ -289,21 +291,62 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           children: [
-            // BANDEAU DU PRESSE-PAPIER (DÉTECTION AUTOMATIQUE)
+            // BANDEAU DU PRESSE-PAPIER
             if (_detectedClipboardNumber != null) ...[
-              _buildClipboardBanner(cardBg, borderColor, isDark),
+              ClipboardBanner(
+                detectedNumber: _detectedClipboardNumber!,
+                onVerify: () {
+                  final phone = _detectedClipboardNumber!;
+                  setState(() => _detectedClipboardNumber = null);
+                  _executeVerification(phone);
+                },
+                onDismiss: () {
+                  setState(() {
+                    _dismissedClipboardNumber = _detectedClipboardNumber;
+                    _detectedClipboardNumber = null;
+                  });
+                },
+              ),
               const SizedBox(height: 16),
             ],
 
-            // 1. CARTE DE PROTECTION "ZEN" AVEC RADAR CONCENTRIQUE
+            // 1. CARTE DE PROTECTION "ZEN"
             protectionState.when(
-              data: (isActive) => _buildZenShieldCard(isActive, isContactsOnly, nightShieldState.isCurrentlyInNightWindow, l10n),
+              data: (isActive) => ZenShieldCard(
+                isActive: isActive,
+                isContactsOnly: isContactsOnly,
+                isNightWindow: nightShieldState.isCurrentlyInNightWindow,
+                onToggleProtection: () {
+                  ref.read(protectionStatusProvider.notifier).toggleProtection();
+                },
+                onActivateProtection: () async {
+                  final activated = await ref.read(protectionStatusProvider.notifier).requestPermission();
+                  if (!context.mounted) return;
+                  HapticFeedback.mediumImpact();
+                  final successMsg = l10n?.protectionActiveSuccess ?? 'Protection ShieldNet activée avec succès !';
+                  final permMsg = l10n?.protectionPermissionRequired ?? 'Veuillez accorder les autorisations pour activer la protection.';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(activated ? Icons.check_circle_rounded : Icons.error_outline_rounded, color: Colors.white),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text(activated ? successMsg : permMsg, style: const TextStyle(fontWeight: FontWeight.w600))),
+                        ],
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: activated ? AppTheme.accentGreen : AppTheme.accentRed,
+                    ),
+                  );
+                },
+              ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => Text('Erreur: $err'),
             ),
             const SizedBox(height: 16),
 
-            // 2. SCORE DE SÉRÉNITÉ NUMÉRIQUE
+            // 2. SCORE DE SÉRÉNITÉ
             SerenityScoreCard(
               result: serenityResult,
               onOpenSettings: () {
@@ -312,39 +355,35 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             ),
             const SizedBox(height: 16),
 
-            // 3. ACTIONS RAPIDES : VÉRIFICATION & INSPECTEUR SMS
-            _buildActionHub(context, cardBg, borderColor, isDark, l10n),
+            // 3. ACTIONS RAPIDES
+            ActionHubRow(onVerifyNumber: () => _showQuickVerificationDialog(context)),
             const SizedBox(height: 20),
 
-            // 2. STATISTIQUES SIMPLES & VALORISANTES
+            // 4. STATISTIQUES
             Row(
               children: [
                 Expanded(
-                  child: _buildSimpleMetricCard(
+                  child: SimpleMetricCard(
                     icon: Icons.block_rounded,
                     color: AppTheme.accentRed,
                     count: '$_interceptedCallsCount',
                     label: l10n?.statSpamIntercepted ?? 'Spams interceptés',
-                    cardBg: cardBg,
-                    borderColor: borderColor,
                   ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
-                  child: _buildSimpleMetricCard(
+                  child: SimpleMetricCard(
                     icon: Icons.shield_rounded,
                     color: AppTheme.accentGreen,
                     count: '$totalBlocked',
                     label: l10n?.statNumbersBlocked ?? 'Numéros bloqués',
-                    cardBg: cardBg,
-                    borderColor: borderColor,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
-            // IMPACT CITOYEN & ENTRAIDE
+            // 5. IMPACT CITOYEN
             if (_impactData != null) ...[
               CitizenImpactCard(
                 data: _impactData!,
@@ -353,7 +392,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
               const SizedBox(height: 24),
             ],
 
-            // 3. RECENTS SPAMS CONNUS
+            // 6. RÉCENTS SPAMS CONNUS
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -471,448 +510,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             const SizedBox(height: 24),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildClipboardBanner(Color cardBg, Color borderColor, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.accentCyan.withValues(alpha: 0.6), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.accentCyan.withValues(alpha: 0.12),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.accentCyan.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.content_paste_search_rounded, color: AppTheme.accentCyan, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Numéro copié détecté',
-                  style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w600),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  _detectedClipboardNumber!,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentCyan,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () {
-              final phone = _detectedClipboardNumber!;
-              setState(() => _detectedClipboardNumber = null);
-              _executeVerification(phone);
-            },
-            child: const Text('Vérifier', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(width: 6),
-          IconButton(
-            icon: const Icon(Icons.close_rounded, size: 18, color: Colors.grey),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            onPressed: () {
-              setState(() {
-                _dismissedClipboardNumber = _detectedClipboardNumber;
-                _detectedClipboardNumber = null;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionHub(BuildContext context, Color cardBg, Color borderColor, bool isDark, AppLocalizations? l10n) {
-    return Row(
-      children: [
-        // 1. Bouton Vérifier un Numéro
-        Expanded(
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                _showQuickVerificationDialog(context);
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: borderColor),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.search_rounded, color: AppTheme.primaryColor, size: 20),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Vérifier Numéro',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            'Annuaire anti-spam',
-                            style: TextStyle(fontSize: 10, color: Colors.grey),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-
-        // 2. Bouton Inspecteur SMS & Phishing
-        Expanded(
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SmsInspectorPage()),
-                );
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: borderColor),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.accentCyan.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.mark_email_read_rounded, color: AppTheme.accentCyan, size: 20),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Inspecteur SMS',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            'Détection phishing',
-                            style: TextStyle(fontSize: 10, color: Colors.grey),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildZenShieldCard(bool isActive, bool isContactsOnly, bool isNightWindow, AppLocalizations? l10n) {
-    final shieldStatusText = !isActive
-        ? (l10n?.shieldSuspended ?? 'Filtrage suspendu')
-        : (isContactsOnly
-            ? (l10n?.shieldStrictBadge ?? 'Bouclier Strict (Contacts Seuls)')
-            : (l10n?.shieldRealtime ?? 'Bouclier en temps réel'));
-    final shieldTitle = isActive
-        ? (isContactsOnly
-            ? (l10n?.shieldStrictTitle ?? 'Protection Maximale')
-            : (l10n?.shieldProtected ?? 'Vous êtes protégé'))
-        : (l10n?.shieldInactive ?? 'Protection inactive');
-    final shieldDesc = isActive
-        ? (isContactsOnly
-            ? (l10n?.shieldStrictDesc ?? 'Seuls vos contacts enregistrés sont autorisés à sonner.')
-            : (l10n?.shieldActiveDesc ?? 'ShieldNet filtre automatiquement les appels malveillants.'))
-        : (l10n?.shieldInactiveDesc ?? 'Activez le filtrage pour bloquer les appels indésirables.');
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: isActive
-            ? AppTheme.shieldActiveGradient
-            : AppTheme.shieldInactiveGradient,
-        boxShadow: [
-          BoxShadow(
-            color: (isActive ? AppTheme.accentGreen : AppTheme.accentRed).withValues(alpha: 0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Badge Bouclier Nocturne si actif
-          if (isNightWindow) ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.indigo.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.bedtime_rounded, size: 13, color: Colors.white),
-                  SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'Bouclier Nocturne Actif',
-                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          // Badge d'état subtil
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: !isActive
-                        ? const Color(0xFFFCA5A5)
-                        : (isContactsOnly ? AppTheme.accentOrange : AppTheme.accentCyan),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    shieldStatusText,
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          // Bouclier animé avec radar pulsant à ondes concentriques
-          PulseRadarShield(
-            isActive: isActive,
-            isContactsOnly: isContactsOnly,
-            onTap: () {
-              ref.read(protectionStatusProvider.notifier).toggleProtection();
-            },
-          ),
-          const SizedBox(height: 16),
-          Text(
-            shieldTitle,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            shieldDesc,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.92), fontSize: 13),
-          ),
-          if (!isActive) ...[
-            const SizedBox(height: 18),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  HapticFeedback.lightImpact();
-                  final activated = await ref.read(protectionStatusProvider.notifier).requestPermission();
-                  if (!mounted) return;
-                  HapticFeedback.mediumImpact();
-                  final successMsg = l10n?.protectionActiveSuccess ?? 'Protection ShieldNet activée avec succès !';
-                  final permMsg = l10n?.protectionPermissionRequired ?? 'Veuillez accorder les autorisations pour activer la protection.';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        children: [
-                          Icon(
-                            activated ? Icons.check_circle_rounded : Icons.error_outline_rounded,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              activated ? successMsg : permMsg,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ],
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      backgroundColor: activated ? AppTheme.accentGreen : AppTheme.accentRed,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.flash_on_rounded, size: 18),
-                label: Text(l10n?.btnActivateProtection ?? 'Activer la protection', style: const TextStyle(fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppTheme.accentRed,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 3,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSimpleMetricCard({
-    required IconData icon,
-    required Color color,
-    required String count,
-    required String label,
-    required Color cardBg,
-    required Color borderColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text('Live', style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(count, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
       ),
     );
   }

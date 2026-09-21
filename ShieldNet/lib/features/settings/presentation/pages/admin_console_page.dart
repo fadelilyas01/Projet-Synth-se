@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/app_providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/database_helper.dart';
-import 'developer_diagnostic_page.dart';
+import '../widgets/admin_overview_tab.dart';
+import '../widgets/admin_blacklist_tab.dart';
+import '../widgets/admin_reports_tab.dart';
+import '../widgets/admin_users_tab.dart';
+import '../widgets/admin_audit_tab.dart';
 
 class AdminConsolePage extends ConsumerStatefulWidget {
   const AdminConsolePage({super.key});
@@ -64,6 +68,8 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
     _blacklistScrollController.dispose();
     super.dispose();
   }
+
+  // ==================== CHARGEMENT DES DONNÉES ====================
 
   Future<void> _loadAllAdminData() async {
     _loadStats();
@@ -212,6 +218,8 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
       if (mounted) setState(() => _isLoadingUsers = false);
     }
   }
+
+  // ==================== ACTIONS ====================
 
   Future<void> _moderate(String phoneHash, String action) async {
     try {
@@ -438,12 +446,10 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
     );
   }
 
+  // ==================== BUILD ====================
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = AppTheme.cardBg(isDark);
-    final borderColor = AppTheme.borderColor(isDark);
-
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -484,20 +490,45 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
       body: TabBarView(
         controller: _tabController,
         children: [
-          // 1. VUE D'ENSEMBLE & ACTIONS
-          _buildOverviewTab(cardBg, borderColor, isDark),
-
-          // 2. GESTION DE LA LISTE NOIRE
-          _buildBlacklistTab(cardBg, borderColor),
-
-          // 3. SIGNALEMENTS & MODÉRATION
-          _buildReportsTab(cardBg, borderColor),
-
-          // 4. GESTION DES UTILISATEURS
-          _buildUsersTab(cardBg, borderColor),
-
-          // 5. JOURNAL D'AUDIT ET TRAÇABILITÉ WEB/MOBILE
-          _buildAuditLogsTab(cardBg, borderColor),
+          AdminOverviewTab(
+            stats: _stats,
+            syncStatus: _syncStatus,
+            isLoadingStats: _isLoadingStats,
+            isSyncingClient: _isSyncingClient,
+            onPurge: _purgeJunk,
+            onConsensusAudit: _runConsensusAudit,
+            onDeltaSync: () => _triggerManualSync(delta: true),
+            onFullSync: () => _triggerManualSync(delta: false),
+            onRefresh: _loadAllAdminData,
+          ),
+          AdminBlacklistTab(
+            blacklist: _blacklist,
+            isLoading: _isLoadingBlacklist,
+            hasMore: _hasMoreBlacklist,
+            currentFilter: _blacklistFilter,
+            searchController: _searchBlacklistController,
+            scrollController: _blacklistScrollController,
+            onFilterChanged: (filter) { setState(() => _blacklistFilter = filter); _loadBlacklist(); },
+            onSearch: () => _loadBlacklist(),
+            onClearSearch: () { _searchBlacklistController.clear(); _loadBlacklist(); },
+            onModerate: _moderate,
+            onDelete: _deleteNumber,
+          ),
+          AdminReportsTab(
+            reports: _reports,
+            isLoading: _isLoadingReports,
+            onModerate: _moderate,
+            onDeleteReport: _deleteReport,
+          ),
+          AdminUsersTab(
+            users: _users,
+            isLoading: _isLoadingUsers,
+          ),
+          AdminAuditTab(
+            auditLogs: _auditLogs,
+            isLoading: _isLoadingAuditLogs,
+            onRefresh: _loadAuditLogs,
+          ),
         ],
       ),
       floatingActionButton: _tabController.index == 1
@@ -509,646 +540,6 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
               onPressed: _showAddNumberDialog,
             )
           : null,
-    );
-  }
-
-  // ======================== TAB 1: OVERVIEW ========================
-  Widget _buildOverviewTab(Color cardBg, Color borderColor, bool isDark) {
-    if (_isLoadingStats) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Carte d'accès Admin Unifié
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: AppTheme.brandGradient,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.shield_rounded, color: Colors.white, size: 36),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Contrôle Administrateur Total', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 2),
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final currentAdminEmail = ref.watch(authNotifierProvider)?.email;
-                        final displayEmail = (currentAdminEmail != null && currentAdminEmail.isNotEmpty) ? currentAdminEmail : 'admin@shieldnet.app';
-                        return Text('Connecté en tant que $displayEmail avec privilèges complets (Web & Mobile).', style: const TextStyle(color: Colors.white70, fontSize: 12));
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        // Métriques globales
-        const Text('MÉTRIQUES SERVEUR EN TEMPS RÉEL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.1)),
-        const SizedBox(height: 8),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.6,
-          children: [
-            _buildStatBox('Numéros Bloqués', '${_stats?['total_blocked'] ?? 0}', AppTheme.accentRed, Icons.block_rounded, cardBg, borderColor),
-            _buildStatBox('Numéros Blanchis', '${_stats?['total_whitelisted'] ?? 0}', AppTheme.accentGreen, Icons.verified_user_rounded, cardBg, borderColor),
-            _buildStatBox('Signalements', '${_stats?['total_reports'] ?? 0}', AppTheme.primaryColor, Icons.report_problem_rounded, cardBg, borderColor),
-            _buildStatBox('Utilisateurs', '${_stats?['total_users'] ?? 0}', AppTheme.accentOrange, Icons.people_alt_rounded, cardBg, borderColor),
-            _buildStatBox('Avis Légitimes', '${_stats?['total_safe_reports'] ?? 0}', Colors.teal, Icons.thumb_up_alt_rounded, cardBg, borderColor),
-            _buildStatBox('Auto-Consensus', '${_stats?['total_auto_consensus'] ?? 0}', Colors.deepPurpleAccent, Icons.auto_awesome_rounded, cardBg, borderColor),
-          ],
-        ),
-        const SizedBox(height: 24),
-
-        // Maintenance & Purge BDD
-        const Text('MAINTENANCE & SÉCURITÉ BDD', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.1)),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(Icons.cleaning_services_rounded, color: AppTheme.accentGreen, size: 22),
-                  SizedBox(width: 8),
-                  Text('Maintenance Automatisée & Consensualité', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                ],
-              ),
-              const SizedBox(height: 6),
-              const Text('Purge les signalements obsolètes (>30j) ou lance l\'audit de consensualité pour réhabiliter automatiquement les faux positifs légitimes.', style: TextStyle(fontSize: 12, color: Colors.grey)),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 8,
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.auto_delete_outlined, size: 18),
-                    label: const Text('Nettoyage BDD'),
-                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGreen, foregroundColor: Colors.white),
-                    onPressed: _purgeJunk,
-                  ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                    label: const Text('Audit Consensualité'),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
-                    onPressed: _runConsensusAudit,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        // Synchronisation Client-Serveur & Invalidation
-        const Text('SYNCHRONISATION EN TEMPS RÉEL & DELTA SYNC', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.1)),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.sync_rounded, color: Colors.cyan, size: 22),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text('Synchronisation Différentielle Client', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.cyan.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'v${_syncStatus?['total_version'] ?? 1}',
-                      style: const TextStyle(color: Colors.cyan, fontWeight: FontWeight.bold, fontSize: 11),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Numéros actifs en production: ${_syncStatus?['active_count'] ?? _stats?['total_blacklisted'] ?? '—'} • Cache invalidé automatiquement lors des actions admin.',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      icon: _isSyncingClient
-                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Icon(Icons.flash_on_rounded, size: 16),
-                      label: const Text('Delta Sync', style: TextStyle(fontSize: 12)),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan, foregroundColor: Colors.white),
-                      onPressed: _isSyncingClient ? null : () => _triggerManualSync(delta: true),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.cloud_download_rounded, size: 16),
-                      label: const Text('Sync Totale', style: TextStyle(fontSize: 12)),
-                      onPressed: _isSyncingClient ? null : () => _triggerManualSync(delta: false),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        // Outils Système & Diagnostic Kotlin
-        const Text('DIAGNOSTICS TECHNIQUES DE BAS NIVEAU', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.1)),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-          child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-              child: const Icon(Icons.terminal_rounded, color: AppTheme.primaryColor),
-            ),
-            title: const Text('Diagnostic Pont Kotlin & SQLite', style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('Vérification CallScreeningService, latence et WAL', style: TextStyle(fontSize: 12)),
-            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const DeveloperDiagnosticPage()));
-            },
-          ),
-        ),
-        const SizedBox(height: 32),
-      ],
-    );
-  }
-
-  // ======================== TAB 2: BLACKLIST ========================
-  Widget _buildBlacklistTab(Color cardBg, Color borderColor) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: TextField(
-            controller: _searchBlacklistController,
-            decoration: InputDecoration(
-              hintText: 'Rechercher un numéro ou empreinte...',
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear_rounded),
-                onPressed: () {
-                  _searchBlacklistController.clear();
-                  _loadBlacklist();
-                },
-              ),
-            ),
-            onSubmitted: (_) => _loadBlacklist(),
-          ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              FilterChip(
-                label: const Text('Tous'),
-                selected: _blacklistFilter == 'all',
-                onSelected: (val) { setState(() => _blacklistFilter = 'all'); _loadBlacklist(); },
-              ),
-              const SizedBox(width: 8),
-              FilterChip(
-                label: const Text('Bloqués'),
-                selected: _blacklistFilter == 'blocked',
-                onSelected: (val) { setState(() => _blacklistFilter = 'blocked'); _loadBlacklist(); },
-              ),
-              const SizedBox(width: 8),
-              FilterChip(
-                label: const Text('Blanchis'),
-                selected: _blacklistFilter == 'whitelisted',
-                onSelected: (val) { setState(() => _blacklistFilter = 'whitelisted'); _loadBlacklist(); },
-              ),
-              const SizedBox(width: 8),
-              FilterChip(
-                label: const Text('Auto-Consensus'),
-                selected: _blacklistFilter == 'auto_consensus',
-                onSelected: (val) { setState(() => _blacklistFilter = 'auto_consensus'); _loadBlacklist(); },
-              ),
-            ],
-          ),
-        ),
-        const Divider(height: 16),
-        Expanded(
-          child: _isLoadingBlacklist
-              ? const Center(child: CircularProgressIndicator())
-              : _blacklist.isEmpty
-                  ? const Center(child: Text('Aucun numéro trouvé.', style: TextStyle(color: Colors.grey)))
-                  : ListView.separated(
-                      controller: _blacklistScrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _blacklist.length + (_hasMoreBlacklist ? 1 : 0),
-                      separatorBuilder: (context, index) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        if (index == _blacklist.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        final item = _blacklist[index];
-                        final masked = item['masked_number'] as String? ?? 'Numéro masqué';
-                        final phoneHash = item['phone_hash'] as String? ?? '';
-                        final category = item['category'] as String? ?? 'fraud';
-                        final riskScore = item['risk_score'] as int? ?? 0;
-                        final isWhitelisted = item['is_whitelisted'] as bool? ?? false;
-                        final isBlocked = item['is_blocked'] as bool? ?? true;
-                        final whitelistReason = item['whitelist_reason'] as String? ?? '';
-                        final isAutoConsensus = whitelistReason == 'auto_consensus';
-                        final safeCount = item['safe_reports_count'] as int? ?? 0;
-
-                        return Container(
-                          decoration: BoxDecoration(color: cardBg, border: Border.all(color: borderColor)),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: isWhitelisted
-                                  ? (isAutoConsensus ? Colors.deepPurple.withValues(alpha: 0.15) : AppTheme.accentGreen.withValues(alpha: 0.1))
-                                  : AppTheme.accentRed.withValues(alpha: 0.1),
-                              child: Icon(
-                                isWhitelisted
-                                    ? (isAutoConsensus ? Icons.auto_awesome_rounded : Icons.verified_user_rounded)
-                                    : Icons.block_rounded,
-                                color: isWhitelisted
-                                    ? (isAutoConsensus ? Colors.deepPurpleAccent : AppTheme.accentGreen)
-                                    : AppTheme.accentRed,
-                              ),
-                            ),
-                            title: Row(
-                              children: [
-                                Expanded(child: Text(masked, style: const TextStyle(fontWeight: FontWeight.bold))),
-                                if (isAutoConsensus)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.deepPurple.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: Colors.deepPurpleAccent, width: 0.8),
-                                    ),
-                                    child: const Text('Auto-Consensus', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 10, fontWeight: FontWeight.bold)),
-                                  ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              'Score: $riskScore/100 • $category${safeCount > 0 ? ' • $safeCount avis légitime(s)' : ''}\nHash: ${phoneHash.length >= 12 ? phoneHash.substring(0, 12) : phoneHash}...',
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                            isThreeLine: true,
-                            trailing: PopupMenuButton<String>(
-                              onSelected: (action) {
-                                if (action == 'delete') {
-                                  _deleteNumber(phoneHash);
-                                } else {
-                                  _moderate(phoneHash, action);
-                                }
-                              },
-                              itemBuilder: (ctx) => [
-                                if (!isWhitelisted)
-                                  const PopupMenuItem(value: 'whitelist', child: Text('Blanchir (Whitelist)')),
-                                if (!isBlocked)
-                                  const PopupMenuItem(value: 'block', child: Text('Bloquer')),
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text('Supprimer de la base', style: TextStyle(color: AppTheme.accentRed)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-        ),
-      ],
-    );
-  }
-
-  // ======================== TAB 3: REPORTS ========================
-  Widget _buildReportsTab(Color cardBg, Color borderColor) {
-    if (_isLoadingReports) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_reports.isEmpty) {
-      return const Center(child: Text('Aucun signalement utilisateur.', style: TextStyle(color: Colors.grey)));
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: _reports.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final r = _reports[index];
-        final id = r['id'] as String? ?? '';
-        final masked = r['masked_number'] as String? ?? 'Numéro';
-        final phoneHash = r['phone_hash'] as String? ?? '';
-        final category = r['category'] as String? ?? '';
-        final comment = r['comment'] as String? ?? '';
-        final reporter = r['reporter_email'] as String? ?? 'Anonyme';
-
-        return Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(masked, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                    child: Text(category, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              if (comment.isNotEmpty) ...[
-                Text('"$comment"', style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12)),
-                const SizedBox(height: 6),
-              ],
-              Text('Par : $reporter', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    icon: const Icon(Icons.check_circle_outline, size: 16, color: AppTheme.accentGreen),
-                    label: const Text('Blanchir', style: TextStyle(color: AppTheme.accentGreen, fontSize: 12)),
-                    onPressed: () => _moderate(phoneHash, 'whitelist'),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    icon: const Icon(Icons.block, size: 16, color: AppTheme.accentRed),
-                    label: const Text('Bloquer', style: TextStyle(color: AppTheme.accentRed, fontSize: 12)),
-                    onPressed: () => _moderate(phoneHash, 'block'),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18, color: Colors.grey),
-                    tooltip: 'Supprimer ce signalement',
-                    onPressed: () => _deleteReport(id),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // ======================== TAB 4: USERS ========================
-  Widget _buildUsersTab(Color cardBg, Color borderColor) {
-    if (_isLoadingUsers) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_users.isEmpty) {
-      return const Center(child: Text('Aucun utilisateur enregistré.', style: TextStyle(color: Colors.grey)));
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: _users.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final u = _users[index];
-        final email = u['email'] as String? ?? 'Sans email';
-        final name = u['name'] as String? ?? '';
-        final isStaff = u['is_staff'] as bool? ?? false;
-        final reportsCount = u['reports_count'] as int? ?? 0;
-
-        return Container(
-          decoration: BoxDecoration(color: cardBg, border: Border.all(color: borderColor)),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: isStaff ? AppTheme.accentOrange.withValues(alpha: 0.15) : AppTheme.primaryColor.withValues(alpha: 0.1),
-              child: Icon(
-                isStaff ? Icons.admin_panel_settings_rounded : Icons.person_rounded,
-                color: isStaff ? AppTheme.accentOrange : AppTheme.primaryColor,
-              ),
-            ),
-            title: Row(
-              children: [
-                Expanded(child: Text(name.isNotEmpty ? name : email.split('@')[0], style: const TextStyle(fontWeight: FontWeight.bold))),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isStaff ? AppTheme.accentOrange.withValues(alpha: 0.15) : AppTheme.accentGreen.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(isStaff ? 'ADMIN' : 'MEMBRE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isStaff ? AppTheme.accentOrange : AppTheme.accentGreen)),
-                ),
-              ],
-            ),
-            subtitle: Text('$email • $reportsCount signalement(s) soumis', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStatBox(String label, String value, Color color, IconData icon, Color bg, Color border) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: border)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
-              Icon(icon, color: color, size: 20),
-            ],
-          ),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-
-  // ======================== TAB 5: AUDIT LOGS ========================
-  Widget _buildAuditLogsTab(Color cardBg, Color borderColor) {
-    if (_isLoadingAuditLogs) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_auditLogs.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.history_toggle_off_rounded, size: 64, color: Colors.grey.withValues(alpha: 0.5)),
-            const SizedBox(height: 16),
-            const Text('Aucun événement d\'audit enregistré.', style: TextStyle(color: Colors.grey, fontSize: 16)),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadAuditLogs,
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: _auditLogs.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 10),
-        itemBuilder: (context, index) {
-          final log = _auditLogs[index];
-          final action = log['action'] as String? ?? '';
-          final source = log['source'] as String? ?? 'web';
-          final username = log['user_username'] as String? ?? 'Système';
-          final targetHash = log['target_hash'] as String? ?? '';
-          final createdAt = log['created_at'] as String? ?? '';
-          final details = log['details'];
-
-          Color actionColor = AppTheme.primaryColor;
-          IconData actionIcon = Icons.info_outline_rounded;
-          String actionLabel = action;
-
-          if (action.contains('BLOCK') && !action.contains('UNBLOCK')) {
-            actionColor = AppTheme.accentRed;
-            actionIcon = Icons.block_rounded;
-            actionLabel = 'Blocage de numéro';
-          } else if (action.contains('UNBLOCK') || action.contains('WHITELIST')) {
-            actionColor = AppTheme.accentGreen;
-            actionIcon = Icons.check_circle_outline_rounded;
-            actionLabel = 'Déblocage / Blanchiment';
-          } else if (action.contains('PURGE')) {
-            actionColor = Colors.purple;
-            actionIcon = Icons.auto_delete_rounded;
-            actionLabel = 'Purge Maintenance BDD';
-          } else if (action.contains('APPROVE')) {
-            actionColor = AppTheme.accentOrange;
-            actionIcon = Icons.verified_user_rounded;
-            actionLabel = 'Signalement Validé';
-          } else if (action.contains('REJECT')) {
-            actionColor = Colors.grey;
-            actionIcon = Icons.cancel_outlined;
-            actionLabel = 'Signalement Rejeté';
-          }
-
-          final isWeb = source.toLowerCase() == 'web';
-
-          return Container(
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: actionColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(actionIcon, color: actionColor, size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              actionLabel,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: actionColor,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Par $username • ${createdAt.length > 19 ? createdAt.substring(0, 19).replaceAll("T", " ") : createdAt}',
-                              style: const TextStyle(fontSize: 11, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isWeb ? Colors.blue.withValues(alpha: 0.12) : AppTheme.accentOrange.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isWeb ? Icons.language_rounded : Icons.smartphone_rounded,
-                              size: 13,
-                              color: isWeb ? Colors.blue : AppTheme.accentOrange,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              isWeb ? 'WEB ADMIN' : 'MOBILE APP',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: isWeb ? Colors.blue : AppTheme.accentOrange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (targetHash.isNotEmpty || (details != null && details.toString() != '{}')) ...[
-                    const SizedBox(height: 8),
-                    const Divider(height: 1),
-                    const SizedBox(height: 8),
-                    if (targetHash.isNotEmpty)
-                      Text(
-                        'Cible (Hash): ${targetHash.length > 16 ? "${targetHash.substring(0, 16)}..." : targetHash}',
-                        style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Colors.grey),
-                      ),
-                    if (details != null && details.toString() != '{}')
-                      Text(
-                        'Détails: $details',
-                        style: const TextStyle(fontSize: 11, color: Colors.grey),
-                      ),
-                  ],
-                ],
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

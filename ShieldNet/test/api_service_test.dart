@@ -3,19 +3,41 @@ import 'package:mocktail/mocktail.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shieldnet/core/network/api_service.dart';
+import 'package:shieldnet/core/database/database_helper.dart';
 
 // ==================== MOCKS ====================
 class MockDio extends Mock implements Dio {}
+class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(() {
+    registerFallbackValue(BlacklistedNumber(
+      phoneHash: 'test',
+      category: 'test',
+      riskScore: 0,
+      reportsCount: 1,
+      updatedAt: '',
+    ));
+  });
+
   late MockDio mockDio;
+  late MockDatabaseHelper mockDb;
   late ApiService apiService;
 
   setUp(() {
     mockDio = MockDio();
-    apiService = ApiService(dio: mockDio);
+    mockDb = MockDatabaseHelper();
+
+    when(() => mockDb.batchInsertOrUpdateBlacklistedNumbers(any()))
+        .thenAnswer((_) async {});
+    when(() => mockDb.deleteBatchBlacklistedNumbers(any()))
+        .thenAnswer((_) async => 0);
+    when(() => mockDb.insertOrUpdateBlacklistedNumber(any()))
+        .thenAnswer((_) async {});
+
+    apiService = ApiService(dio: mockDio, databaseHelper: mockDb);
     SharedPreferences.setMockInitialValues({});
   });
 

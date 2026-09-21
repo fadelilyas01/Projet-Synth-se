@@ -7,8 +7,11 @@ import 'api_client.dart';
 
 class ApiService {
   final Dio _dio;
+  final DatabaseHelper _databaseHelper;
 
-  ApiService({Dio? dio}) : _dio = dio ?? ApiClient.createDio();
+  ApiService({Dio? dio, DatabaseHelper? databaseHelper})
+      : _dio = dio ?? ApiClient.createDio(),
+        _databaseHelper = databaseHelper ?? DatabaseHelper.instance;
 
   /// Synchronise la liste noire globale depuis le serveur backend vers la base SQLite locale.
   /// Prend en charge la synchronisation différentielle (delta sync) et la purge locale
@@ -49,12 +52,12 @@ class ApiService {
           }).toList();
 
           if (activeNumbers.isNotEmpty) {
-            await DatabaseHelper.instance.batchInsertOrUpdateBlacklistedNumbers(activeNumbers);
+            await _databaseHelper.batchInsertOrUpdateBlacklistedNumbers(activeNumbers);
           }
 
           // 2. Purge locale des faux positifs blanchis par l'admin
           if (removedHashes.isNotEmpty) {
-            final purgedCount = await DatabaseHelper.instance.deleteBatchBlacklistedNumbers(removedHashes);
+            final purgedCount = await _databaseHelper.deleteBatchBlacklistedNumbers(removedHashes);
             AppLogger.log("[Sync] Purge de $purgedCount faux-positifs réussie.");
           }
 
@@ -80,7 +83,7 @@ class ApiService {
           }).toList();
 
           if (numbers.isNotEmpty) {
-            await DatabaseHelper.instance.batchInsertOrUpdateBlacklistedNumbers(numbers);
+            await _databaseHelper.batchInsertOrUpdateBlacklistedNumbers(numbers);
           }
 
           await prefs.setString('last_sync_timestamp', DateTime.now().toIso8601String());
@@ -130,7 +133,7 @@ class ApiService {
       
       if (response.statusCode == 201) {
         // Mettre à jour le cache local immédiatement
-        await DatabaseHelper.instance.insertOrUpdateBlacklistedNumber(
+        await _databaseHelper.insertOrUpdateBlacklistedNumber(
           BlacklistedNumber(
             phoneHash: phoneHash,
             maskedNumber: maskedNumber,
