@@ -45,8 +45,12 @@
   --accent-blue-bg: rgba(59, 130, 246, 0.15);
 }
 
-/* Mode Clair Adaptatif Haute Lisibilité */
-html.light-mode {
+/* Mode Clair Adaptatif Haute Lisibilité (Universal Dual-Engine) */
+html.light-mode,
+body.light-mode,
+html[data-theme="light"],
+body[data-theme="light"],
+[data-theme="light"] {
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --primary-glow: rgba(37, 99, 235, 0.2);
@@ -2278,227 +2282,73 @@ ul.errorlist li {
 }
 
 /* =====================================================================
-   LIGHT MODE: HIGH-CONTRAST TYPOGRAPHY & VISIBILITY GUARDS
+   LIGHT MODE: HIGH-CONTRAST DUAL-ENGINE ARCHITECTURE & VISIBILITY GUARDS
+   Universal Compatibility: html.light-mode, body.light-mode, [data-theme="light"]
    ===================================================================== */
-html.light-mode body {
+
+/* 1. Global Backgrounds & Container Shells */
+html.light-mode,
+body.light-mode,
+html[data-theme="light"],
+body[data-theme="light"],
+[data-theme="light"] {
   background-color: #f8fafc !important;
   color: #0f172a !important;
 }
 
-/* Typography & Headings */
-html.light-mode h1,
-html.light-mode h2,
-html.light-mode h3,
-html.light-mode h4,
-html.light-mode h5,
-html.light-mode h6,
-html.light-mode .page-main-title,
-html.light-mode .hero-banner-title,
-html.light-mode .soc-page-title,
-html.light-mode .brand-name,
-html.light-mode strong,
-html.light-mode b {
+html.light-mode body,
+body.light-mode,
+[data-theme="light"] body {
+  background-color: #f8fafc !important;
   color: #0f172a !important;
 }
 
-html.light-mode .hero-banner-sub,
-html.light-mode .page-subtitle,
-html.light-mode .soc-page-subtitle,
-html.light-mode .brand-sub,
-html.light-mode .kpi-sub-text,
-html.light-mode .help,
-html.light-mode .nav-section-label {
-  color: #475569 !important;
-}
-
-html.light-mode .kpi-label {
-  color: #475569 !important;
-}
-
-/* High contrast table styling in Light Mode */
-html.light-mode table thead th,
-html.light-mode .triage-table th {
-  background: #f1f5f9 !important;
-  color: #1e293b !important;
-  border-bottom: 2px solid #e2e8f0 !important;
-  font-weight: 700 !important;
-}
-
-html.light-mode table tbody td,
-html.light-mode .triage-table td {
+html.light-mode .soc-shell,
+body.light-mode .soc-shell,
+[data-theme="light"] .soc-shell,
+html.light-mode .soc-main-area,
+body.light-mode .soc-main-area,
+[data-theme="light"] .soc-main-area,
+html.light-mode .soc-canvas,
+body.light-mode .soc-canvas,
+[data-theme="light"] .soc-canvas,
+html.light-mode #content,
+body.light-mode #content,
+[data-theme="light"] #content {
+  background-color: #f8fafc !important;
   color: #0f172a !important;
-  border-bottom: 1px solid #e2e8f0 !important;
 }
 
-html.light-mode table tbody tr:nth-child(even),
-html.light-mode .triage-table tbody tr:nth-child(even) {
-  background: #f8fafc !important;
-}
-
-html.light-mode table tbody tr:hover,
-html.light-mode .triage-table tbody tr:hover {
-  background: #eff6ff !important;
-}
-
-/* Form controls in Light Mode */
-html.light-mode input[type="text"],
-html.light-mode input[type="password"],
-html.light-mode input[type="email"],
-html.light-mode input[type="url"],
-html.light-mode input[type="number"],
-html.light-mode input[type="tel"],
-html.light-mode textarea,
-html.light-mode select,
-html.light-mode .vTextField,
-html.light-mode .vIntegerField,
-html.light-mode .sandbox-input,
-html.light-mode .sandbox-phone-field,
-html.light-mode .search-field,
-html.light-mode .select-category-field {
+/* 2. Topbar & Sidebar in Light Mode */
+html.light-mode .soc-top-bar,
+body.light-mode .soc-top-bar,
+[data-theme="light"] .soc-top-bar {
   background: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
+  border-bottom-color: #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
 }
 
-html.light-mode input::placeholder,
-html.light-mode textarea::placeholder {
-  color: #94a3b8 !important;
-}
-
-html.light-mode input:focus,
-html.light-mode textarea:focus,
-html.light-mode select:focus,
-html.light-mode .sandbox-input:focus,
-html.light-mode .sandbox-phone-field:focus {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
-}
-
-/* Preserve crisp white text on primary actions and buttons */
-html.light-mode .ops-btn-primary,
-html.light-mode .ops-btn-primary *,
-html.light-mode .brand-icon *,
-html.light-mode .user-avatar-pill,
-html.light-mode .submit-row input[type="submit"],
-html.light-mode .submit-row input[type="submit"].default,
-html.light-mode .actions button.button,
-html.light-mode .paginator .this-page,
-html.light-mode .delete-confirmation input[type="submit"],
-html.light-mode .triage-btn-block:hover,
-html.light-mode .triage-btn-whitelist:hover,
-html.light-mode .topbar-return-btn:hover,
-html.light-mode .topbar-return-btn:hover *,
-html.light-mode .ops-btn-return:hover,
-html.light-mode .ops-btn-return:hover * {
-  color: #ffffff !important;
-}
-
-html.light-mode .brand-icon svg,
-html.light-mode .ops-btn-primary svg,
-html.light-mode .topbar-return-btn:hover svg,
-html.light-mode .ops-btn-return:hover svg {
-  stroke: #ffffff !important;
-}
-
-/* Secondary & ghost buttons in Light Mode */
-html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return),
-html.light-mode .soc-theme-toggle {
-  background: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #1e293b !important;
-}
-
-html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover,
-html.light-mode .soc-theme-toggle:hover {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-  border-color: #94a3b8 !important;
-}
-
-/* Return buttons in Light Mode */
-html.light-mode .topbar-return-btn,
-html.light-mode .ops-btn-return {
-  background: #eff6ff !important;
-  border-color: #3b82f6 !important;
-  color: #1d4ed8 !important;
-}
-html.light-mode .topbar-return-btn svg,
-html.light-mode .ops-btn-return svg {
-  stroke: #1d4ed8 !important;
-}
-html.light-mode .topbar-return-btn:hover,
-html.light-mode .ops-btn-return:hover {
-  background: #2563eb !important;
-  border-color: #2563eb !important;
-  color: #ffffff !important;
-}
-
-/* Hash codes in Light Mode */
-html.light-mode .hash-code,
-html.light-mode code.hash-code {
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  color: #1e40af !important;
-}
-
-/* Breadcrumbs in Light Mode */
-html.light-mode .soc-breadcrumbs a,
-html.light-mode .breadcrumbs a {
-  color: #475569 !important;
-}
-html.light-mode .soc-breadcrumbs a:hover,
-html.light-mode .breadcrumbs a:hover {
-  color: #0f172a !important;
-}
-html.light-mode .soc-breadcrumbs span,
-html.light-mode .breadcrumbs span {
-  color: #0f172a !important;
-}
-html.light-mode .soc-breadcrumbs svg,
-html.light-mode .breadcrumbs svg {
-  stroke: #64748b !important;
-}
-
-/* Sidebar navigation in Light Mode */
-html.light-mode .soc-sidebar {
+html.light-mode .soc-sidebar,
+body.light-mode .soc-sidebar,
+[data-theme="light"] .soc-sidebar {
   background: #ffffff !important;
   border-right-color: #e2e8f0 !important;
 }
-html.light-mode .nav-item {
-  color: #334155 !important;
-}
-html.light-mode .nav-item svg {
-  stroke: #475569 !important;
-}
-html.light-mode .nav-item:hover {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-}
-html.light-mode .nav-item:hover svg {
-  stroke: #0f172a !important;
-}
-html.light-mode .nav-item.active {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-  border-left-color: #2563eb !important;
-}
-html.light-mode .nav-item.active svg {
-  stroke: #1d4ed8 !important;
+
+html.light-mode .sidebar-brand,
+body.light-mode .sidebar-brand,
+[data-theme="light"] .sidebar-brand {
+  border-bottom-color: #e2e8f0 !important;
 }
 
-/* Live ticker in Light Mode */
-html.light-mode .live-ticker-wrap {
+html.light-mode .sidebar-footer,
+body.light-mode .sidebar-footer,
+[data-theme="light"] .sidebar-footer {
   background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-html.light-mode .ticker-content {
-  color: #1e293b !important;
-}
-html.light-mode #live-ticker-text {
-  color: #1e293b !important;
+  border-top-color: #e2e8f0 !important;
 }
 
-/* Metric boxes and containers in Light Mode */
+/* 3. Cards, Panels, Modules & Metric Containers */
 html.light-mode .soc-hero-banner,
 html.light-mode .sandbox-panel,
 html.light-mode .ops-bar,
@@ -2512,175 +2362,1026 @@ html.light-mode .sandbox-input-card,
 html.light-mode .sandbox-results-panel,
 html.light-mode .sb-metric-box,
 html.light-mode fieldset.module,
-html.light-mode .form-row {
+html.light-mode .form-row,
+html.light-mode .results,
+html.light-mode .actions,
+html.light-mode .submit-row,
+html.light-mode .selector-available,
+html.light-mode .selector-chosen,
+html.light-mode #change-history,
+html.light-mode .delete-confirmation form,
+html.light-mode .live-ticker-wrap,
+[data-theme="light"] .soc-hero-banner,
+[data-theme="light"] .sandbox-panel,
+[data-theme="light"] .ops-bar,
+[data-theme="light"] .triage-panel,
+[data-theme="light"] .kpi-card,
+[data-theme="light"] .chart-card,
+[data-theme="light"] .posture-widget,
+[data-theme="light"] .triage-header-card,
+[data-theme="light"] .sandbox-header-card,
+[data-theme="light"] .sandbox-input-card,
+[data-theme="light"] .sandbox-results-panel,
+[data-theme="light"] .sb-metric-box,
+[data-theme="light"] fieldset.module,
+[data-theme="light"] .form-row,
+[data-theme="light"] .results,
+[data-theme="light"] .actions,
+[data-theme="light"] .submit-row,
+[data-theme="light"] .selector-available,
+[data-theme="light"] .selector-chosen,
+[data-theme="light"] #change-history,
+[data-theme="light"] .delete-confirmation form,
+[data-theme="light"] .live-ticker-wrap,
+body.light-mode .soc-hero-banner,
+body.light-mode .kpi-card,
+body.light-mode .chart-card,
+body.light-mode .posture-widget,
+body.light-mode .triage-panel,
+body.light-mode .sandbox-panel,
+body.light-mode .ops-bar,
+body.light-mode .results,
+body.light-mode .actions,
+body.light-mode fieldset.module,
+body.light-mode .form-row,
+body.light-mode .submit-row {
   background: #ffffff !important;
   border-color: #e2e8f0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
 }
 
-/* KPI numbers in Light Mode */
-html.light-mode .kpi-val.red { color: #dc2626 !important; }
-html.light-mode .kpi-val.green { color: #059669 !important; }
-html.light-mode .kpi-val.amber { color: #d97706 !important; }
-html.light-mode .kpi-val.blue { color: #2563eb !important; }
+/* 4. Headings & Text Contrast Guards */
+html.light-mode h1,
+html.light-mode h2,
+html.light-mode h3,
+html.light-mode h4,
+html.light-mode h5,
+html.light-mode h6,
+html.light-mode .page-main-title,
+html.light-mode .hero-banner-title,
+html.light-mode .soc-page-title,
+html.light-mode .brand-name,
+html.light-mode strong,
+html.light-mode b,
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] .page-main-title,
+[data-theme="light"] .hero-banner-title,
+[data-theme="light"] .soc-page-title,
+[data-theme="light"] .brand-name,
+[data-theme="light"] strong,
+[data-theme="light"] b,
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode .page-main-title,
+body.light-mode .hero-banner-title,
+body.light-mode .soc-page-title,
+body.light-mode .brand-name {
+  color: #0f172a !important;
+}
 
-/* Status Badges in Light Mode */
-html.light-mode .badge-safe {
+html.light-mode p,
+html.light-mode span,
+html.light-mode li,
+html.light-mode label,
+html.light-mode .ticker-content,
+html.light-mode #live-ticker-text,
+html.light-mode .form-row label,
+html.light-mode .actions label,
+html.light-mode .delete-confirmation form p,
+[data-theme="light"] p,
+[data-theme="light"] span,
+[data-theme="light"] li,
+[data-theme="light"] label,
+[data-theme="light"] .ticker-content,
+[data-theme="light"] #live-ticker-text,
+[data-theme="light"] .form-row label,
+[data-theme="light"] .actions label,
+[data-theme="light"] .delete-confirmation form p,
+body.light-mode p,
+body.light-mode span,
+body.light-mode li,
+body.light-mode label {
+  color: #1e293b !important;
+}
+
+html.light-mode .hero-banner-sub,
+html.light-mode .page-subtitle,
+html.light-mode .soc-page-subtitle,
+html.light-mode .brand-sub,
+html.light-mode .kpi-sub-text,
+html.light-mode .help,
+html.light-mode .help-tooltip,
+html.light-mode .help-block,
+html.light-mode .nav-section-label,
+html.light-mode .kpi-label,
+html.light-mode .sb-metric-label,
+html.light-mode .area-code-stat,
+html.light-mode .actions .action-counter,
+[data-theme="light"] .hero-banner-sub,
+[data-theme="light"] .page-subtitle,
+[data-theme="light"] .soc-page-subtitle,
+[data-theme="light"] .brand-sub,
+[data-theme="light"] .kpi-sub-text,
+[data-theme="light"] .help,
+[data-theme="light"] .help-tooltip,
+[data-theme="light"] .help-block,
+[data-theme="light"] .nav-section-label,
+[data-theme="light"] .kpi-label,
+[data-theme="light"] .sb-metric-label,
+[data-theme="light"] .area-code-stat,
+[data-theme="light"] .actions .action-counter,
+body.light-mode .hero-banner-sub,
+body.light-mode .page-subtitle,
+body.light-mode .kpi-sub-text,
+body.light-mode .kpi-label {
+  color: #475569 !important;
+}
+
+/* 5. High-Contrast Table Styling (Changelists & Triage) */
+html.light-mode table thead th,
+html.light-mode .triage-table th,
+html.light-mode #result_list thead th,
+html.light-mode #change-history th,
+[data-theme="light"] table thead th,
+[data-theme="light"] .triage-table th,
+[data-theme="light"] #result_list thead th,
+[data-theme="light"] #change-history th,
+body.light-mode table thead th,
+body.light-mode .triage-table th,
+body.light-mode #result_list thead th {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  font-weight: 700 !important;
+}
+
+html.light-mode table thead th a,
+html.light-mode #result_list thead th a,
+[data-theme="light"] table thead th a,
+[data-theme="light"] #result_list thead th a,
+body.light-mode table thead th a {
+  color: #0f172a !important;
+}
+html.light-mode table thead th a:hover,
+html.light-mode #result_list thead th a:hover,
+[data-theme="light"] table thead th a:hover,
+[data-theme="light"] #result_list thead th a:hover {
+  color: #2563eb !important;
+}
+
+html.light-mode table tbody td,
+html.light-mode table tbody th,
+html.light-mode .triage-table td,
+html.light-mode #result_list tbody td,
+html.light-mode #result_list tbody th,
+html.light-mode #change-history td,
+[data-theme="light"] table tbody td,
+[data-theme="light"] table tbody th,
+[data-theme="light"] .triage-table td,
+[data-theme="light"] #result_list tbody td,
+[data-theme="light"] #result_list tbody th,
+[data-theme="light"] #change-history td,
+body.light-mode table tbody td,
+body.light-mode table tbody th,
+body.light-mode .triage-table td {
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html.light-mode table tbody tr:nth-child(even),
+html.light-mode .triage-table tbody tr:nth-child(even),
+html.light-mode #result_list tbody tr:nth-child(even),
+[data-theme="light"] table tbody tr:nth-child(even),
+[data-theme="light"] .triage-table tbody tr:nth-child(even),
+[data-theme="light"] #result_list tbody tr:nth-child(even),
+body.light-mode table tbody tr:nth-child(even) {
+  background: #f8fafc !important;
+}
+
+html.light-mode table tbody tr:hover,
+html.light-mode .triage-table tbody tr:hover,
+html.light-mode #result_list tbody tr:hover,
+[data-theme="light"] table tbody tr:hover,
+[data-theme="light"] .triage-table tbody tr:hover,
+[data-theme="light"] #result_list tbody tr:hover,
+body.light-mode table tbody tr:hover {
+  background: #eff6ff !important;
+}
+
+/* 6. Form Controls & Inputs in Light Mode */
+html.light-mode input[type="text"],
+html.light-mode input[type="password"],
+html.light-mode input[type="email"],
+html.light-mode input[type="url"],
+html.light-mode input[type="number"],
+html.light-mode input[type="tel"],
+html.light-mode textarea,
+html.light-mode select,
+html.light-mode .vTextField,
+html.light-mode .vIntegerField,
+html.light-mode .sandbox-input,
+html.light-mode .sandbox-phone-field,
+html.light-mode .search-field,
+html.light-mode .select-category-field,
+html.light-mode #searchbar,
+html.light-mode .actions select,
+html.light-mode .selector select,
+html.light-mode .selector-filter input,
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="password"],
+[data-theme="light"] input[type="email"],
+[data-theme="light"] input[type="url"],
+[data-theme="light"] input[type="number"],
+[data-theme="light"] input[type="tel"],
+[data-theme="light"] textarea,
+[data-theme="light"] select,
+[data-theme="light"] .vTextField,
+[data-theme="light"] .vIntegerField,
+[data-theme="light"] .sandbox-input,
+[data-theme="light"] .sandbox-phone-field,
+[data-theme="light"] .search-field,
+[data-theme="light"] .select-category-field,
+[data-theme="light"] #searchbar,
+[data-theme="light"] .actions select,
+[data-theme="light"] .selector select,
+[data-theme="light"] .selector-filter input,
+body.light-mode input[type="text"],
+body.light-mode textarea,
+body.light-mode select {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light-mode input::placeholder,
+html.light-mode textarea::placeholder,
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.light-mode input:focus,
+html.light-mode textarea:focus,
+html.light-mode select:focus,
+html.light-mode .sandbox-input:focus,
+html.light-mode .sandbox-phone-field:focus,
+html.light-mode #searchbar:focus,
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] .sandbox-input:focus,
+[data-theme="light"] .sandbox-phone-field:focus,
+[data-theme="light"] #searchbar:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
+}
+
+/* 7. ALL SVG ICONS & ACTIONS VISIBILITY (DARK & LIGHT) */
+
+/* Brand Icon (White icon on royal blue gradient in both themes) */
+.brand-icon,
+.soc-footer-icon {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+}
+.brand-icon svg,
+.soc-footer-icon svg,
+html.light-mode .brand-icon svg,
+html.light-mode .soc-footer-icon svg,
+[data-theme="light"] .brand-icon svg,
+[data-theme="light"] .soc-footer-icon svg {
+  stroke: #ffffff !important;
+}
+
+/* Primary Action Buttons (White text and white icon in both themes) */
+.ops-btn-primary,
+.ops-btn-primary *,
+.submit-row input[type="submit"].default,
+.actions button.button,
+.paginator .this-page,
+.user-avatar-pill,
+html.light-mode .ops-btn-primary,
+html.light-mode .ops-btn-primary *,
+html.light-mode .submit-row input[type="submit"].default,
+html.light-mode .actions button.button,
+html.light-mode .paginator .this-page,
+html.light-mode .user-avatar-pill,
+[data-theme="light"] .ops-btn-primary,
+[data-theme="light"] .ops-btn-primary *,
+[data-theme="light"] .submit-row input[type="submit"].default,
+[data-theme="light"] .actions button.button,
+[data-theme="light"] .paginator .this-page,
+[data-theme="light"] .user-avatar-pill {
+  color: #ffffff !important;
+}
+.ops-btn-primary svg,
+html.light-mode .ops-btn-primary svg,
+[data-theme="light"] .ops-btn-primary svg {
+  stroke: #ffffff !important;
+}
+
+/* Sidebar Navigation Items & Icons */
+.nav-item svg {
+  stroke: #94a3b8 !important;
+}
+.nav-item:hover svg {
+  stroke: #f8fafc !important;
+}
+.nav-item.active svg {
+  stroke: #3b82f6 !important;
+}
+
+html.light-mode .nav-item,
+body.light-mode .nav-item,
+[data-theme="light"] .nav-item {
+  color: #334155 !important;
+}
+html.light-mode .nav-item svg,
+body.light-mode .nav-item svg,
+[data-theme="light"] .nav-item svg {
+  stroke: #475569 !important;
+}
+html.light-mode .nav-item:hover,
+body.light-mode .nav-item:hover,
+[data-theme="light"] .nav-item:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+html.light-mode .nav-item:hover svg,
+body.light-mode .nav-item:hover svg,
+[data-theme="light"] .nav-item:hover svg {
+  stroke: #0f172a !important;
+}
+html.light-mode .nav-item.active,
+body.light-mode .nav-item.active,
+[data-theme="light"] .nav-item.active {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-left-color: #2563eb !important;
+}
+html.light-mode .nav-item.active svg,
+body.light-mode .nav-item.active svg,
+[data-theme="light"] .nav-item.active svg {
+  stroke: #1d4ed8 !important;
+}
+
+/* Topbar Return Button & Icons */
+.topbar-return-btn svg,
+.ops-btn-return svg {
+  stroke: #3b82f6 !important;
+}
+.topbar-return-btn:hover svg,
+.ops-btn-return:hover svg {
+  stroke: #ffffff !important;
+}
+
+html.light-mode .topbar-return-btn,
+html.light-mode .ops-btn-return,
+[data-theme="light"] .topbar-return-btn,
+[data-theme="light"] .ops-btn-return {
+  background: #eff6ff !important;
+  border: 1px solid #3b82f6 !important;
+  color: #1d4ed8 !important;
+}
+html.light-mode .topbar-return-btn svg,
+html.light-mode .ops-btn-return svg,
+[data-theme="light"] .topbar-return-btn svg,
+[data-theme="light"] .ops-btn-return svg {
+  stroke: #1d4ed8 !important;
+}
+html.light-mode .topbar-return-btn:hover,
+html.light-mode .ops-btn-return:hover,
+[data-theme="light"] .topbar-return-btn:hover,
+[data-theme="light"] .ops-btn-return:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+html.light-mode .topbar-return-btn:hover svg,
+html.light-mode .ops-btn-return:hover svg,
+[data-theme="light"] .topbar-return-btn:hover svg,
+[data-theme="light"] .ops-btn-return:hover svg {
+  stroke: #ffffff !important;
+}
+
+/* Theme Toggle Button & Icon */
+.soc-theme-toggle {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+.soc-theme-toggle svg {
+  stroke: #f8fafc !important;
+}
+.soc-theme-toggle:hover {
+  background: var(--bg-hover);
+}
+
+html.light-mode .soc-theme-toggle,
+body.light-mode .soc-theme-toggle,
+[data-theme="light"] .soc-theme-toggle {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode .soc-theme-toggle svg,
+body.light-mode .soc-theme-toggle svg,
+[data-theme="light"] .soc-theme-toggle svg {
+  stroke: #1e293b !important;
+}
+html.light-mode .soc-theme-toggle:hover,
+body.light-mode .soc-theme-toggle:hover,
+[data-theme="light"] .soc-theme-toggle:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+html.light-mode .soc-theme-toggle:hover svg,
+body.light-mode .soc-theme-toggle:hover svg,
+[data-theme="light"] .soc-theme-toggle:hover svg {
+  stroke: #0f172a !important;
+}
+
+/* Secondary & Generic Operations Buttons */
+html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return),
+[data-theme="light"] .ops-btn:not(.ops-btn-primary):not(.ops-btn-return),
+body.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return) {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return) svg,
+[data-theme="light"] .ops-btn:not(.ops-btn-primary):not(.ops-btn-return) svg,
+body.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return) svg {
+  stroke: #1e293b !important;
+}
+html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover,
+[data-theme="light"] .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover,
+body.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover svg,
+[data-theme="light"] .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover svg,
+body.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover svg {
+  stroke: #0f172a !important;
+}
+
+/* KPI Icon Pills (High Visibility in Dark & Light) */
+.kpi-icon-pill.amber svg { stroke: #f59e0b !important; }
+.kpi-icon-pill.red svg { stroke: #ef4444 !important; }
+.kpi-icon-pill.green svg { stroke: #10b981 !important; }
+.kpi-icon-pill.blue svg { stroke: #3b82f6 !important; }
+
+html.light-mode .kpi-icon-pill.amber,
+[data-theme="light"] .kpi-icon-pill.amber {
+  background: #fffbeb !important;
+  border: 1px solid #fde68a !important;
+  color: #d97706 !important;
+}
+html.light-mode .kpi-icon-pill.amber svg,
+[data-theme="light"] .kpi-icon-pill.amber svg {
+  stroke: #d97706 !important;
+}
+html.light-mode .kpi-icon-pill.red,
+[data-theme="light"] .kpi-icon-pill.red {
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  color: #dc2626 !important;
+}
+html.light-mode .kpi-icon-pill.red svg,
+[data-theme="light"] .kpi-icon-pill.red svg {
+  stroke: #dc2626 !important;
+}
+html.light-mode .kpi-icon-pill.green,
+[data-theme="light"] .kpi-icon-pill.green {
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #059669 !important;
+}
+html.light-mode .kpi-icon-pill.green svg,
+[data-theme="light"] .kpi-icon-pill.green svg {
+  stroke: #059669 !important;
+}
+html.light-mode .kpi-icon-pill.blue,
+[data-theme="light"] .kpi-icon-pill.blue {
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  color: #2563eb !important;
+}
+html.light-mode .kpi-icon-pill.blue svg,
+[data-theme="light"] .kpi-icon-pill.blue svg {
+  stroke: #2563eb !important;
+}
+
+/* KPI Values in Light Mode */
+html.light-mode .kpi-val.red,
+[data-theme="light"] .kpi-val.red { color: #dc2626 !important; }
+html.light-mode .kpi-val.green,
+[data-theme="light"] .kpi-val.green { color: #059669 !important; }
+html.light-mode .kpi-val.amber,
+[data-theme="light"] .kpi-val.amber { color: #d97706 !important; }
+html.light-mode .kpi-val.blue,
+[data-theme="light"] .kpi-val.blue { color: #2563eb !important; }
+
+/* Triage Quick Action Buttons & Icons */
+.triage-btn-block svg { stroke: #ef4444 !important; }
+.triage-btn-block:hover svg { stroke: #ffffff !important; }
+.triage-btn-whitelist svg { stroke: #10b981 !important; }
+.triage-btn-whitelist:hover svg { stroke: #ffffff !important; }
+
+html.light-mode .triage-btn-block,
+[data-theme="light"] .triage-btn-block {
+  background: #fef2f2 !important;
+  border: 1px solid #fca5a5 !important;
+  color: #dc2626 !important;
+}
+html.light-mode .triage-btn-block svg,
+[data-theme="light"] .triage-btn-block svg {
+  stroke: #dc2626 !important;
+}
+html.light-mode .triage-btn-block:hover,
+[data-theme="light"] .triage-btn-block:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+}
+html.light-mode .triage-btn-block:hover svg,
+[data-theme="light"] .triage-btn-block:hover svg {
+  stroke: #ffffff !important;
+}
+
+html.light-mode .triage-btn-whitelist,
+[data-theme="light"] .triage-btn-whitelist {
+  background: #ecfdf5 !important;
+  border: 1px solid #86efac !important;
+  color: #059669 !important;
+}
+html.light-mode .triage-btn-whitelist svg,
+[data-theme="light"] .triage-btn-whitelist svg {
+  stroke: #059669 !important;
+}
+html.light-mode .triage-btn-whitelist:hover,
+[data-theme="light"] .triage-btn-whitelist:hover {
+  background: #059669 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+}
+html.light-mode .triage-btn-whitelist:hover svg,
+[data-theme="light"] .triage-btn-whitelist:hover svg {
+  stroke: #ffffff !important;
+}
+
+/* Copy Hash Buttons & Icons */
+.copy-hash-btn svg { stroke: #94a3b8 !important; }
+.copy-hash-btn:hover svg { stroke: #3b82f6 !important; }
+
+html.light-mode .copy-hash-btn,
+[data-theme="light"] .copy-hash-btn {
+  color: #475569 !important;
+}
+html.light-mode .copy-hash-btn svg,
+[data-theme="light"] .copy-hash-btn svg {
+  stroke: #475569 !important;
+}
+html.light-mode .copy-hash-btn:hover,
+[data-theme="light"] .copy-hash-btn:hover {
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+}
+html.light-mode .copy-hash-btn:hover svg,
+[data-theme="light"] .copy-hash-btn:hover svg {
+  stroke: #1d4ed8 !important;
+}
+
+/* Breadcrumbs Arrow Icon */
+.soc-breadcrumbs svg,
+.breadcrumbs svg {
+  stroke: #94a3b8 !important;
+}
+html.light-mode .soc-breadcrumbs a,
+html.light-mode .breadcrumbs a,
+[data-theme="light"] .soc-breadcrumbs a,
+[data-theme="light"] .breadcrumbs a {
+  color: #475569 !important;
+}
+html.light-mode .soc-breadcrumbs a:hover,
+html.light-mode .breadcrumbs a:hover,
+[data-theme="light"] .soc-breadcrumbs a:hover,
+[data-theme="light"] .breadcrumbs a:hover {
+  color: #0f172a !important;
+}
+html.light-mode .soc-breadcrumbs span,
+html.light-mode .breadcrumbs span,
+[data-theme="light"] .soc-breadcrumbs span,
+[data-theme="light"] .breadcrumbs span {
+  color: #0f172a !important;
+}
+html.light-mode .soc-breadcrumbs svg,
+html.light-mode .breadcrumbs svg,
+[data-theme="light"] .soc-breadcrumbs svg,
+[data-theme="light"] .breadcrumbs svg {
+  stroke: #64748b !important;
+}
+
+/* Search Icon */
+.search-input-wrap svg {
+  stroke: #94a3b8 !important;
+}
+html.light-mode .search-input-wrap,
+[data-theme="light"] .search-input-wrap {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+html.light-mode .search-input-wrap svg,
+[data-theme="light"] .search-input-wrap svg {
+  stroke: #64748b !important;
+}
+
+/* User Profile & Logout */
+.logout-icon-btn svg { stroke: #94a3b8 !important; }
+.logout-icon-btn:hover svg { stroke: #ef4444 !important; }
+
+html.light-mode .user-profile-card,
+[data-theme="light"] .user-profile-card {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode .user-name-text,
+[data-theme="light"] .user-name-text {
+  color: #0f172a !important;
+}
+html.light-mode .user-role-text,
+[data-theme="light"] .user-role-text {
+  color: #64748b !important;
+}
+html.light-mode .logout-icon-btn,
+[data-theme="light"] .logout-icon-btn {
+  color: #64748b !important;
+}
+html.light-mode .logout-icon-btn svg,
+[data-theme="light"] .logout-icon-btn svg {
+  stroke: #64748b !important;
+}
+html.light-mode .logout-icon-btn:hover,
+[data-theme="light"] .logout-icon-btn:hover {
+  color: #dc2626 !important;
+  background: #fee2e2 !important;
+}
+html.light-mode .logout-icon-btn:hover svg,
+[data-theme="light"] .logout-icon-btn:hover svg {
+  stroke: #dc2626 !important;
+}
+
+/* Live Ticker & Toggle Button */
+.live-toggle-btn svg { stroke: #10b981 !important; }
+html.light-mode .live-toggle-btn,
+[data-theme="light"] .live-toggle-btn {
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #059669 !important;
+}
+html.light-mode .live-toggle-btn svg,
+[data-theme="light"] .live-toggle-btn svg {
+  stroke: #059669 !important;
+}
+
+/* Header Icon Badges (Triage & Sandbox) */
+.header-icon-badge.amber svg { stroke: #f59e0b !important; }
+.header-icon-badge.purple svg { stroke: #8b5cf6 !important; }
+
+html.light-mode .header-icon-badge.amber,
+[data-theme="light"] .header-icon-badge.amber {
+  background: #fffbeb !important;
+  border: 1px solid #fde68a !important;
+  color: #d97706 !important;
+}
+html.light-mode .header-icon-badge.amber svg,
+[data-theme="light"] .header-icon-badge.amber svg {
+  stroke: #d97706 !important;
+}
+html.light-mode .header-icon-badge.purple,
+[data-theme="light"] .header-icon-badge.purple {
+  background: #f5f3ff !important;
+  border: 1px solid #ddd6fe !important;
+  color: #7c3aed !important;
+}
+html.light-mode .header-icon-badge.purple svg,
+[data-theme="light"] .header-icon-badge.purple svg {
+  stroke: #7c3aed !important;
+}
+
+/* Posture Widget Circular Gauge */
+html.light-mode .gauge-bg,
+[data-theme="light"] .gauge-bg {
+  stroke: #e2e8f0 !important;
+}
+html.light-mode .gauge-percentage,
+[data-theme="light"] .gauge-percentage {
+  color: #0f172a !important;
+}
+html.light-mode .gauge-label,
+[data-theme="light"] .gauge-label {
+  color: #475569 !important;
+}
+
+/* Area Code Heatmap Rows */
+html.light-mode .area-code-pill,
+[data-theme="light"] .area-code-pill {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+}
+html.light-mode .area-bar-wrap,
+[data-theme="light"] .area-bar-wrap {
+  background: #f1f5f9 !important;
+}
+
+/* Object Tools Buttons */
+html.light-mode .object-tools a,
+[data-theme="light"] .object-tools a {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode .object-tools a:hover,
+[data-theme="light"] .object-tools a:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Changelist Search Submit Button */
+html.light-mode #changelist-search input[type="submit"],
+[data-theme="light"] #changelist-search input[type="submit"] {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode #changelist-search input[type="submit"]:hover,
+[data-theme="light"] #changelist-search input[type="submit"]:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+/* Changelist Filters */
+html.light-mode #changelist-filter,
+[data-theme="light"] #changelist-filter {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode #changelist-filter h2,
+[data-theme="light"] #changelist-filter h2 {
+  color: #0f172a !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+html.light-mode #changelist-filter summary,
+[data-theme="light"] #changelist-filter summary {
+  color: #2563eb !important;
+}
+html.light-mode #changelist-filter li a,
+[data-theme="light"] #changelist-filter li a {
+  color: #475569 !important;
+}
+html.light-mode #changelist-filter li a:hover,
+[data-theme="light"] #changelist-filter li a:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+html.light-mode #changelist-filter li.selected a,
+[data-theme="light"] #changelist-filter li.selected a {
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+}
+
+/* Dual Selector (Permissions & Groups) */
+html.light-mode .selector-available h2,
+html.light-mode .selector-chosen h2,
+[data-theme="light"] .selector-available h2,
+[data-theme="light"] .selector-chosen h2 {
+  color: #0f172a !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+html.light-mode .selector select option,
+[data-theme="light"] .selector select option {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+html.light-mode .selector-chooser a,
+[data-theme="light"] .selector-chooser a {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode .selector-chooser a:hover,
+[data-theme="light"] .selector-chooser a:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Changeform Submit Row */
+html.light-mode .submit-row input[name="_addanother"],
+html.light-mode .submit-row input[name="_continue"],
+[data-theme="light"] .submit-row input[name="_addanother"],
+[data-theme="light"] .submit-row input[name="_continue"] {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode .submit-row input[name="_addanother"]:hover,
+html.light-mode .submit-row input[name="_continue"]:hover,
+[data-theme="light"] .submit-row input[name="_addanother"]:hover,
+[data-theme="light"] .submit-row input[name="_continue"]:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Paginator */
+html.light-mode .paginator,
+[data-theme="light"] .paginator {
+  color: #475569 !important;
+  border-top-color: #e2e8f0 !important;
+}
+html.light-mode .paginator a:link,
+html.light-mode .paginator a:visited,
+[data-theme="light"] .paginator a:link,
+[data-theme="light"] .paginator a:visited {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+}
+html.light-mode .paginator a:hover,
+[data-theme="light"] .paginator a:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+}
+
+/* Status Badges */
+html.light-mode .badge-safe,
+[data-theme="light"] .badge-safe {
   background-color: #ecfdf5 !important;
   color: #065f46 !important;
   border: 1px solid #a7f3d0 !important;
 }
-html.light-mode .badge-critical {
+html.light-mode .badge-critical,
+[data-theme="light"] .badge-critical {
   background-color: #fef2f2 !important;
   color: #991b1b !important;
   border: 1px solid #fecaca !important;
 }
-html.light-mode .badge-warning {
+html.light-mode .badge-warning,
+[data-theme="light"] .badge-warning {
   background-color: #fffbeb !important;
   color: #92400e !important;
   border: 1px solid #fde68a !important;
 }
 
-/* Category Chip in Light Mode */
-html.light-mode .category-chip {
+/* Chips & Pills */
+html.light-mode .category-chip,
+[data-theme="light"] .category-chip {
   background: #f1f5f9 !important;
   color: #1e293b !important;
   border-color: #cbd5e1 !important;
 }
-
-/* Area code row in Light Mode */
-html.light-mode .area-code-pill {
+html.light-mode .hash-code,
+html.light-mode code.hash-code,
+[data-theme="light"] .hash-code,
+[data-theme="light"] code.hash-code {
   background: #eff6ff !important;
-  color: #1d4ed8 !important;
-  border-color: #bfdbfe !important;
+  border: 1px solid #bfdbfe !important;
+  color: #1e40af !important;
 }
-html.light-mode .area-code-info span {
-  color: #1e293b !important;
-}
-html.light-mode .area-code-stat {
-  color: #475569 !important;
-}
-
-/* User profile card in Light Mode */
-html.light-mode .user-profile-card {
-  background: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-}
-html.light-mode .user-name-text {
-  color: #0f172a !important;
-}
-html.light-mode .user-role-text {
-  color: #64748b !important;
-}
-html.light-mode .logout-icon-btn {
-  color: #64748b !important;
-}
-html.light-mode .logout-icon-btn:hover {
-  color: #dc2626 !important;
-  background: #fee2e2 !important;
-}
-
-/* System Health Chip in Light Mode */
-html.light-mode .sys-health-chip {
+html.light-mode .sys-health-chip,
+[data-theme="light"] .sys-health-chip {
   background: #ecfdf5 !important;
   border-color: #a7f3d0 !important;
   color: #065f46 !important;
 }
 
-/* Sandbox Audit Details in Light Mode */
-html.light-mode #sandbox-result {
+/* Sandbox Audit Details */
+html.light-mode #sandbox-result,
+[data-theme="light"] #sandbox-result {
   background: #ffffff !important;
   border-color: #e2e8f0 !important;
-}
-html.light-mode .sb-metric-label {
-  color: #475569 !important;
 }
 html.light-mode .sb-cat-val,
 html.light-mode .sb-counts-val,
 html.light-mode #sb-masked-num,
 html.light-mode #sb-score,
 html.light-mode #sb-category,
-html.light-mode #sb-reports {
+html.light-mode #sb-reports,
+[data-theme="light"] .sb-cat-val,
+[data-theme="light"] .sb-counts-val,
+[data-theme="light"] #sb-masked-num,
+[data-theme="light"] #sb-score,
+[data-theme="light"] #sb-category,
+[data-theme="light"] #sb-reports {
   color: #0f172a !important;
 }
 
-/* Django Changelist Filters in Light Mode */
-html.light-mode #changelist-filter {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-html.light-mode #changelist-filter h2 {
-  color: #0f172a !important;
-  border-bottom-color: #e2e8f0 !important;
-}
-html.light-mode #changelist-filter summary {
-  color: #2563eb !important;
-}
-html.light-mode #changelist-filter li a {
-  color: #475569 !important;
-}
-html.light-mode #changelist-filter li a:hover {
-  color: #0f172a !important;
-  background: #f1f5f9 !important;
-}
-html.light-mode #changelist-filter li.selected a {
-  color: #1d4ed8 !important;
-  background: #eff6ff !important;
-}
-
-/* Django Paginator in Light Mode */
-html.light-mode .paginator {
-  color: #475569 !important;
-  border-top-color: #e2e8f0 !important;
-}
-html.light-mode .paginator a:link,
-html.light-mode .paginator a:visited {
-  background: #ffffff !important;
-  color: #1e293b !important;
-  border-color: #cbd5e1 !important;
-}
-html.light-mode .paginator a:hover {
-  background: #2563eb !important;
-  color: #ffffff !important;
-  border-color: #2563eb !important;
-}
-
-/* Global SOC Footer in Light Mode */
-html.light-mode .soc-footer {
+/* Global SOC Footer */
+html.light-mode .soc-footer,
+[data-theme="light"] .soc-footer {
   background: #ffffff !important;
   border-top-color: #e2e8f0 !important;
 }
-html.light-mode .soc-footer-inner {
+html.light-mode .soc-footer-inner,
+[data-theme="light"] .soc-footer-inner {
   border-bottom-color: #e2e8f0 !important;
 }
 html.light-mode .soc-footer-title,
-html.light-mode .soc-footer-col-title {
+html.light-mode .soc-footer-col-title,
+[data-theme="light"] .soc-footer-title,
+[data-theme="light"] .soc-footer-col-title {
   color: #0f172a !important;
 }
 html.light-mode .soc-footer-sub,
-html.light-mode .soc-footer-desc {
+html.light-mode .soc-footer-desc,
+[data-theme="light"] .soc-footer-sub,
+[data-theme="light"] .soc-footer-desc {
   color: #475569 !important;
 }
-html.light-mode .soc-footer-links li a {
+html.light-mode .soc-footer-links li a,
+[data-theme="light"] .soc-footer-links li a {
   color: #475569 !important;
 }
-html.light-mode .soc-footer-links li a:hover {
+html.light-mode .soc-footer-links li a:hover,
+[data-theme="light"] .soc-footer-links li a:hover {
   color: #2563eb !important;
 }
-html.light-mode .soc-footer-bottom {
+html.light-mode .soc-footer-bottom,
+[data-theme="light"] .soc-footer-bottom {
   color: #64748b !important;
 }
-html.light-mode .soc-footer-copy strong {
+html.light-mode .soc-footer-copy strong,
+[data-theme="light"] .soc-footer-copy strong {
   color: #0f172a !important;
 }
-html.light-mode .soc-footer-scroll-top {
+html.light-mode .soc-footer-scroll-top,
+[data-theme="light"] .soc-footer-scroll-top {
   background: #f8fafc !important;
-  border-color: #cbd5e1 !important;
+  border: 1px solid #cbd5e1 !important;
   color: #1e293b !important;
 }
-html.light-mode .soc-footer-scroll-top:hover {
+html.light-mode .soc-footer-scroll-top svg,
+[data-theme="light"] .soc-footer-scroll-top svg {
+  stroke: #1e293b !important;
+}
+html.light-mode .soc-footer-scroll-top:hover,
+[data-theme="light"] .soc-footer-scroll-top:hover {
   background: #eff6ff !important;
   border-color: #3b82f6 !important;
   color: #1d4ed8 !important;
+}
+html.light-mode .soc-footer-scroll-top:hover svg,
+[data-theme="light"] .soc-footer-scroll-top:hover svg {
+  stroke: #1d4ed8 !important;
+}
+
+/* 8. UNIVERSAL FLUID THEME TRANSITION */
+html, body,
+.soc-shell,
+.soc-main-area,
+.soc-canvas,
+.soc-sidebar,
+.soc-top-bar,
+.soc-footer,
+.soc-hero-banner,
+.kpi-card,
+.chart-card,
+.posture-widget,
+.triage-panel,
+.sandbox-panel,
+.ops-bar,
+.live-ticker-wrap,
+.results,
+.actions,
+#changelist-filter,
+fieldset.module,
+.form-row,
+.submit-row,
+.triage-header-card,
+.sandbox-header-card,
+.sandbox-input-card,
+.sandbox-results-panel,
+.sb-metric-box,
+.user-profile-card,
+.sidebar-brand,
+.sidebar-footer,
+.ops-btn,
+.soc-theme-toggle {
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 

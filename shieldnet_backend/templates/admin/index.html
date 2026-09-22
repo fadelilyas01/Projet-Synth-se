@@ -629,6 +629,34 @@
     startLiveTickerCountdown();
   });
 
+  // Synchronisation dynamique des graphiques lors du basculement de thème
+  window.addEventListener('shieldnet-theme-changed', (e) => {
+    const isLight = e.detail && e.detail.isLight;
+    const legendColor = isLight ? '#0f172a' : '#94a3b8';
+    const ticksColor = isLight ? '#334155' : '#64748b';
+    const gridColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.05)';
+
+    if (categoryChartInstance && categoryChartInstance.options && categoryChartInstance.options.plugins && categoryChartInstance.options.plugins.legend) {
+      categoryChartInstance.options.plugins.legend.labels.color = legendColor;
+      categoryChartInstance.update();
+    }
+
+    if (activityChartInstance && activityChartInstance.options && activityChartInstance.options.scales) {
+      if (activityChartInstance.options.scales.x && activityChartInstance.options.scales.x.ticks) {
+        activityChartInstance.options.scales.x.ticks.color = ticksColor;
+      }
+      if (activityChartInstance.options.scales.y) {
+        if (activityChartInstance.options.scales.y.ticks) {
+          activityChartInstance.options.scales.y.ticks.color = ticksColor;
+        }
+        if (activityChartInstance.options.scales.y.grid) {
+          activityChartInstance.options.scales.y.grid.color = gridColor;
+        }
+      }
+      activityChartInstance.update();
+    }
+  });
+
   // Triage Rapide AJAX
   function executeTriage(reportId, action) {
     const csrftoken = getCookie('csrftoken');

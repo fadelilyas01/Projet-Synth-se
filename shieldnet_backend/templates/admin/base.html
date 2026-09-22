@@ -12,35 +12,62 @@
 
   <!-- Django Base Stylesheet (Foundational resets and widget support) -->
   <link rel="stylesheet" href="{% block stylesheet %}{% static 'admin/css/base.css' %}{% endblock %}">
-
-  <!-- Stylesheet Cyber SOC Ultra-Premium (Senior Design System Overrides) -->
-  <link rel="stylesheet" href="{% static 'shield_api/admin_premium.css' %}">
   {% block extrastyle %}{% endblock %}
+
+  <!-- Stylesheet Cyber SOC Ultra-Premium (Senior Design System Overrides - Priorité Absolue) -->
+  <link rel="stylesheet" href="{% static 'shield_api/admin_premium.css' %}?v={% now 'U' %}">
   {% block extrahead %}{% endblock %}
 
   <!-- Chart.js pour la télémétrie SOC -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-  <!-- Script d'initialisation du Thème Sombre / Clair -->
+  <!-- Moteur Universel de Gestion du Thème Sombre / Clair (Dual-Engine Sync) -->
   <script>
-    (function() {
-      const savedTheme = localStorage.getItem('shieldnet_admin_theme');
-      if (savedTheme === 'light') {
-        document.documentElement.classList.add('light-mode');
+    function applyAdminTheme(theme) {
+      const isLight = theme === 'light';
+      document.documentElement.classList.toggle('light-mode', isLight);
+      if (document.body) {
+        document.body.classList.toggle('light-mode', isLight);
       }
-    })();
+      document.documentElement.setAttribute('data-theme', theme);
+      if (document.body) {
+        document.body.setAttribute('data-theme', theme);
+      }
+      localStorage.setItem('shieldnet_admin_theme', theme);
+      localStorage.setItem('theme', theme);
 
-    function toggleAdminTheme() {
-      const isLight = document.documentElement.classList.toggle('light-mode');
-      localStorage.setItem('shieldnet_admin_theme', isLight ? 'light' : 'dark');
       const btn = document.getElementById('soc-theme-btn');
       if (btn) {
         btn.innerHTML = isLight 
           ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> <span>Sombre</span>'
           : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> <span>Clair</span>';
       }
-      window.dispatchEvent(new CustomEvent('shieldnet-theme-changed', { detail: { isLight } }));
+      window.dispatchEvent(new CustomEvent('shieldnet-theme-changed', { detail: { isLight, theme } }));
     }
+
+    function toggleAdminTheme() {
+      const isCurrentlyLight = document.documentElement.classList.contains('light-mode') || document.documentElement.getAttribute('data-theme') === 'light';
+      const targetTheme = isCurrentlyLight ? 'dark' : 'light';
+      applyAdminTheme(targetTheme);
+    }
+
+    // Exécution immédiate avant le premier rendu du body
+    (function() {
+      const savedTheme = localStorage.getItem('shieldnet_admin_theme') || localStorage.getItem('theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-mode');
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.classList.remove('light-mode');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+
+    // Synchronisation complète dès que le DOM est prêt
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('shieldnet_admin_theme') || localStorage.getItem('theme') || 'dark';
+      applyAdminTheme(savedTheme);
+    });
 
     // Système de Toast Global
     function showSocToast(message, type = 'success') {
@@ -222,12 +249,6 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
             <span>Clair</span>
           </button>
-          <script>
-            if (localStorage.getItem('shieldnet_admin_theme') === 'light') {
-              const b = document.getElementById('soc-theme-btn');
-              if (b) b.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> <span>Sombre</span>';
-            }
-          </script>
         </div>
       </header>
       {% endif %}

@@ -135,6 +135,7 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
 
 class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
   bool _isLogin = true;
+  bool _obscurePassword = true;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -323,10 +324,26 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
             const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
                 labelText: 'Mot de passe',
-                prefixIcon: Icon(Icons.lock_outline_rounded),
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20,
+                  ),
+                  tooltip: _obscurePassword
+                      ? 'Afficher le mot de passe'
+                      : 'Masquer le mot de passe',
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
             ),
             if (_isLogin) ...[

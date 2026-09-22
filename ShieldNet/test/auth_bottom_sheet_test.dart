@@ -42,4 +42,42 @@ void main() {
     expect(find.text('Connexion'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('AuthBottomSheet password visibility toggle shows and hides password', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: AuthBottomSheet(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final passwordFieldFinder = find.byWidgetPredicate(
+      (widget) => widget is TextField && widget.decoration?.labelText == 'Mot de passe',
+    );
+    expect(passwordFieldFinder, findsOneWidget);
+
+    TextField passwordField = tester.widget(passwordFieldFinder);
+    expect(passwordField.obscureText, isTrue);
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+
+    // Clic sur l'icône oeil pour afficher le mot de passe
+    await tester.tap(find.byIcon(Icons.visibility_off_outlined));
+    await tester.pumpAndSettle();
+
+    passwordField = tester.widget(passwordFieldFinder);
+    expect(passwordField.obscureText, isFalse);
+    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+
+    // Clic pour masquer à nouveau le mot de passe
+    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.pumpAndSettle();
+
+    passwordField = tester.widget(passwordFieldFinder);
+    expect(passwordField.obscureText, isTrue);
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+  });
 }
