@@ -39,6 +39,7 @@
           ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> <span>Sombre</span>'
           : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> <span>Clair</span>';
       }
+      window.dispatchEvent(new CustomEvent('shieldnet-theme-changed', { detail: { isLight } }));
     }
 
     // Système de Toast Global
@@ -191,11 +192,17 @@
       {% if user.is_authenticated and user.is_staff and not is_popup %}
       <!-- Top Header Bar -->
       <header class="soc-top-bar">
-        <!-- Breadcrumbs -->
+        <!-- Breadcrumbs & Quick Return -->
         <div class="top-bar-left">
+          {% if request.path != '/admin/' %}
+          <a href="{% url 'admin:index' %}" class="topbar-return-btn" title="Retourner au Tableau de Bord SOC">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>Tableau de Bord</span>
+          </a>
+          {% endif %}
           {% block breadcrumbs %}
           <div class="soc-breadcrumbs">
-            <a href="{% url 'admin:index' %}">SOC Console</a>
+            <a href="{% url 'admin:index' %}" title="Retourner au Tableau de Bord SOC">Tableau de Bord SOC</a>
             {% if title and title != "Tableau de Bord de Modération & Cybersécurité" %}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
               <span>{{ title }}</span>
@@ -257,6 +264,79 @@
           {% block sidebar %}{% endblock %}
         </div>
       </main>
+
+      <!-- ==================== 3. GLOBAL SOC FOOTER ==================== -->
+      {% if user.is_authenticated and user.is_staff and not is_popup %}
+      <footer class="soc-footer">
+        <div class="soc-footer-inner">
+          <div class="soc-footer-brand">
+            <div class="soc-footer-logo-row">
+              <div class="brand-icon soc-footer-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+              </div>
+              <div>
+                <div class="soc-footer-title">
+                  ShieldNet SOC <span class="brand-tag">v1.2-Enterprise</span>
+                </div>
+                <div class="soc-footer-sub">
+                  Console de Cybersécurité Télécom &bull; Université du Québec en Outaouais (UQO)
+                </div>
+              </div>
+            </div>
+            <p class="soc-footer-desc">
+              Plateforme déterministe de détection, modération et consensus communautaire pour la protection des réseaux téléphoniques nord-américains (NANP +1).
+            </p>
+            <div class="soc-footer-badges">
+              <span class="soc-pill soc-pill-green">
+                <span class="pulse-dot"></span> Moteur Déterministe : En Ligne
+              </span>
+              <span class="soc-pill soc-pill-blue">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                HMAC-SHA256 Conforme
+              </span>
+              <span class="soc-pill" style="background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); border: 1px solid var(--accent-purple);">
+                MTTR &lt; 350ms
+              </span>
+            </div>
+          </div>
+
+          <div class="soc-footer-links-col">
+            <div class="soc-footer-col-title">Navigation Rapide</div>
+            <ul class="soc-footer-links">
+              <li><a href="{% url 'admin:index' %}">Tableau de Bord SOC</a></li>
+              <li><a href="/admin/operations/triage/">Centre de Triage Direct</a></li>
+              <li><a href="/admin/operations/sandbox/">Simulateur Sandbox E.164</a></li>
+              <li><a href="{% url 'admin:shield_api_blacklistednumber_changelist' %}">Liste Noire Télécom</a></li>
+              <li><a href="{% url 'admin:shield_api_spamreport_changelist' %}">Signalements Spams</a></li>
+              <li><a href="{% url 'admin:shield_api_safereport_changelist' %}">Avis & Faux-Positifs</a></li>
+            </ul>
+          </div>
+
+          <div class="soc-footer-links-col">
+            <div class="soc-footer-col-title">Outils & Rapports</div>
+            <ul class="soc-footer-links">
+              <li><a href="/admin/operations/export/csv/">Exporter Blacklist (CSV)</a></li>
+              <li><a href="/admin/operations/report/executive/" target="_blank">Rapport Exécutif PDF</a></li>
+              <li><a href="/api/v1/docs/" target="_blank">Spécification Swagger API</a></li>
+              <li><a href="{% url 'admin:shield_api_auditlog_changelist' %}">Journaux d'Audit Immuables</a></li>
+              <li><a href="{% url 'admin:auth_user_changelist' %}">Gestion des Utilisateurs SOC</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="soc-footer-bottom">
+          <div class="soc-footer-copy">
+            &copy; 2026 <strong>ShieldNet Cyber Defense</strong> &bull; Tous droits réservés &bull; Laboratoire d'Ingénierie Télécom UQO
+          </div>
+          <div class="soc-footer-bottom-actions">
+            <a href="#content-start" class="soc-footer-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" title="Remonter tout en haut">
+              <span>Haut de page</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            </a>
+          </div>
+        </div>
+      </footer>
+      {% endif %}
 
     </div>
 

@@ -513,12 +513,52 @@
     return cookieValue;
   }
 
+  // Variables globales pour les instances Chart.js
+  let categoryChartInstance = null;
+  let activityChartInstance = null;
+
+  function updateChartsForTheme(isLight) {
+    const legendColor = isLight ? '#0f172a' : '#94a3b8';
+    const ticksColor = isLight ? '#334155' : '#64748b';
+    const gridColor = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.05)';
+
+    if (categoryChartInstance) {
+      if (categoryChartInstance.options.plugins && categoryChartInstance.options.plugins.legend) {
+        categoryChartInstance.options.plugins.legend.labels.color = legendColor;
+      }
+      categoryChartInstance.update();
+    }
+
+    if (activityChartInstance) {
+      if (activityChartInstance.options.scales) {
+        if (activityChartInstance.options.scales.x) {
+          activityChartInstance.options.scales.x.ticks.color = ticksColor;
+        }
+        if (activityChartInstance.options.scales.y) {
+          activityChartInstance.options.scales.y.ticks.color = ticksColor;
+          activityChartInstance.options.scales.y.grid.color = gridColor;
+        }
+      }
+      activityChartInstance.update();
+    }
+  }
+
+  // Écoute de l'événement de basculement de thème
+  window.addEventListener('shieldnet-theme-changed', (e) => {
+    updateChartsForTheme(e.detail.isLight);
+  });
+
   // Initialisation Graphiques
   document.addEventListener('DOMContentLoaded', () => {
+    const isLightInitial = document.documentElement.classList.contains('light-mode');
+    const legendColor = isLightInitial ? '#0f172a' : '#94a3b8';
+    const ticksColor = isLightInitial ? '#334155' : '#64748b';
+    const gridColor = isLightInitial ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.05)';
+
     // 1. Chart Donut Catégories
     const catCtx = document.getElementById('categoryChart');
     if (catCtx) {
-      new Chart(catCtx, {
+      categoryChartInstance = new Chart(catCtx, {
         type: 'doughnut',
         data: {
           labels: ['Fraude', 'Démarchage', 'Arnaque Fin.', 'Phishing', 'Robocalls', 'Autre'],
@@ -536,8 +576,8 @@
             legend: {
               position: 'right',
               labels: {
-                color: '#94a3b8',
-                font: { family: 'Inter', size: 11 },
+                color: legendColor,
+                font: { family: 'Inter', size: 11, weight: '600' },
                 boxWidth: 12,
                 padding: 10
               }
@@ -551,7 +591,7 @@
     // 2. Chart Courbe d'activité
     const actCtx = document.getElementById('activityChart');
     if (actCtx) {
-      new Chart(actCtx, {
+      activityChartInstance = new Chart(actCtx, {
         type: 'line',
         data: {
           labels: {{ activity_dates|safe|default:"['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\\'hui']" }},
@@ -573,11 +613,11 @@
           scales: {
             x: {
               grid: { display: false },
-              ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+              ticks: { color: ticksColor, font: { family: 'Inter', size: 10, weight: '600' } }
             },
             y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#64748b', font: { family: 'Inter', size: 10 }, stepSize: 5 }
+              grid: { color: gridColor },
+              ticks: { color: ticksColor, font: { family: 'Inter', size: 10, weight: '600' }, stepSize: 5 }
             }
           },
           plugins: { legend: { display: false } }

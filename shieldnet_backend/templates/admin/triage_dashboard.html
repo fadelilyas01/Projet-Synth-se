@@ -17,10 +17,14 @@
         <p class="page-subtitle">Modération collaborative en direct des flux d'appels entrants et arbitrage des faux-positifs</p>
       </div>
     </div>
-    <div class="header-right">
+    <div class="header-right" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <span class="soc-pill soc-pill-green">
         <span class="pulse-dot"></span> Triage Actif
       </span>
+      <a href="{% url 'admin:index' %}" class="ops-btn ops-btn-return" title="Retourner au Tableau de Bord SOC">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Retour au Tableau de Bord SOC</span>
+      </a>
     </div>
   </div>
 
@@ -175,6 +179,15 @@
       {% endif %}
     </div>
     {% endif %}
+
+    <!-- Footer Navigation -->
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <a href="{% url 'admin:index' %}" class="ops-btn ops-btn-return" title="Retourner au Tableau de Bord SOC">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Retour au Tableau de Bord SOC</span>
+      </a>
+      <span style="font-size: 11px; color: var(--text-muted);">Console de Cybersécurité ShieldNet &bull; UQO</span>
+    </div>
   </div>
 
 </div>

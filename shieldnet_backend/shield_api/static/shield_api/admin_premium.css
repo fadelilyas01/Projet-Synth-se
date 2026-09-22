@@ -404,6 +404,47 @@ html {
   z-index: 900;
 }
 
+.top-bar-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.topbar-return-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  background: var(--accent-blue-bg) !important;
+  border: 1px solid var(--accent-blue) !important;
+  color: var(--accent-blue) !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.topbar-return-btn svg {
+  stroke: currentColor !important;
+  transition: transform 0.2s ease !important;
+}
+
+.topbar-return-btn:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+  transform: translateX(-2px) !important;
+}
+
+.topbar-return-btn:hover svg {
+  stroke: #ffffff !important;
+  transform: translateX(-2px) !important;
+}
+
 .soc-breadcrumbs, .breadcrumbs {
   display: flex !important;
   align-items: center !important;
@@ -1479,6 +1520,33 @@ ul.errorlist li {
   background: var(--primary-hover) !important;
 }
 
+.ops-btn-return {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  transition: all 0.2s ease !important;
+}
+.ops-btn-return svg {
+  stroke: currentColor !important;
+  transition: transform 0.2s ease !important;
+}
+.ops-btn-return:hover {
+  background: var(--accent-blue-bg) !important;
+  border-color: var(--accent-blue) !important;
+  color: var(--accent-blue) !important;
+  transform: translateX(-3px) !important;
+}
+.ops-btn-return:hover svg {
+  transform: translateX(-3px) !important;
+}
+
 /* =====================================================================
    8. COMPOSANTS SOC ULTRA-PREMIUM (JAUGE, HEATMAP, TRIAGE, TOASTS)
    ===================================================================== */
@@ -1668,6 +1736,80 @@ ul.errorlist li {
   color: #ffffff;
 }
 
+/* SOC Main Dashboard Containers & Hero Banner */
+.soc-dashboard-wrap {
+  width: 100%;
+}
+
+.soc-hero-banner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--card-shadow);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hero-banner-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.hero-banner-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.sandbox-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: var(--card-shadow);
+}
+
+.sandbox-input {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  color: var(--text-main) !important;
+  transition: all 0.15s ease !important;
+}
+
+.sandbox-input:focus {
+  outline: none !important;
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+.ops-bar {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 18px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: var(--card-shadow);
+}
+
 /* KPI Cards Grid */
 .kpi-grid {
   display: grid;
@@ -1777,6 +1919,169 @@ ul.errorlist li {
 @keyframes toastSlideIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+/* =====================================================================
+   GLOBAL SOC FOOTER
+   ===================================================================== */
+.soc-footer {
+  width: 100%;
+  margin-top: auto;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-color);
+  padding: 40px 32px 24px 32px;
+  box-sizing: border-box;
+}
+
+.soc-footer-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.soc-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.soc-footer-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.soc-footer-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.soc-footer-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.3px;
+}
+
+.soc-footer-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.soc-footer-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 520px;
+}
+
+.soc-footer-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.soc-footer-links-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.soc-footer-col-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 16px;
+}
+
+.soc-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.soc-footer-links li a {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.soc-footer-links li a:hover {
+  color: var(--accent-blue);
+  transform: translateX(3px);
+}
+
+.soc-footer-bottom {
+  max-width: 1600px;
+  margin: 20px auto 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.soc-footer-copy strong {
+  color: var(--text-main);
+}
+
+.soc-footer-scroll-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.soc-footer-scroll-top:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-focus);
+  color: var(--accent-blue);
+}
+
+.soc-footer-scroll-top svg {
+  stroke: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.soc-footer-scroll-top:hover svg {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 960px) {
+  .soc-footer-inner {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
 }
 
 /* Badges de Statut */
@@ -1972,22 +2277,67 @@ ul.errorlist li {
   stroke: #ffffff !important;
 }
 
-/* High contrast table styling in Light Mode */
-html.light-mode thead th {
-  background: #f1f5f9 !important;
-  color: #334155 !important;
-  border-bottom: 2px solid #e2e8f0 !important;
+/* =====================================================================
+   LIGHT MODE: HIGH-CONTRAST TYPOGRAPHY & VISIBILITY GUARDS
+   ===================================================================== */
+html.light-mode body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
 }
 
-html.light-mode tbody tr:nth-child(even) {
-  background: #f8fafc !important;
+/* Typography & Headings */
+html.light-mode h1,
+html.light-mode h2,
+html.light-mode h3,
+html.light-mode h4,
+html.light-mode h5,
+html.light-mode h6,
+html.light-mode .page-main-title,
+html.light-mode .hero-banner-title,
+html.light-mode .soc-page-title,
+html.light-mode .brand-name,
+html.light-mode strong,
+html.light-mode b {
+  color: #0f172a !important;
 }
-html.light-mode tbody tr:hover {
-  background: #eff6ff !important;
+
+html.light-mode .hero-banner-sub,
+html.light-mode .page-subtitle,
+html.light-mode .soc-page-subtitle,
+html.light-mode .brand-sub,
+html.light-mode .kpi-sub-text,
+html.light-mode .help,
+html.light-mode .nav-section-label {
+  color: #475569 !important;
 }
-html.light-mode tbody td {
+
+html.light-mode .kpi-label {
+  color: #475569 !important;
+}
+
+/* High contrast table styling in Light Mode */
+html.light-mode table thead th,
+html.light-mode .triage-table th {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  font-weight: 700 !important;
+}
+
+html.light-mode table tbody td,
+html.light-mode .triage-table td {
   color: #0f172a !important;
   border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html.light-mode table tbody tr:nth-child(even),
+html.light-mode .triage-table tbody tr:nth-child(even) {
+  background: #f8fafc !important;
+}
+
+html.light-mode table tbody tr:hover,
+html.light-mode .triage-table tbody tr:hover {
+  background: #eff6ff !important;
 }
 
 /* Form controls in Light Mode */
@@ -2000,29 +2350,337 @@ html.light-mode input[type="tel"],
 html.light-mode textarea,
 html.light-mode select,
 html.light-mode .vTextField,
-html.light-mode .vIntegerField {
+html.light-mode .vIntegerField,
+html.light-mode .sandbox-input,
+html.light-mode .sandbox-phone-field,
+html.light-mode .search-field,
+html.light-mode .select-category-field {
   background: #ffffff !important;
   border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
 
+html.light-mode input::placeholder,
+html.light-mode textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
 html.light-mode input:focus,
 html.light-mode textarea:focus,
-html.light-mode select:focus {
+html.light-mode select:focus,
+html.light-mode .sandbox-input:focus,
+html.light-mode .sandbox-phone-field:focus {
   border-color: #2563eb !important;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
 }
 
-/* Subtle shadows in light mode */
+/* Preserve crisp white text on primary actions and buttons */
+html.light-mode .ops-btn-primary,
+html.light-mode .ops-btn-primary *,
+html.light-mode .brand-icon *,
+html.light-mode .user-avatar-pill,
+html.light-mode .submit-row input[type="submit"],
+html.light-mode .submit-row input[type="submit"].default,
+html.light-mode .actions button.button,
+html.light-mode .paginator .this-page,
+html.light-mode .delete-confirmation input[type="submit"],
+html.light-mode .triage-btn-block:hover,
+html.light-mode .triage-btn-whitelist:hover,
+html.light-mode .topbar-return-btn:hover,
+html.light-mode .topbar-return-btn:hover *,
+html.light-mode .ops-btn-return:hover,
+html.light-mode .ops-btn-return:hover * {
+  color: #ffffff !important;
+}
+
+html.light-mode .brand-icon svg,
+html.light-mode .ops-btn-primary svg,
+html.light-mode .topbar-return-btn:hover svg,
+html.light-mode .ops-btn-return:hover svg {
+  stroke: #ffffff !important;
+}
+
+/* Secondary & ghost buttons in Light Mode */
+html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return),
+html.light-mode .soc-theme-toggle {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+html.light-mode .ops-btn:not(.ops-btn-primary):not(.ops-btn-return):hover,
+html.light-mode .soc-theme-toggle:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+/* Return buttons in Light Mode */
+html.light-mode .topbar-return-btn,
+html.light-mode .ops-btn-return {
+  background: #eff6ff !important;
+  border-color: #3b82f6 !important;
+  color: #1d4ed8 !important;
+}
+html.light-mode .topbar-return-btn svg,
+html.light-mode .ops-btn-return svg {
+  stroke: #1d4ed8 !important;
+}
+html.light-mode .topbar-return-btn:hover,
+html.light-mode .ops-btn-return:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Hash codes in Light Mode */
+html.light-mode .hash-code,
+html.light-mode code.hash-code {
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  color: #1e40af !important;
+}
+
+/* Breadcrumbs in Light Mode */
+html.light-mode .soc-breadcrumbs a,
+html.light-mode .breadcrumbs a {
+  color: #475569 !important;
+}
+html.light-mode .soc-breadcrumbs a:hover,
+html.light-mode .breadcrumbs a:hover {
+  color: #0f172a !important;
+}
+html.light-mode .soc-breadcrumbs span,
+html.light-mode .breadcrumbs span {
+  color: #0f172a !important;
+}
+html.light-mode .soc-breadcrumbs svg,
+html.light-mode .breadcrumbs svg {
+  stroke: #64748b !important;
+}
+
+/* Sidebar navigation in Light Mode */
+html.light-mode .soc-sidebar {
+  background: #ffffff !important;
+  border-right-color: #e2e8f0 !important;
+}
+html.light-mode .nav-item {
+  color: #334155 !important;
+}
+html.light-mode .nav-item svg {
+  stroke: #475569 !important;
+}
+html.light-mode .nav-item:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+html.light-mode .nav-item:hover svg {
+  stroke: #0f172a !important;
+}
+html.light-mode .nav-item.active {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-left-color: #2563eb !important;
+}
+html.light-mode .nav-item.active svg {
+  stroke: #1d4ed8 !important;
+}
+
+/* Live ticker in Light Mode */
+html.light-mode .live-ticker-wrap {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode .ticker-content {
+  color: #1e293b !important;
+}
+html.light-mode #live-ticker-text {
+  color: #1e293b !important;
+}
+
+/* Metric boxes and containers in Light Mode */
+html.light-mode .soc-hero-banner,
+html.light-mode .sandbox-panel,
+html.light-mode .ops-bar,
+html.light-mode .triage-panel,
 html.light-mode .kpi-card,
 html.light-mode .chart-card,
 html.light-mode .posture-widget,
-html.light-mode .triage-panel,
-html.light-mode .sandbox-input-card,
-html.light-mode .sandbox-results-panel,
 html.light-mode .triage-header-card,
 html.light-mode .sandbox-header-card,
+html.light-mode .sandbox-input-card,
+html.light-mode .sandbox-results-panel,
+html.light-mode .sb-metric-box,
 html.light-mode fieldset.module,
 html.light-mode .form-row {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
 }
+
+/* KPI numbers in Light Mode */
+html.light-mode .kpi-val.red { color: #dc2626 !important; }
+html.light-mode .kpi-val.green { color: #059669 !important; }
+html.light-mode .kpi-val.amber { color: #d97706 !important; }
+html.light-mode .kpi-val.blue { color: #2563eb !important; }
+
+/* Status Badges in Light Mode */
+html.light-mode .badge-safe {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+html.light-mode .badge-critical {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
+}
+html.light-mode .badge-warning {
+  background-color: #fffbeb !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a !important;
+}
+
+/* Category Chip in Light Mode */
+html.light-mode .category-chip {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Area code row in Light Mode */
+html.light-mode .area-code-pill {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+html.light-mode .area-code-info span {
+  color: #1e293b !important;
+}
+html.light-mode .area-code-stat {
+  color: #475569 !important;
+}
+
+/* User profile card in Light Mode */
+html.light-mode .user-profile-card {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode .user-name-text {
+  color: #0f172a !important;
+}
+html.light-mode .user-role-text {
+  color: #64748b !important;
+}
+html.light-mode .logout-icon-btn {
+  color: #64748b !important;
+}
+html.light-mode .logout-icon-btn:hover {
+  color: #dc2626 !important;
+  background: #fee2e2 !important;
+}
+
+/* System Health Chip in Light Mode */
+html.light-mode .sys-health-chip {
+  background: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #065f46 !important;
+}
+
+/* Sandbox Audit Details in Light Mode */
+html.light-mode #sandbox-result {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode .sb-metric-label {
+  color: #475569 !important;
+}
+html.light-mode .sb-cat-val,
+html.light-mode .sb-counts-val,
+html.light-mode #sb-masked-num,
+html.light-mode #sb-score,
+html.light-mode #sb-category,
+html.light-mode #sb-reports {
+  color: #0f172a !important;
+}
+
+/* Django Changelist Filters in Light Mode */
+html.light-mode #changelist-filter {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html.light-mode #changelist-filter h2 {
+  color: #0f172a !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+html.light-mode #changelist-filter summary {
+  color: #2563eb !important;
+}
+html.light-mode #changelist-filter li a {
+  color: #475569 !important;
+}
+html.light-mode #changelist-filter li a:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+html.light-mode #changelist-filter li.selected a {
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+}
+
+/* Django Paginator in Light Mode */
+html.light-mode .paginator {
+  color: #475569 !important;
+  border-top-color: #e2e8f0 !important;
+}
+html.light-mode .paginator a:link,
+html.light-mode .paginator a:visited {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+}
+html.light-mode .paginator a:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+}
+
+/* Global SOC Footer in Light Mode */
+html.light-mode .soc-footer {
+  background: #ffffff !important;
+  border-top-color: #e2e8f0 !important;
+}
+html.light-mode .soc-footer-inner {
+  border-bottom-color: #e2e8f0 !important;
+}
+html.light-mode .soc-footer-title,
+html.light-mode .soc-footer-col-title {
+  color: #0f172a !important;
+}
+html.light-mode .soc-footer-sub,
+html.light-mode .soc-footer-desc {
+  color: #475569 !important;
+}
+html.light-mode .soc-footer-links li a {
+  color: #475569 !important;
+}
+html.light-mode .soc-footer-links li a:hover {
+  color: #2563eb !important;
+}
+html.light-mode .soc-footer-bottom {
+  color: #64748b !important;
+}
+html.light-mode .soc-footer-copy strong {
+  color: #0f172a !important;
+}
+html.light-mode .soc-footer-scroll-top {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light-mode .soc-footer-scroll-top:hover {
+  background: #eff6ff !important;
+  border-color: #3b82f6 !important;
+  color: #1d4ed8 !important;
+}
+

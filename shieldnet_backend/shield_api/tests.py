@@ -666,6 +666,9 @@ class UltraPremiumSOCTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'Centre de Triage')
         self.assertContains(resp, 'Signalements Reçus')
+        self.assertContains(resp, 'topbar-return-btn')
+        self.assertContains(resp, 'ops-btn-return')
+        self.assertContains(resp, 'Retour au Tableau de Bord SOC')
 
     def test_admin_sandbox_dashboard_view(self):
         url = reverse('admin-sandbox-dashboard')
@@ -673,6 +676,9 @@ class UltraPremiumSOCTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'Laboratoire Sandbox')
         self.assertContains(resp, 'Lancer le Diagnostic')
+        self.assertContains(resp, 'topbar-return-btn')
+        self.assertContains(resp, 'ops-btn-return')
+        self.assertContains(resp, 'Retour au Tableau de Bord SOC')
 
     def test_admin_sidebar_presence_across_all_staff_views(self):
         """
@@ -803,6 +809,48 @@ class UltraPremiumSOCTests(TestCase):
         self.assertIn('.delete-confirmation', css_content)
         self.assertIn('#change-history', css_content)
         self.assertIn('ul.errorlist', css_content)
+
+        # Vérification des classes de composants SOC
+        self.assertIn('.soc-hero-banner', css_content)
+        self.assertIn('.hero-banner-title', css_content)
+        self.assertIn('.hero-banner-sub', css_content)
+        self.assertIn('.sandbox-panel', css_content)
+        self.assertIn('.sandbox-input', css_content)
+        self.assertIn('.ops-bar', css_content)
+
+        # Vérification des règles de contraste renforcées pour le mode clair
+        self.assertIn('html.light-mode table thead th', css_content)
+        self.assertIn('html.light-mode table tbody td', css_content)
+        self.assertIn('html.light-mode .ops-btn-primary', css_content)
+        self.assertIn('html.light-mode .topbar-return-btn', css_content)
+        self.assertIn('html.light-mode .badge-safe', css_content)
+
+        # Vérification de l'intégrité syntaxique CSS (accolades parfaitement équilibrées)
+        open_braces = 0
+        for char in css_content:
+            if char == '{':
+                open_braces += 1
+            elif char == '}':
+                open_braces -= 1
+        self.assertEqual(open_braces, 0, "admin_premium.css doit avoir un solde parfait d'accolades { et }")
+
+        # Vérification du footer SOC global
+        self.assertIn('.soc-footer', css_content)
+        self.assertIn('html.light-mode .soc-footer', css_content)
+
+        # Vérification de l'événement de basculement de thème et footer dans les templates
+        base_html_path = os.path.join(settings.BASE_DIR, 'templates', 'admin', 'base.html')
+        with open(base_html_path, 'r', encoding='utf-8') as f:
+            base_html = f.read()
+        self.assertIn('shieldnet-theme-changed', base_html)
+        self.assertIn('soc-footer', base_html)
+
+        index_html_path = os.path.join(settings.BASE_DIR, 'templates', 'admin', 'index.html')
+        with open(index_html_path, 'r', encoding='utf-8') as f:
+            index_html = f.read()
+        self.assertIn('shieldnet-theme-changed', index_html)
+        self.assertIn('updateChartsForTheme', index_html)
+
 
 
 
