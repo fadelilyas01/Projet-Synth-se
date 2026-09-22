@@ -297,16 +297,19 @@ def custom_admin_index(request, extra_context=None):
             item['pct'] = round((item['count'] / total_geo) * 100, 1)
 
         # File d'attente pour le Centre de Triage Rapide (Fast Triage Hub)
+        from .ai_engine import ShieldNetAIEngine
         pending_reports = SpamReport.objects.order_by('-created_at')[:6]
         triage_items = []
         for rep in pending_reports:
             bn = BlacklistedNumber.objects.filter(phone_hash=rep.phone_hash).first()
+            ai_diag = ShieldNetAIEngine.diagnose(phone_number=bn.masked_number if bn and bn.masked_number else '', phone_hash=rep.phone_hash)
             triage_items.append({
                 'report': rep,
                 'blacklisted': bn,
                 'is_blocked': bn.is_blocked if bn else False,
                 'is_whitelisted': bn.is_whitelisted if bn else False,
                 'risk_score': bn.risk_score if bn else 50,
+                'ai': ai_diag,
             })
 
         extra_context.update({

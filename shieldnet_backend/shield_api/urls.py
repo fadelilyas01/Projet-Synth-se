@@ -21,9 +21,11 @@ from .views import (
     AdminConsensusAuditView,
     AdminSafeReportsListView,
     HealthCheckView,
+    AIDiagnoseView,
 )
 
 urlpatterns = [
+    path('ai/diagnose/', AIDiagnoseView.as_view(), name='ai-diagnose'),
     path('health/', HealthCheckView.as_view(), name='health-check'),
     path('sync/status/', SyncStatusView.as_view(), name='sync-status'),
     path('blacklist/', BlacklistDownloadView.as_view(), name='blacklist-download'),

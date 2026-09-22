@@ -231,6 +231,13 @@
             <span class="category-chip">
               {{ item.report.category }}
             </span>
+            {% if item.ai %}
+              {% if item.ai.recommendation == 'AUTO_WHITELIST' %}
+                <span class="badge-safe" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-block;">🤖 Faux-Positif ({{ item.ai.false_positive_confidence }}%)</span>
+              {% elif item.ai.recommendation == 'ESCALATE_BLOCK' %}
+                <span class="badge-critical" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-block;">🤖 Menace ({{ item.ai.composite_risk_score }}%)</span>
+              {% endif %}
+            {% endif %}
           </td>
           <td style="color: var(--text-secondary); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             {{ item.report.comment|default:"Aucun commentaire fourni" }}
@@ -333,6 +340,18 @@
       </div>
 
       <div id="sb-anomalies-box" style="margin-top: 12px; font-size: 11px; color: var(--accent-red); display: none; padding: 8px 12px; background: var(--accent-red-bg); border-radius: 6px; border: 1px solid var(--accent-red);"></div>
+
+      <!-- Arbitrage IA ShieldNet & XAI -->
+      <div id="sb-ai-badge-row" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--accent-blue);">ShieldNet AI Engine :</span>
+          <span id="sb-ai-verdict" class="badge-safe" style="font-size: 11px;">-</span>
+          <span id="sb-ai-fp-pct" style="font-size: 11px; color: var(--text-muted);"></span>
+        </div>
+        <a href="/admin/operations/sandbox/" class="ops-btn" style="font-size: 11px; padding: 4px 10px;">
+          Voir Explications XAI Détaillées &rarr;
+        </a>
+      </div>
     </div>
   </div>
 
@@ -728,7 +747,27 @@
         anomBox.style.display = 'none';
       }
 
-      showSocToast('Diagnostic heuristique achevé.', 'info');
+      // Traitement IA ShieldNet
+      const aiRow = document.getElementById('sb-ai-badge-row');
+      if (data.ai) {
+        aiRow.style.display = 'flex';
+        const vEl = document.getElementById('sb-ai-verdict');
+        vEl.textContent = data.ai.verdict_label;
+        if (data.ai.verdict === 'FAUX_POSITIF_CONFIRME' || data.ai.verdict === 'FAUX_POSITIF_PROBABLE') {
+          vEl.className = 'badge-safe';
+        } else if (data.ai.verdict === 'CYBER_MENACE_CRITIQUE' || data.ai.verdict === 'FRAUDE_SUSPECTEE') {
+          vEl.className = 'badge-critical';
+        } else if (data.ai.verdict === 'NUMERO_LEGITIME') {
+          vEl.className = 'soc-pill soc-pill-blue';
+        } else {
+          vEl.className = 'badge-warning';
+        }
+        document.getElementById('sb-ai-fp-pct').textContent = `Indice faux-positif : ${data.ai.false_positive_confidence}% | Risque IA : ${data.ai.composite_risk_score}/100`;
+      } else {
+        aiRow.style.display = 'none';
+      }
+
+      showSocToast('Diagnostic IA & heuristique achevé.', 'info');
     })
     .catch(() => {
       showSocToast('Erreur lors de l\'appel au moteur sandbox.', 'error');

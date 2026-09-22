@@ -131,6 +131,13 @@
             <span class="category-chip">
               {{ item.report.category }}
             </span>
+            {% if item.ai %}
+              {% if item.ai.recommendation == 'AUTO_WHITELIST' %}
+                <span class="badge-safe" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-block;">🤖 Faux-Positif ({{ item.ai.false_positive_confidence }}%)</span>
+              {% elif item.ai.recommendation == 'ESCALATE_BLOCK' %}
+                <span class="badge-critical" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-block;">🤖 Menace ({{ item.ai.composite_risk_score }}%)</span>
+              {% endif %}
+            {% endif %}
           </td>
           <td style="max-width: 320px; word-break: break-word;">
             {{ item.report.comment|default:"Aucun commentaire fourni par l'utilisateur." }}

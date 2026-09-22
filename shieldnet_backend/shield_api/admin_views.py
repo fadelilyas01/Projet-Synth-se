@@ -35,6 +35,10 @@ def sandbox_check_view(request):
     # Évaluation algorithmique heuristique
     heuristic = AutomatedSpamVerifier.evaluate_number(phone_hash, phone_number)
 
+    # Diagnostic d'Intelligence Artificielle (XAI, arbitrage faux positif, NLP)
+    from .ai_engine import ShieldNetAIEngine
+    ai_diag = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash)
+
     # Recherche en base de données
     record = BlacklistedNumber.objects.filter(phone_hash=phone_hash).first()
 
@@ -57,6 +61,7 @@ def sandbox_check_view(request):
             'safe_reports_count': record.safe_reports_count,
             'consensus_score': round(record.consensus_score * 100, 1) if record.consensus_score else 0.0,
             'anomalies': heuristic.get('anomalies', []),
+            'ai': ai_diag,
             'updated_at': record.updated_at.strftime('%d/%m/%Y %H:%M') if record.updated_at else '-',
         })
     else:
@@ -77,6 +82,7 @@ def sandbox_check_view(request):
             'safe_reports_count': 0,
             'consensus_score': 0.0,
             'anomalies': heuristic.get('anomalies', []),
+            'ai': ai_diag,
             'updated_at': 'Jamais',
         })
 
@@ -418,12 +424,14 @@ def admin_triage_dashboard_view(request):
     triage_items = []
     for r in page_obj:
         rec = existing_records.get(r.phone_hash)
+        ai_diag = ShieldNetAIEngine.diagnose(phone_number=rec.masked_number if rec and rec.masked_number else '', phone_hash=r.phone_hash)
         triage_items.append({
             'report': r,
             'record': rec,
             'is_blocked': rec.is_blocked if rec else False,
             'is_whitelisted': rec.is_whitelisted if rec else False,
             'risk_score': rec.risk_score if rec else 0,
+            'ai': ai_diag,
         })
 
     total_pending = SpamReport.objects.count()

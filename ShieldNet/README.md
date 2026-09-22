@@ -1,19 +1,20 @@
 # 🛡️ ShieldNet — Solution Collaborative de Filtrage & Anti-Spam (Mobile Flutter & Android)
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.27.x-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20(Prêt)-green.svg)]()
-[![License](https://img.shields.io/badge/License-Propriétaire%20%2F%20UQO-blue.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-31%2F31%20Pass-success.svg)]()
+[![Platform](https://img.shields.io/badge/Platform-Android%20(Natif%20CallScreening)%20%7C%20iOS-green.svg)]()
+[![Propriété](https://img.shields.io/badge/Propriété-UQO%20(Université%20du%20Québec%20en%20Outaouais)-004f9e.svg)](https://uqo.ca)
+[![Tests](https://img.shields.io/badge/Tests%20Mobile-59%2F59%20Pass%20(100%25)-success.svg)]()
+[![Linter](https://img.shields.io/badge/Linter-0%20Avertissement-brightgreen.svg)]()
 
-**ShieldNet** est une solution mobile et cloud de pointe dédiée à l'interception, au filtrage et à la signalisation communautaire d'appels et SMS indésirables (spam commercial agressif, hameçonnage / phishing, arnaques financières et robocalls).  
-Conçu et développé dans le cadre du **Projet Synthèse (Université du Québec en Outaouais - UQO)**, le système cible en priorité le plan de numérotation nord-américain (**indicatif `+1` pour le Canada et les États-Unis**).
+**ShieldNet** est une application mobile native et multiplateforme de pointe dédiée à l'interception, au filtrage et à la neutralisation des appels et SMS indésirables (démarchage agressif, usurpations gouvernementales, arnaques financières et robocalls).  
+Conçu et développé dans le cadre du **Projet de Synthèse en Informatique à l'Université du Québec en Outaouais (UQO)**, le système protège spécifiquement le plan de numérotation nord-américain (**indicatif `+1` pour le Canada et les États-Unis**).
 
 ---
 
 ## 🏛️ Architecture Modulaire & Clean Architecture
 
-L'application mobile respecte scrupuleusement les principes de **Clean Architecture**, orchestrée par **Riverpod** pour une gestion d'état réactive et découplée :
+L'application mobile respecte scrupuleusement les principes de **Clean Architecture**, orchestrée par **Riverpod** pour une gestion d'état réactive, testable et découplée :
 
 ```text
 lib/
@@ -24,113 +25,86 @@ lib/
 │   ├── network/            # Client Dio REST API (authentification X-API-Key, interceptors)
 │   ├── providers/          # Injection de dépendances et état global (Riverpod)
 │   ├── security/           # Anonymisation HMAC-SHA256, validation NANP (+1), heuristique
-│   ├── services/           # Intégration native Android (Telecom CallScreeningService)
+│   ├── services/           # Intégration native Android (Telecom CallScreeningService, BackgroundSync)
 │   ├── theme/              # Design System moderne (modes Clair / Sombre, HSL dynamiques)
 │   ├── utils/              # AppLogger structuré et monitoring Sentry
 │   └── widgets/            # Composants UI atomiques et réutilisables
 ├── features/
-│   ├── call_filtering/     # Dashboard interactif, historique d'appels et signalement
+│   ├── call_filtering/     # Dashboard "Zen", historique d'appels et signalement en 1 clic
 │   │   ├── domain/         # Entités et cas d'utilisation métier
 │   │   ├── data/           # Répertoires et sources de données (local SQLite + remote API)
 │   │   └── presentation/   # Écrans (DashboardPage, ActivityPage, ReportPage)
 │   ├── onboarding/         # Parcours d'accueil, pédagogie RGPD et demande de permissions
 │   └── settings/           # Paramètres de sécurité, diagnostics et Console Administrateur
-│       └── presentation/   # SettingsPage, AdminConsolePage, DeveloperDiagnosticPage
+│       └── presentation/
+│           ├── widgets/auth_bottom_sheet.dart  # Formulaire de connexion/inscription avec bascule œil
+│           └── SettingsPage, AdminConsolePage, DeveloperDiagnosticPage
 ├── l10n/                   # Internationalisation bilingue (Français / Anglais)
 └── main.dart               # Point d'entrée, initialisation Sentry, SQLite et injection
 ```
 
 ---
 
-## 🔒 Sécurité, Confidentialité & Conformité RGPD
+## 🔒 Sécurité, Confidentialité & Conformité RGPD / Loi 25
 
 1. **Anonymisation stricte HMAC-SHA256 (`crypto_utils.dart`)** :
-   - Aucun numéro de téléphone en clair ne transite sur le réseau ni n'est stocké dans la base cloud.
-   - Les numéros sont hachés via **HMAC-SHA256** combiné à un sel cryptographique secret configurable.
-   - L'algorithme de hachage est **strictement déterministe et identique** entre le code Dart de Flutter et les services natifs Kotlin Android (`ShieldNetCallScreeningService` et `SmsScreeningReceiver`).
-   - L'exécution du hachage sur les listes volumineuses est déportée dans un **Isolate d'arrière-plan (`compute`)**, garantissant une interface fluide à 60 FPS sans micro-saccades.
-
+   - Aucun numéro de téléphone en clair ne transite sur le réseau ni n'est persisté côté serveur.
+   - Hachage cryptographique **HMAC-SHA256** combiné à un sel secret partagé, strictement déterministe et identique entre Dart, Kotlin (`ShieldNetCallScreeningService`) et Django.
+   - Déport des calculs intensifs dans un **Isolate d'arrière-plan (`compute`)** pour garantir 60 FPS constants.
 2. **Cache Local Haute Performance (`database_helper.dart`)** :
-   - SQLite configuré avec le mode **Write-Ahead Logging (WAL)** et des **index B-Tree composites (`idx_category`)**.
-   - Temps de résolution d'un appel entrant **inférieur à 2 ms**, assurant un filtrage instantané même hors-ligne ou en mode avion.
-   - Les numéros affichés à l'utilisateur sont anonymisés visuellement (ex: `+1 819 *** **67`) afin de préserver la vie privée.
-
+   - SQLite configuré en mode **Write-Ahead Logging (WAL)** avec index composites.
+   - Temps d'interception d'un appel entrant **inférieur à 2 ms**, opérationnel hors-ligne ou en mode avion.
+   - Masquage automatique des numéros affichés (`+1 819 *** **67`).
 3. **Filtrage Natif Temps Réel (`CallScreeningService`)** :
-   - Intégration profonde au sous-système Télécom officiel d'Android pour rejeter les fraudeurs avant même la première sonnerie de l'appareil.
+   - Intégration directe au sous-système Télécom Android pour rejeter silencieusement les fraudeurs avant toute sonnerie.
 
 ---
 
 ## ✨ Fonctionnalités Majeures
- 
-* **Tableau de bord "Zen" & Dynamique** : Visualisation en temps réel du statut de protection, pulsation lumineuse réactive et recherche rapide de numéros suspects.
-* **Score de Sérénité & Impact Citoyen** : Mesure concrète de la tranquillité préservée (appels bloqués, minutes gagnées) et valorisation de la participation citoyenne au bouclier collectif.
-* **Liste Blanche d'Urgence (Emergency Whitelist)** : Immunité garantie pour les services de secours (911, 811) et les contacts prioritaires, même sous bouclier actif.
-* **Mode « Bouclier Strict (Contacts Uniquement) »** : Rejet automatique de tout appel hors carnet d'adresses pour une protection maximale des personnes vulnérables.
-* **Bouclier Nocturne Programmé (Night Shield)** : Activation silencieuse planifiée pendant les heures de repos avec exception pour les proches.
-* **Inspecteur de Phishing SMS** : Analyse heuristique sur l'appareil détectant les messages frauduleux (faux colis, fausses banques, liens suspects).
-* **Journal d'Activité à Double Volet** : Historique des appels récents enrichi avec pastille de sécurité (Reçu / Bloqué) et liste noire locale consultable.
-* **Signalement Communautaire en 1 Clic** : Formulaire intuitif avec classification par motif (Fraude, Démarchage, Phishing, Robocall).
-* **Console d'Administration Complète** : Accès réservé aux modérateurs (JWT) pour inspecter les métriques globales, auditer la liste noire avec défilement infini paginé, approuver/blanchir des numéros et purger les données obsolètes.
-* **Ergonomie Responsive & Zéro Débordement** : Architecture d'interface testée et certifiée sans `RenderFlex overflow` sur toutes largeurs d'écran (dès 320 px).
-* **Diagnostics Développeur Intégrés** : Outil d'auto-test en temps réel (ping API, inspection de la base SQLite, vérification des permissions système).
-* **Support Bilingue (i18n)** : Prise en charge native du Français (`fr`) et de l'Anglais (`en`).
-* **Monitoring & Observabilité** : Intégration de **Sentry** (configuré via `.env`) et journalisation unifiée via `AppLogger`.
 
----
-
-## 🔐 Accès & Console d'Administration Mobile
-
-L'application mobile ShieldNet embarque une console d'administration native permettant aux opérateurs et modérateurs de superviser le système directement depuis leur téléphone :
-
-1. **Procédure de Connexion Administrateur** :
-   - Accéder à l'onglet **Paramètres** de l'application.
-   - Sélectionner la carte **Compte Utilisateur** (*« Se connecter ou s'inscrire »*).
-   - Renseigner le courriel `admin@shieldnet.app` et le mot de passe `admin123` *(ou cliquer directement sur le bouton d'assistance rapide `🔑 Identifiants Démo Admin (admin@shieldnet.app)`)*.
-   - Cliquer sur **Se connecter** : un badge **`ADMIN`** s'active sur votre profil et déverrouille l'accès à la **Console d'Administration**.
-
-2. **Outils d'Administration Intégrés (5 Onglets)** :
-   - **1. Vue d'Ensemble & Métriques** : Suivi en direct du total des numéros bloqués/blanchis, du nombre de signalements citoyens et de la santé globale.
-   - **2. Gestion de la Liste Noire (Blacklist)** : Recherche instantanée par numéro masqué ou haché, ajout manuel direct, et modération en 1 clic (*blanchiment / blocage*).
-   - **3. Modération des Signalements** : Examen qualitatif des rapports soumis par les utilisateurs mobiles avec motifs et horodatages.
-   - **4. Supervision des Utilisateurs** : Consultation des comptes utilisateurs et attribution des privilèges administrateur.
-   - **5. Journaux d'Audit** : Historique inaltérable traçant les actions de sécurité exécutées.
-   - **Outils & Diagnostic Développeur** : Forçage manuel de la synchronisation WAL (complète ou différentielle) et auto-tests matériels.
+* **Bascule de Visibilité du Mot de Passe (Icône Œil)** : Formulaire d'authentification (`auth_bottom_sheet.dart`) avec bouton intuitif permettant de vérifier ou masquer le mot de passe saisi sans compromettre la sécurité.
+* **Tableau de Bord « Zen »** : Visualisation en temps réel de l'état de veille du bouclier, pulsation d'activité et testeur rapide de numéro.
+* **Score de Sérénité & Impact Citoyen** : Valorisation chiffrée de la tranquillité d'esprit (appels bloqués, minutes préservées, signalements utiles).
+* **Liste Blanche d'Urgence (Emergency Whitelist)** : Immunité absolue garantie pour les services de secours (911, 811, 988) et les contacts personnels favoris.
+* **Mode « Bouclier Strict (Contacts Uniquement) »** : Blocage préventif de tout appel ne figurant pas dans le carnet d'adresses de l'appareil.
+* **Bouclier Nocturne Programmé (Night Shield)** : Protection silencieuse automatique selon des plages horaires définies.
+* **Inspecteur de Phishing SMS** : Analyseur heuristique sur l'appareil détectant les messages frauduleux (liens suspects, usurpations bancaires ou colis).
+* **Console d'Administration Mobile Intégrée (5 Onglets)** : Déverrouillée pour les comptes avec privilèges `is_staff` (`admin@shieldnet.app`), offrant la supervision en direct, la gestion de la liste noire, le traitement des signalements, la gestion des utilisateurs et les journaux d'audit.
+* **Ergonomie Responsive & Zéro Débordement** : Interface certifiée sans aucun débordement (`0 RenderFlex overflow`) sur les écrans étroits de 320 px.
+* **Synchronisation d'Arrière-Plan Robuste (`BackgroundSyncService`)** : Rafraîchissement périodique configurable de la liste noire certifiée.
 
 ---
 
 ## 🚀 Guide de Démarrage Rapide
 
 ### 1. Configuration de l'environnement (`.env`)
-Un fichier `.env` à la racine de `ShieldNet/` configure les paramètres réseau et de sécurité :
+À la racine de `ShieldNet/`, configurez `.env` :
 
 ```env
-API_BASE_URL=http://127.0.0.1:8000/api/v1  # 10.0.2.2 pour émulateur Android, ou 127.0.0.1 avec adb reverse
+API_BASE_URL=http://127.0.0.1:8000/api/v1  # Ou 10.0.2.2 pour émulateur Android
 API_KEY=ShieldNet_Secret_Token_UQO_2026
 HASH_SALT=ShieldNet_Secure_Salt_2026_UQO
 CRYPTO_SALT=ShieldNet_Secure_Salt_2026_UQO
 OFFLINE_CACHE_TTL_HOURS=24
 ENABLE_AUTO_BLOCKING=true
-
-# Optionnel : DSN Sentry pour le monitoring des erreurs
-# SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
 ```
 
 ### 2. Installation & Exécution
 ```bash
-# 1. Télécharger les dépendances Flutter
+# 1. Télécharger les paquets
 flutter pub get
 
-# 2. Exécuter la suite de tests automatisés (100% de réussite)
+# 2. Exécuter la suite complète de tests (59 tests — 100% de réussite)
 flutter test
 
-# 3. Analyser la qualité du code (0 avertissement, 0 lint)
+# 3. Vérifier la qualité du code (0 avertissement)
 flutter analyze
 
-# 4. Lancer sur appareil connecté ou émulateur
+# 4. Lancer l'application
 flutter run
 ```
 
 ---
 
-## 👥 Équipe & Cadre Académique
-Projet réalisé dans le cadre du **Projet Synthèse d'Informatique** — **Université du Québec en Outaouais (UQO)**.
+## 🏛️ Mentions Légales
+© 2026 Université du Québec en Outaouais (UQO) — Tous droits réservés.

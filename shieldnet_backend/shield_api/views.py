@@ -742,3 +742,40 @@ class AdminAuditLogsListView(APIView):
             'page': page,
             'has_more': (offset + limit) < total,
         })
+
+
+# ==============================================================================
+# MOTEUR D'INTELLIGENCE ARTIFICIELLE & ARBITRAGE (SHIELDNET AI ENGINE)
+# ==============================================================================
+from .ai_engine import ShieldNetAIEngine
+
+class AIDiagnoseView(APIView):
+    """
+    POST /api/v1/ai/diagnose/ ou GET /api/v1/ai/diagnose/?phone_number=...
+    Diagnostic intelligent de réputation télécom, arbitrage prédictif de faux-positifs
+    et explicabilité causale (XAI - Explainable AI).
+    """
+    permission_classes = [HasAPIKeyOrAuthenticated]
+
+    def get(self, request):
+        phone_number = request.query_params.get('phone_number', '').strip()
+        phone_hash = request.query_params.get('phone_hash', '').strip()
+        if not phone_number and not phone_hash:
+            return Response(
+                {'error': 'Veuillez fournir un phone_number ou un phone_hash.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        result = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash)
+        return Response(result)
+
+    def post(self, request):
+        phone_number = request.data.get('phone_number', '').strip()
+        phone_hash = request.data.get('phone_hash', '').strip()
+        if not phone_number and not phone_hash:
+            return Response(
+                {'error': 'Veuillez fournir un phone_number ou un phone_hash.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        result = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash)
+        return Response(result)
+

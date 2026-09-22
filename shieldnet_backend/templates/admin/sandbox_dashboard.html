@@ -99,6 +99,77 @@
       <h3 class="sb-anomalies-title">Anomalies Télécoms Détectées par l'Algorithme :</h3>
       <ul id="sb-anomalies-list" class="sb-anomalies-list"></ul>
     </div>
+
+    <!-- Moteur d'Arbitrage & IA Explicable (ShieldNet AI Engine & XAI) -->
+    <div id="sb-ai-container" style="display: none; margin-top: 20px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; padding: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="header-icon-badge blue" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"></path><path d="M12 6v6l4 2"></path></svg>
+          </div>
+          <div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+              <span>Moteur d'Arbitrage Prédictif & XAI (ShieldNet AI Engine)</span>
+              <span id="sb-ai-latency" class="soc-pill soc-pill-blue" style="font-size: 11px;">0 ms</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);">Résolution sémantique des faux positifs & interception proactive des arnaques</div>
+          </div>
+        </div>
+        <div id="sb-ai-verdict-badge" class="badge-safe" style="font-size: 12px; padding: 6px 14px; font-weight: 700;">
+          VERDICT IA
+        </div>
+      </div>
+
+      <!-- Métriques IA : Score Composite, Confiance Faux-Positif & NLP -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px;">
+        <div class="sb-metric-box">
+          <span class="sb-metric-label">Indice de Faux-Positif :</span>
+          <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+            <span id="sb-ai-fp-confidence" style="font-size: 20px; font-weight: 800; color: #10b981;">0%</span>
+            <span style="font-size: 11px; color: var(--text-muted);">(Légitimité)</span>
+          </div>
+        </div>
+        <div class="sb-metric-box">
+          <span class="sb-metric-label">Score de Risque IA :</span>
+          <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+            <span id="sb-ai-risk-score" style="font-size: 20px; font-weight: 800; color: #ef4444;">0 / 100</span>
+            <span style="font-size: 11px; color: var(--text-muted);">(Composite)</span>
+          </div>
+        </div>
+        <div class="sb-metric-box">
+          <span class="sb-metric-label">Entités Détectées (NLP) :</span>
+          <div id="sb-ai-entities" style="font-size: 13px; font-weight: 600; color: var(--text-main); margin-top: 4px;">
+            Aucune
+          </div>
+        </div>
+        <div class="sb-metric-box">
+          <span class="sb-metric-label">Recommandation d'Action :</span>
+          <div id="sb-ai-rec" style="font-size: 13px; font-weight: 700; margin-top: 4px;">
+            -
+          </div>
+        </div>
+      </div>
+
+      <!-- Description et Explication Causale XAI -->
+      <div style="margin-bottom: 14px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Explication du Diagnostic :</div>
+        <div id="sb-ai-desc" style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;"></div>
+      </div>
+
+      <!-- Facteurs d'Attribution Causale XAI (Explainable AI) -->
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Facteurs d'Attribution XAI (Pondération Causale) :</div>
+        <div id="sb-ai-xai-factors" style="display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
+
+      <!-- Action Recommandée en 1 Clic -->
+      <div id="sb-ai-action-banner" style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <span id="sb-ai-action-text" style="font-size: 12px; color: var(--text-muted);">Recommandation automatisée prête à être appliquée.</span>
+        <button type="button" id="sb-ai-action-btn" class="ops-btn ops-btn-primary" style="display: none;" onclick="applyAIRecommendation()">
+          Appliquer la Recommandation IA
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Dernières Opérations et Enregistrements -->
@@ -216,7 +287,102 @@ function runSandboxAudit() {
       anomaliesContainer.style.display = 'none';
     }
 
-    showSocToast('Analyse heuristique complétée avec succès.', 'info');
+    // Rendu dynamique du moteur IA ShieldNet (XAI & Arbitrage)
+    if (data.ai) {
+      const ai = data.ai;
+      document.getElementById('sb-ai-container').style.display = 'block';
+      document.getElementById('sb-ai-latency').textContent = `${ai.execution_time_ms} ms`;
+      
+      const vBadge = document.getElementById('sb-ai-verdict-badge');
+      vBadge.textContent = ai.verdict_label;
+      if (ai.verdict === 'FAUX_POSITIF_CONFIRME' || ai.verdict === 'FAUX_POSITIF_PROBABLE') {
+        vBadge.className = 'badge-safe';
+      } else if (ai.verdict === 'CYBER_MENACE_CRITIQUE' || ai.verdict === 'FRAUDE_SUSPECTEE') {
+        vBadge.className = 'badge-critical';
+      } else if (ai.verdict === 'NUMERO_LEGITIME') {
+        vBadge.className = 'soc-pill soc-pill-blue';
+      } else {
+        vBadge.className = 'badge-warning';
+      }
+
+      document.getElementById('sb-ai-fp-confidence').textContent = `${ai.false_positive_confidence}%`;
+      document.getElementById('sb-ai-risk-score').textContent = `${ai.composite_risk_score} / 100`;
+
+      // Entités sémantiques NLP
+      const entitiesWrap = document.getElementById('sb-ai-entities');
+      if (ai.extracted_entities && ai.extracted_entities.length > 0) {
+        entitiesWrap.innerHTML = ai.extracted_entities.map(e => `<span class="category-chip" style="margin-right: 4px; display: inline-block;">${e}</span>`).join('');
+      } else {
+        entitiesWrap.textContent = 'Aucune entité critique';
+      }
+
+      // Recommandation
+      const recEl = document.getElementById('sb-ai-rec');
+      let recText = ai.recommendation;
+      let recColor = 'var(--text-main)';
+      if (ai.recommendation === 'AUTO_WHITELIST') {
+        recText = 'Blanchiment Recommandé (Faux Positif)';
+        recColor = '#10b981';
+      } else if (ai.recommendation === 'ESCALATE_BLOCK') {
+        recText = 'Blocage Réseau Recommandé (Menace)';
+        recColor = '#ef4444';
+      } else if (ai.recommendation === 'MAINTAIN_OBSERVATION') {
+        recText = 'Maintien sous Observation';
+        recColor = '#f59e0b';
+      } else if (ai.recommendation === 'SAFE_REPUTATION') {
+        recText = 'Trafic Télécom Conforme';
+        recColor = '#3b82f6';
+      }
+      recEl.textContent = recText;
+      recEl.style.color = recColor;
+
+      // Description explicative
+      document.getElementById('sb-ai-desc').textContent = ai.verdict_description;
+
+      // Facteurs d'attribution causale XAI (Explainable AI)
+      const xaiContainer = document.getElementById('sb-ai-xai-factors');
+      xaiContainer.innerHTML = '';
+      if (ai.xai_factors && ai.xai_factors.length > 0) {
+        ai.xai_factors.forEach(f => {
+          const fDiv = document.createElement('div');
+          fDiv.style.cssText = `display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 6px; font-size: 12px; background: ${f.direction === 'positive' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border-left: 3px solid ${f.direction === 'positive' ? '#10b981' : '#ef4444'};`;
+          fDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 700; color: ${f.direction === 'positive' ? '#10b981' : '#ef4444'};">${f.direction === 'positive' ? '🛡️ RÉHABILITATION' : '⚠️ MENACE'}</span>
+              <span style="color: var(--text-main);">${f.factor}</span>
+            </div>
+            <strong style="color: ${f.direction === 'positive' ? '#10b981' : '#ef4444'};">${f.weight > 0 ? '+' : ''}${f.weight}%</strong>
+          `;
+          xaiContainer.appendChild(fDiv);
+        });
+      } else {
+        xaiContainer.innerHTML = '<div style="font-size: 12px; color: var(--text-muted);">Aucun facteur anomalique spécifique détecté.</div>';
+      }
+
+      // Bouton d'action intelligente en 1 clic
+      const actionBtn = document.getElementById('sb-ai-action-btn');
+      const actionText = document.getElementById('sb-ai-action-text');
+      if (ai.recommendation === 'AUTO_WHITELIST') {
+        actionBtn.style.display = 'inline-flex';
+        actionBtn.className = 'ops-btn ops-btn-primary';
+        actionBtn.innerHTML = '🛡️ Appliquer : Blanchir & Réhabiliter Immédiatement';
+        actionBtn.onclick = () => executeSandboxAction('whitelist');
+        actionText.textContent = `Confiance IA de ${ai.false_positive_confidence}% pour la réhabilitation immédiate de ce service essentiel.`;
+      } else if (ai.recommendation === 'ESCALATE_BLOCK') {
+        actionBtn.style.display = 'inline-flex';
+        actionBtn.className = 'ops-btn';
+        actionBtn.style.background = '#ef4444';
+        actionBtn.style.color = '#fff';
+        actionBtn.innerHTML = '🚫 Appliquer : Bloquer en Liste Noire d\'Urgence';
+        actionBtn.onclick = () => executeSandboxAction('block');
+        actionText.textContent = `Score de risque critique (${ai.composite_risk_score}/100) — Menace imminente ou usurpation avérée.`;
+      } else {
+        actionBtn.style.display = 'none';
+        actionText.textContent = 'Statut conforme — Aucune action corrective urgente requise.';
+      }
+    }
+
+    showSocToast('Analyse IA & heuristique complétée avec succès.', 'info');
   })
   .catch(() => {
     showSocToast('Erreur lors du calcul dans le simulateur.', 'error');

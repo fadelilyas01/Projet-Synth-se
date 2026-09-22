@@ -852,6 +852,144 @@ class UltraPremiumSOCTests(TestCase):
         self.assertIn('updateChartsForTheme', index_html)
 
 
+class ShieldNetAIEngineTest(APITestCase):
+    """
+    Tests de validation du moteur d'Intelligence Artificielle ShieldNet :
+    - Analyseur sémantique NLP (FR / EN)
+    - Détection et arbitrage des faux positifs (services essentiels, santé, livraison)
+    - Détection proactive des attaques robocall et numéros fictifs NANP
+    - Explicabilité causale XAI (Explainable AI)
+    - Endpoint REST API /api/v1/ai/diagnose/
+    """
+    def setUp(self):
+        from .ai_engine import ShieldNetAIEngine, NLPSemanticAnalyzer
+        from .services import hash_phone_number
+        self.ai_engine = ShieldNetAIEngine
+        self.nlp = NLPSemanticAnalyzer
+        self.hash_fn = hash_phone_number
+        self.client.credentials(HTTP_X_API_KEY='ShieldNet_Secret_Token_UQO_2026')
+
+    def test_nlp_legitimate_keywords(self):
+        comments = [
+            "Rappel de rendez-vous avec le Dr Tremblay à la clinique médicale de Gatineau.",
+            "Livreur Amazon pour livraison de colis à votre adresse.",
+            "Hydro-Québec avis de coupure de service programmée."
+        ]
+        score, entities = self.nlp.analyze_comments(comments)
+        self.assertGreater(score, 40.0)
+        self.assertTrue(any("Santé" in e or "Livraison" in e or "Services Publics" in e for e in entities))
+
+    def test_nlp_threat_keywords(self):
+        comments = [
+            "Urgent CRA Canada Revenue Agency warrant for arrest pay bitcoin immediately.",
+            "Gendarmerie Royale mandat d'arrêt et amende impayée carte cadeau.",
+            "Your SIN social insurance number has been suspended press 1."
+        ]
+        score, entities = self.nlp.analyze_comments(comments)
+        self.assertLess(score, -40.0)
+        self.assertTrue(any("Agence Publique" in e or "Fiscale" in e or "Extorsion" in e for e in entities))
+
+    def test_ai_diagnose_fictitious_scam_number(self):
+        # 555-01xx est réservé pour la fiction dans le plan NANP nord-américain
+        fictitious_phone = "+1 819 555 0199"
+        phone_hash = self.hash_fn(fictitious_phone)
+
+        # Création de signalements de menace
+        SpamReport.objects.create(
+            phone_hash=phone_hash,
+            category='robocall',
+            comment="Appel automatisé prétendant être l'Agence du revenu du Canada avec menace de prison."
+        )
+        SpamReport.objects.create(
+            phone_hash=phone_hash,
+            category='phishing',
+            comment="Robocall CRA tax arrest warrant bitcoin."
+        )
+
+        diag = self.ai_engine.diagnose(phone_number=fictitious_phone, phone_hash=phone_hash)
+
+        self.assertIn(diag['verdict'], ['CYBER_MENACE_CRITIQUE', 'FRAUDE_SUSPECTEE'])
+        self.assertEqual(diag['recommendation'], 'ESCALATE_BLOCK')
+        self.assertGreaterEqual(diag['composite_risk_score'], 80)
+        self.assertLess(diag['false_positive_confidence'], 15)
+        self.assertTrue(any(f['direction'] == 'threat' for f in diag['xai_factors']))
+
+    def test_ai_diagnose_false_positive_rehabilitation(self):
+        # Numéro d'un hôpital ou d'une clinique malencontreusement signalé
+        clinic_phone = "+1 819 777 3838"
+        phone_hash = self.hash_fn(clinic_phone)
+
+        # 1 signalement isolé erroné
+        SpamReport.objects.create(
+            phone_hash=phone_hash,
+            category='other',
+            comment="Secrétariat du Dr Lavoie pour confirmation de biopsie et rendez-vous médical clinique."
+        )
+
+        # 3 confirmations citoyennes légitimes (avis sûrs)
+        SafeReport.objects.create(
+            phone_hash=phone_hash,
+            reason='clinic',
+            comment="C'est le secrétariat médical de la clinique de Gatineau."
+        )
+        SafeReport.objects.create(
+            phone_hash=phone_hash,
+            reason='delivery',
+            comment="Numéro légitime de l'hôpital pour les consultations externes."
+        )
+
+        # Entrée en base
+        BlacklistedNumber.objects.create(
+            phone_hash=phone_hash,
+            masked_number='+1 819 *** **38',
+            category='other',
+            risk_score=35,
+            reports_count=1,
+            safe_reports_count=2,
+            consensus_score=0.67,
+            is_blocked=False,
+            is_whitelisted=False
+        )
+
+        diag = self.ai_engine.diagnose(phone_number=clinic_phone, phone_hash=phone_hash)
+
+        self.assertIn(diag['verdict'], ['FAUX_POSITIF_CONFIRME', 'FAUX_POSITIF_PROBABLE'])
+        self.assertEqual(diag['recommendation'], 'AUTO_WHITELIST')
+        self.assertGreaterEqual(diag['false_positive_confidence'], 70)
+        self.assertLessEqual(diag['composite_risk_score'], 30)
+
+        # Vérification des facteurs d'explicabilité XAI
+        positive_factors = [f for f in diag['xai_factors'] if f['direction'] == 'positive']
+        self.assertGreater(len(positive_factors), 0)
+
+    def test_ai_diagnose_api_endpoint(self):
+        url = reverse('ai-diagnose')
+
+        # Requête GET avec paramètre
+        res_get = self.client.get(url, {'phone_number': '+1 819 555 0199'})
+        self.assertEqual(res_get.status_code, status.HTTP_200_OK)
+        self.assertIn('verdict', res_get.data)
+        self.assertIn('false_positive_confidence', res_get.data)
+        self.assertIn('composite_risk_score', res_get.data)
+        self.assertIn('xai_factors', res_get.data)
+        self.assertIn('execution_time_ms', res_get.data)
+
+        # Requête POST avec JSON
+        res_post = self.client.post(url, {'phone_number': '+1 819 777 3838'}, format='json')
+        self.assertEqual(res_post.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_post.data['phone_number'], '+1 819 777 3838')
+
+        # Requête sans numéro ni hash -> 400
+        res_bad = self.client.post(url, {}, format='json')
+        self.assertEqual(res_bad.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Requête sans authentification API Key -> 401/403
+        unauth_client = self.client_class()
+        res_unauth = unauth_client.get(url, {'phone_number': '+1 819 555 0199'})
+        self.assertIn(res_unauth.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+
+
+
 
 
 
