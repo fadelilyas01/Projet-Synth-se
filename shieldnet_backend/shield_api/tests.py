@@ -641,6 +641,171 @@ class UltraPremiumSOCTests(TestCase):
         self.assertContains(resp, 'Threat Intelligence Briefing')
         self.assertContains(resp, 'CONFIDENTIEL')
 
+    def test_admin_index_rendering(self):
+        resp = self.client.get('/admin/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'ShieldNet')
+        self.assertContains(resp, 'SOC')
+        self.assertContains(resp, 'Tableau de Bord SOC')
+
+    def test_admin_changelist_rendering(self):
+        resp = self.client.get('/admin/shield_api/blacklistednumber/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Liste Noire Télécom')
+
+    def test_admin_login_rendering(self):
+        # Déconnexion pour tester la page de login autonome
+        self.client.logout()
+        resp = self.client.get('/admin/login/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'login-form')
+
+    def test_admin_triage_dashboard_view(self):
+        url = reverse('admin-triage-dashboard')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Centre de Triage')
+        self.assertContains(resp, 'Signalements Reçus')
+
+    def test_admin_sandbox_dashboard_view(self):
+        url = reverse('admin-sandbox-dashboard')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Laboratoire Sandbox')
+        self.assertContains(resp, 'Lancer le Diagnostic')
+
+    def test_admin_sidebar_presence_across_all_staff_views(self):
+        """
+        Garantit que la barre latérale soc-sidebar est présente sur TOUTES les pages d'administration.
+        """
+        urls_to_test = [
+            '/admin/',
+            '/admin/operations/triage/',
+            '/admin/operations/sandbox/',
+            '/admin/shield_api/blacklistednumber/',
+            '/admin/shield_api/blacklistednumber/add/',
+            '/admin/shield_api/spamreport/',
+            '/admin/shield_api/safereport/',
+            '/admin/shield_api/auditlog/',
+            '/admin/auth/user/',
+            '/admin/auth/user/add/',
+            '/admin/password_change/',
+        ]
+        for u in urls_to_test:
+            resp = self.client.get(u)
+            self.assertEqual(resp.status_code, 200, f"La page {u} a retourné le code {resp.status_code}")
+            content = resp.content.decode('utf-8')
+            self.assertIn('soc-sidebar', content, f"La barre latérale soc-sidebar est absente de la page {u}")
+
+    def test_admin_breadcrumbs_present_on_all_views(self):
+        """
+        Garantit que le fil d'Ariane est rendu proprement sur toutes les pages d'administration.
+        """
+        urls = [
+            '/admin/',
+            '/admin/operations/triage/',
+            '/admin/operations/sandbox/',
+            '/admin/shield_api/blacklistednumber/',
+            '/admin/shield_api/spamreport/',
+            '/admin/shield_api/safereport/',
+            '/admin/shield_api/auditlog/',
+            '/admin/auth/user/',
+        ]
+        for u in urls:
+            resp = self.client.get(u)
+            self.assertEqual(resp.status_code, 200)
+            content = resp.content.decode('utf-8')
+            has_bc = 'soc-breadcrumbs' in content or 'breadcrumbs' in content
+            self.assertTrue(has_bc, f"Fil d'Ariane manquant sur {u}")
+
+    def test_no_duplicate_titles_on_custom_dashboards(self):
+        """
+        Vérifie qu'aucun en-tête en doublon n'apparaît sur le Centre de Triage ou la Sandbox.
+        """
+        for route in ['/admin/operations/triage/', '/admin/operations/sandbox/']:
+            resp = self.client.get(route)
+            self.assertEqual(resp.status_code, 200)
+            content = resp.content.decode('utf-8')
+            # Ne doit pas contenir soc-page-header car content_title est surchargé vide
+            self.assertNotIn('soc-page-header', content, f"Titre en doublon détecté sur {route}")
+
+    def test_sandbox_check_and_action_flow(self):
+        """
+        Teste le cycle de vie du simulateur sandbox : diagnostic d'un numéro puis action de blocage.
+        """
+        # Diagnostic
+        check_url = reverse('admin-sandbox-check') + '?phone_number=+18195550199'
+        resp = self.client.get(check_url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data['success'])
+        self.assertIn('phone_hash', data)
+        self.assertIn('risk_score', data)
+
+        # Action directe de blocage
+        action_url = reverse('admin-sandbox-action')
+        resp_action = self.client.post(
+            action_url,
+            data=json.dumps({'phone_number': '+18195550199', 'action': 'block'}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_action.status_code, 200)
+        action_data = resp_action.json()
+        self.assertTrue(action_data['success'])
+        self.assertTrue(action_data['is_blocked'])
+
+    def test_export_blacklist_csv(self):
+        """
+        Vérifie que l'export CSV fonctionne et renvoie les bons en-têtes et le bon Content-Type.
+        """
+        url = reverse('admin-export-csv')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp['Content-Type'], 'text/csv; charset=utf-8')
+        self.assertIn('attachment; filename="shieldnet_blacklist_', resp['Content-Disposition'])
+
+    def test_trigger_consensus_and_purge(self):
+        """
+        Vérifie les opérations de maintenance de consensus et de purge des orphelins.
+        """
+        consensus_url = reverse('admin-trigger-consensus')
+        resp = self.client.post(consensus_url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json()['success'])
+
+        purge_url = reverse('admin-trigger-purge')
+        resp2 = self.client.post(purge_url)
+        self.assertEqual(resp2.status_code, 200)
+        self.assertTrue(resp2.json()['success'])
+
+    def test_css_static_file_integrity_and_light_mode_tokens(self):
+        """
+        Vérifie l'intégrité du fichier CSS de design system et la présence des variables critiques.
+        """
+        import os
+        from django.conf import settings
+        css_path = os.path.join(settings.BASE_DIR, 'shield_api', 'static', 'shield_api', 'admin_premium.css')
+        self.assertTrue(os.path.exists(css_path), "admin_premium.css doit exister")
+        
+        with open(css_path, 'r', encoding='utf-8') as f:
+            css_content = f.read()
+        
+        # Vérification des variables clés pour éviter tout texte invisible
+        self.assertIn('--text-main:', css_content)
+        self.assertIn('--text-primary:', css_content)
+        self.assertIn('--text-secondary:', css_content)
+        self.assertIn('--text-muted:', css_content)
+        self.assertIn('--bg-surface:', css_content)
+        self.assertIn('--bg-card:', css_content)
+        self.assertIn('--bg-input:', css_content)
+        self.assertIn('html.light-mode', css_content)
+        self.assertIn('.selector', css_content)
+        self.assertIn('.delete-confirmation', css_content)
+        self.assertIn('#change-history', css_content)
+        self.assertIn('ul.errorlist', css_content)
+
+
+
 
 
 

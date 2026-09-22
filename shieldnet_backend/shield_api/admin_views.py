@@ -386,3 +386,84 @@ def executive_report_view(request):
     }
     return render(request, 'admin/executive_report.html', context)
 
+@staff_member_required
+@require_GET
+def admin_triage_dashboard_view(request):
+    """
+    Page dédiée plein écran pour le Centre de Triage SOC.
+    Permet à l'opérateur d'examiner et de traiter tous les signalements de spams
+    avec filtres par catégorie, recherche et actions rapides AJAX.
+    """
+    from django.core.paginator import Paginator
+
+    category_filter = request.GET.get('category', '').strip()
+    search_query = request.GET.get('q', '').strip()
+
+    reports_qs = SpamReport.objects.select_related('reporter').order_by('-created_at')
+
+    if category_filter:
+        reports_qs = reports_qs.filter(category=category_filter)
+    if search_query:
+        reports_qs = reports_qs.filter(phone_hash__icontains=search_query)
+
+    paginator = Paginator(reports_qs, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    phone_hashes = [r.phone_hash for r in page_obj]
+    existing_records = {
+        b.phone_hash: b for b in BlacklistedNumber.objects.filter(phone_hash__in=phone_hashes)
+    }
+
+    triage_items = []
+    for r in page_obj:
+        rec = existing_records.get(r.phone_hash)
+        triage_items.append({
+            'report': r,
+            'record': rec,
+            'is_blocked': rec.is_blocked if rec else False,
+            'is_whitelisted': rec.is_whitelisted if rec else False,
+            'risk_score': rec.risk_score if rec else 0,
+        })
+
+    total_pending = SpamReport.objects.count()
+    total_blocked = BlacklistedNumber.objects.filter(is_blocked=True).count()
+    total_whitelisted = BlacklistedNumber.objects.filter(is_whitelisted=True).count()
+
+    from django.contrib import admin as django_admin
+    context = {
+        **django_admin.site.each_context(request),
+        'title': 'Centre de Triage SOC des Signalements',
+        'triage_items': triage_items,
+        'page_obj': page_obj,
+        'category_filter': category_filter,
+        'search_query': search_query,
+        'total_pending': total_pending,
+        'total_blocked': total_blocked,
+        'total_whitelisted': total_whitelisted,
+        'has_permission': True,
+    }
+    return render(request, 'admin/triage_dashboard.html', context)
+
+@staff_member_required
+@require_GET
+def admin_sandbox_dashboard_view(request):
+    """
+    Page dédiée plein écran pour le Laboratoire d'Analyse Sandbox SOC.
+    Permet à l'opérateur de tester tout numéro de téléphone ou empreinte,
+    d'analyser les anomalies heuristiques et d'exécuter des actions directes.
+    """
+    recent_audits = AuditLog.objects.order_by('-created_at')[:8]
+    recent_blacklisted = BlacklistedNumber.objects.order_by('-updated_at')[:8]
+
+    from django.contrib import admin as django_admin
+    context = {
+        **django_admin.site.each_context(request),
+        'title': "Simulateur Sandbox & Analyse Heuristique",
+        'recent_audits': recent_audits,
+        'recent_blacklisted': recent_blacklisted,
+        'has_permission': True,
+    }
+    return render(request, 'admin/sandbox_dashboard.html', context)
+
+

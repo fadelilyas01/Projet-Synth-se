@@ -12,10 +12,14 @@ from shield_api.admin_views import (
     triage_action_view,
     telemetry_live_view,
     executive_report_view,
+    admin_triage_dashboard_view,
+    admin_sandbox_dashboard_view,
 )
 
 urlpatterns = [
     # Opérations & Outils Avancés de la Console Web SOC
+    path('admin/operations/triage/', admin_triage_dashboard_view, name='admin-triage-dashboard'),
+    path('admin/operations/sandbox/', admin_sandbox_dashboard_view, name='admin-sandbox-dashboard'),
     path('admin/operations/sandbox/check/', sandbox_check_view, name='admin-sandbox-check'),
     path('admin/operations/sandbox/action/', sandbox_action_view, name='admin-sandbox-action'),
     path('admin/operations/export/csv/', export_blacklist_csv_view, name='admin-export-csv'),
