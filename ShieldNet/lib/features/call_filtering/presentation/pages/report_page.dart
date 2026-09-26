@@ -26,17 +26,19 @@ class _ReportPageState extends ConsumerState<ReportPage> {
 
   Future<void> _submitReport() async {
     final rawPhone = _phoneController.text.trim();
-    if (rawPhone.isEmpty) {
+    final digitsOnly = rawPhone.replaceAll(RegExp(r'\D'), '');
+    if (digitsOnly.length < 7) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez saisir un numéro de téléphone valide.')),
+        const SnackBar(
+          content: Text('Veuillez saisir un numéro de téléphone valide (au moins 7 chiffres).'),
+          backgroundColor: AppTheme.accentOrange,
+        ),
       );
       return;
     }
 
     setState(() => _isSubmitting = true);
-    final reportUseCase = ref.read(reportSpamUseCaseProvider);
-
-    final result = await reportUseCase(
+    final result = await ref.read(blacklistProvider.notifier).reportSpam(
       rawPhoneNumber: rawPhone,
       category: _selectedCategory,
       comment: _commentController.text.trim(),

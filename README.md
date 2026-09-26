@@ -1,50 +1,28 @@
-# 🛡️ ShieldNet Enterprise — Solution Intelligente de Filtrage Télécom & d'Arbitrage des Cybermenaces (Appels & SMS)
+# ShieldNet — Filtrage d'Appels & SMS Indésirables
 
-> **Projet de Synthèse en Informatique** — Université du Québec en Outaouais (UQO)  
-> *Architecture de cyberdéfense décentralisée, moteur d'Intelligence Artificielle d'arbitrage des faux-positifs et filtrage temps réel pour la zone Amérique du Nord (NANP +1).*
-
----
-
-[![Licence](https://img.shields.io/badge/Propriété-UQO%20(Université%20du%20Québec%20en%20Outaouais)-004f9e.svg)](https://uqo.ca)
-[![Django](https://img.shields.io/badge/Django-5.x-092E20?logo=django)](https://www.djangoproject.com)
-[![Flutter](https://img.shields.io/badge/Flutter-3.27.x-02569B?logo=flutter)](https://flutter.dev)
-[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python)](https://python.org)
-[![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
-[![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0%20(Swagger)-85EA2D?logo=swagger)](http://127.0.0.1:8000/api/v1/docs/)
-[![Couverture Globale](https://img.shields.io/badge/Tests%20Unitaires-104%2F104%20Pass%20(100%25)-success.svg)]()
-[![Backend Tests](https://img.shields.io/badge/Backend%20Django-45%2F45%20Pass-brightgreen.svg)]()
-[![Mobile Tests](https://img.shields.io/badge/Mobile%20Flutter-59%2F59%20Pass-brightgreen.svg)]()
-[![Linter](https://img.shields.io/badge/Linter-0%20Avertissement-brightgreen.svg)]()
+**Projet de Synthèse en Informatique** — Université du Québec en Outaouais (UQO)  
+**Session** : Hiver / Printemps 2026  
+**Équipe** : Projet ShieldNet  
+**Technologies** : Flutter (client mobile Android) • Django REST Framework (backend d'API) • SQLite (WAL) • PostgreSQL • Docker
 
 ---
 
-## 1. Présentation & Vision du Projet
+## 1. Présentation du Projet
 
-**ShieldNet Enterprise** est une infrastructure logicielle complète de haute sécurité conçue pour neutraliser les menaces téléphoniques modernes : fraudes financières massives, usurpations d'identité gouvernementale (ARC/CRA, GRC/RCMP), arnaques au numéro d'assurance sociale (NAS/SIN), campagnes de phishing par SMS et robocalls automatisés.
+**ShieldNet** est une application développée dans le cadre du cours de Projet de Synthèse en Informatique à l'**Université du Québec en Outaouais (UQO)**. Elle combine une application mobile Flutter (Android) et une API backend Django pour identifier et filtrer les appels et SMS indésirables : fraudes financières, usurpations institutionnelles (ARC/CRA, Revenu Québec), arnaques au numéro d'assurance sociale (NAS) et démarchage abusif.
 
-Développé dans le cadre du **Projet de Synthèse en Informatique à l'Université du Québec en Outaouais (UQO)**, le système cible en priorité le plan de numérotation nord-américain (**NANP** - indicatif international `+1` pour le Canada et les États-Unis), tout en garantissant une réputation universelle conforme à la norme **E.164**.
+Le système est conçu spécifiquement pour le plan de numérotation nord-américain (**NANP** - indicatif `+1` pour le Canada et les États-Unis) selon la norme **E.164**.
 
-### 🌟 Les Quatre Piliers Technologiques
+### Objectifs et caractéristiques principales
 
-1. **Client Mobile Natif Multiplateforme (Flutter & Android Kotlin)** :
-   - Connexion au sous-système Télécom Android via `CallScreeningService` : rejet silencieux des fraudeurs **avant la première sonnerie**.
-   - Cache persistant local SQLite configuré en mode **Write-Ahead Logging (WAL)** avec index B-Tree composites : décision d'interception prise en **$< 2\text{ ms}$**, y compris en mode hors-ligne.
-   - Isolation cryptographique dans un **Isolate d'arrière-plan** (`compute`) préservant une fluidité constante à 60 FPS sans saccade UI.
-2. **Moteur d'Intelligence Artificielle & d'Arbitrage Hybride (ShieldNet AI Engine)** :
-   - Résolution algorithmique des **faux positifs** (protection et réhabilitation automatique des services essentiels : hôpitaux, cliniques, médecins, CLSC, pharmacies, livreurs, services publics et banques).
-   - Traitement du Langage Naturel (**NLP Sémantique Bilingue FR/EN**) pour analyser les intentions citoyennes et corréler les motifs de plainte.
-   - **Explicabilité Causale (XAI - Explainable AI)** : chaque recommandation d'action est décomposée en facteurs causaux transparents et quantifiés pour l'analyste SOC.
-   - Performance pure-Python ultra-légère ($< 1\text{ ms}$ d'inférence CPU, zéro dépendance lourde, 100% déterministe).
-3. **Console Web SOC (Security Operations Center) & Threat Intelligence** :
-   - Centre de supervision avec bascule de thème dynamique (Mode Sombre Cyber & Mode Clair Haute Lisibilité certifié contraste WCAG).
-   - **Laboratoire Sandbox** pour tester en direct la réputation de n'importe quel numéro nord-américain avec calcul HMAC-SHA256, détection d'anomalies structurelles et diagnostic IA en temps réel.
-   - **Centre de Triage Rapide** permettant aux opérateurs de modérer les signalements entrants en 1 clic.
-   - **Rapport Exécutif de Sécurité (Threat Intelligence Briefing)** prêt pour impression ou export PDF A4 pour la gouvernance universitaire et d'entreprise.
-   - Télémétrie opérationnelle en direct avec score de résilience calculé dynamiquement.
-4. **Confidentialité Dès la Conception (*Privacy by Design* — Loi 25 / LPRPDE / RGPD)** :
-   - Aucun carnet d'adresses personnel n'est transmis ni analysé côté serveur.
-   - Aucun numéro de téléphone en clair n'est stocké dans la base cloud.
-   - Pseudonymisation cryptographique irréversible par **HMAC-SHA256** combiné à un sel secret d'infrastructure partagé.
+* **Filtrage natif sur appareil** : Utilisation du composant Android `CallScreeningService` pour intercepter les appels suspects avant le premier son de sonnerie.
+* **Fonctionnement autonome hors-ligne** : Base de données locale SQLite optimisée en mode WAL (*Write-Ahead Logging*) permettant une décision en moins de 2 millisecondes sans dépendre d'une connexion réseau active.
+* **Respect de la vie privée (Loi 25 du Québec)** :
+  - Aucun carnet d'adresses personnel n'est téléversé ni transmis au serveur.
+  - Aucun numéro de téléphone en clair n'est stocké dans la base centrale.
+  - Les numéros signalés sont pseudonymisés via **HMAC-SHA256** avec un sel secret d'infrastructure.
+* **Gestion des faux positifs** : Module de scoring heuristique et lexical permettant d'identifier les services légitimes signalés par erreur (hôpitaux, CLSC, cliniques, livreurs, banques) et consensus communautaire pour réhabiliter automatiquement les numéros légitimes.
+* **Console d'administration** : Interface Web Django pour la modération des signalements, la consultation des métriques et le test unitaire de numéros suspects.
 
 ---
 
@@ -54,13 +32,15 @@ L'arborescence du dépôt sépare rigoureusement la logique métier, la couche d
 
 ```text
 Projet synthese/
-├── .github/
-│   └── workflows/
-│       └── ci.yml                    # Pipeline CI/CD GitHub Actions (Django 45 tests + Flutter 59 tests)
+├── Jenkinsfile                       # Pipeline CI/CD Jenkins déclaratif (Django 61 tests + Flutter 69 tests + build APK)
 ├── README.md                         # Documentation technique maîtresse du projet (ce fichier)
 ├── docker-compose.yml                # Orchestration des conteneurs (Django 5, PostgreSQL 16, Redis 7)
+├── docker-compose.jenkins.yml        # Serveur d'intégration continue Jenkins LTS conteneurisé
 ├── test-all.ps1                      # Script unifié d'assurance qualité (Backend + Mobile)
 ├── start-dev.ps1                     # Script d'amorçage automatique de l'environnement de développement
+├── docs/                             # Documentation technique et académique (UQO) :
+│   ├── SECURITY_AND_THREAT_MODEL.md  # Modèle de menace, analyse d'entropie NANP (+1) et Loi 25
+│   └── JENKINS_CI_CD.md              # Guide d'exploitation et architecture du pipeline Jenkins
 │
 ├── ShieldNet/                        # Client Mobile Multiplateforme (Flutter / Dart / Kotlin)
 │   ├── .env                          # Configuration d'environnement (URLs, clés API, sels)
@@ -69,13 +49,13 @@ Projet synthese/
 │   ├── lib/
 │   │   ├── core/                     # Socle technique (SQLite WAL, HMAC-SHA256, Dio, Thème HSL)
 │   │   ├── features/                 # Clean Architecture par domaine métier :
-│   │   │   ├── call_filtering/       # Dashboard "Zen", activité récente, signalement en 1 clic
+│   │   │   ├── call_filtering/       # Dashboard "Zen", activité récente, audit batch, contestation
 │   │   │   ├── settings/             # Préférences, diagnostic, console d'administration mobile
 │   │   │   │   └── presentation/widgets/auth_bottom_sheet.dart  # Formulaire d'authentification avec bascule d'œil
 │   │   │   └── onboarding/           # Parcours d'accueil, permissions et pédagogie RGPD
 │   │   ├── l10n/                     # Internationalisation bilingue (Français / Anglais)
 │   │   └── main.dart                 # Point d'entrée, cycle de vie, injection de dépendances
-│   └── test/                         # Suite de 59 tests unitaires et d'intégration Flutter
+│   └── test/                         # Suite de 69 tests unitaires et d'intégration Flutter
 │
 └── shieldnet_backend/                # Serveur d'API & Gouvernance (Python / Django REST Framework)
     ├── Dockerfile                    # Image de production conteneurisée (Python 3.12 slim)
@@ -94,41 +74,41 @@ Projet synthese/
         ├── admin_views.py            # Vues spécialisées SOC (Sandbox, Triage, Télémétrie, Export CSV)
         ├── admin.py                  # Personnalisation avancée de l'administration Django
         ├── models.py                 # Modèles de données (Blacklist, SpamReport, SafeReport, AuditLog)
-        ├── services.py               # Services cryptographiques, consensus anti-Sybil et purge
-        ├── views.py                  # Endpoints REST API v1 (dont AIDiagnoseView)
+        ├── services.py               # Services cryptographiques, consensus anti-Sybil, STIR/SHAKEN
+        ├── views.py                  # Endpoints REST API v1 (dont AIDiagnose, BatchCheck, Metrics)
         ├── urls.py                   # Routage des endpoints REST
-        └── tests.py                  # Suite de 45 tests unitaires et de sécurité Django
+        └── tests.py                  # Suite de 61 tests unitaires et de sécurité Django
 ```
 
 ---
 
-## 3. Moteur d'Intelligence Artificielle & d'Arbitrage (ShieldNet AI Engine)
+## 3. Système d'Arbitrage et Détection des Faux Positifs
 
-L'un des défis majeurs des solutions anti-spam traditionnelles réside dans le phénomène des **faux positifs** : des numéros institutionnels légitimes (secrétariats médicaux, rappels de rendez-vous de cliniques, chauffeurs de livraison, services d'urgences ou banques) sont régulièrement signalés par erreur par des citoyens distraits ou mécontents, entraînant leur blocage injustifié.
+L'un des défis majeurs des solutions anti-spam réside dans le risque des **faux positifs** : des numéros institutionnels légitimes (secrétariats médicaux, rappels de rendez-vous de cliniques, chauffeurs de livraison, services d'urgence ou banques) peuvent être signalés par erreur par des utilisateurs, risquant d'entraîner leur blocage injustifié.
 
-Pour éliminer ce problème tout en interceptant proactivement les arnaques de pointe, ShieldNet intègre le **ShieldNet AI Engine** ([`shield_api/ai_engine.py`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/shield_api/ai_engine.py)).
+Pour répondre à cette problématique, ShieldNet implémente un module de classification heuristique et lexicale ([`shield_api/ai_engine.py`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/shield_api/ai_engine.py)).
 
 ```mermaid
 flowchart TD
     A["Numéro Téléphonique / Empreinte SHA-256"] --> B["Normalisation E.164 & Hachage Cryptographique"]
     
-    subgraph IA["ShieldNet AI Engine (Inférence < 1ms)"]
+    subgraph Arbitrage["Moteur d'Arbitrage Heuristique"]
         B --> C["NLPSemanticAnalyzer<br/>(Commentaires Citoyens FR/EN)"]
         B --> D["Détection Structurelle NANP (+1)<br/>(Plages Fictives 555-01xx / Spoofing)"]
-        B --> E["Télémétrie Comportementale<br/>(Vélocité 2h & Pureté Criminelle)"]
-        B --> F["Consensus Citoyen Favorable<br/>(Avis Sûrs & Ratio Safe/Spam)"]
+        B --> E["Télémétrie Comportementale<br/>(Vélocité 2h & Catégories Critiques)"]
+        B --> F["Consensus Favorable<br/>(Avis Sûrs & Ratio Safe/Spam)"]
         
-        C & D & E & F --> G["Modèle Composite d'Arbitrage"]
-        G --> H["Score de Risque IA [0 - 100]"]
+        C & D & E & F --> G["Calcul Composite du Score"]
+        G --> H["Score de Risque [0 - 100]"]
         G --> I["Indice de Faux-Positif [0 - 100%]"]
-        G --> J["Attribution Causale XAI (Explainable AI)"]
+        G --> J["Facteurs Explicatifs"]
     end
     
     H & I & J --> K{"Verdict & Recommandation"}
-    K -->|"Confiance FP >= 65%"| L["AUTO_WHITELIST<br/>(Réhabilitation Immédiate)"]
-    K -->|"Risque IA >= 70"| M["ESCALATE_BLOCK<br/>(Blocage Réseau d'Urgence)"]
+    K -->|"Confiance FP >= 65%"| L["AUTO_WHITELIST<br/>(Réhabilitation Automatique)"]
+    K -->|"Risque >= 70"| M["ESCALATE_BLOCK<br/>(Blocage Recommandé)"]
     K -->|"Risque Modéré [35 - 69]"| N["MONITOR<br/>(Maintien sous Surveillance)"]
-    K -->|"Score Faible < 35"| O["SAFE_REPUTATION<br/>(Trafic Conforme)"]
+    K -->|"Score Faible < 35"| O["SAFE_REPUTATION<br/>(Numéro Conforme)"]
 ```
 
 ### 3.1. Analyseur Sémantique Bilingue (`NLPSemanticAnalyzer`)
@@ -146,56 +126,62 @@ flowchart TD
 ### 3.2. Analyse Structurelle Télécom & Anti-Spoofing NANP
 - **Détection des plages fictives non attribuées** : Dans le plan de numérotation nord-américain, la plage `+1-xxx-555-0100` à `0199` est officiellement réservée à la fiction et aux tests et n'est **jamais assignée à un abonné réel**. Tout appel reçu de cette plage constitue une preuve mathématique certaine de **spoofing de l'identité de l'appelant (CLI Spoofing)**. Le moteur classe immédiatement le numéro en menace critique (`Score >= 88/100`, verdict `CYBER_MENACE_CRITIQUE`).
 
-### 3.3. Explicabilité Causale XAI (Explainable AI)
-Contrairement aux modèles "boîte noire", ShieldNet génère pour chaque diagnostic une liste de facteurs explicatifs quantifiés :
-- **Facteurs Positifs (Réhabilitation)** : identification de vocabulaire médical (`+45%`), présence d'avis sûrs concordants (`+40%`), décision souveraine d'un administrateur (`+100%`).
-- **Facteurs Négatifs (Menace)** : détection d'usurpation policière ou fiscale (`+50%`), numéro fictif non attribué (`+35%`), pic d'activité soudain en moins de deux heures (`+30%`).
+### 3.3. Intégration du Standard Télécom STIR/SHAKEN (FCC / CRTC)
+ShieldNet intègre les niveaux d'attestation cryptographique certifiés par les opérateurs télécoms nord-américains :
+- **Attestation A (Pleine)** : L'opérateur source certifie l'identité de l'abonné et son droit d'utiliser le numéro affiché. Le moteur applique une réduction de score (`-30 points`) et injecte un facteur XAI certifié positif.
+- **Attestation B (Partielle)** : L'origine client est connue mais le numéro spécifique n'est pas garanti (autocommutateurs d'entreprises, centres d'appels légitimes).
+- **Attestation C (Passerelle)** : L'appel provient d'une passerelle VoIP internationale non authentifiée sans validation d'origine. Le moteur majore le score de risque (`+25 points`) et signale l'anomalie d'usurpation potentielle.
 
-### 3.4. Endpoint REST Dédié
-- **`GET /api/v1/ai/diagnose/?phone_number=+18195550199`** ou **`POST /api/v1/ai/diagnose/`**
-- Retourne le diagnostic complet en format JSON (verdict, indices, facteurs XAI, temps d'inférence en ms).
+### 3.4. Explicabilité Causale XAI (Explainable AI)
+Contrairement aux modèles "boîte noire", ShieldNet génère pour chaque diagnostic une liste de facteurs explicatifs quantifiés :
+- **Facteurs Positifs (Réhabilitation)** : identification de vocabulaire médical (`+45%`), attestation STIR/SHAKEN niveau A (`+30%`), présence d'avis sûrs concordants (`+40%`), décision souveraine d'un administrateur (`+100%`).
+- **Facteurs Négatifs (Menace)** : détection d'usurpation policière ou fiscale (`+50%`), numéro fictif non attribué (`+35%`), attestation STIR/SHAKEN niveau C (`+25%`), pic d'activité soudain en moins de deux heures (`+30%`).
+
+### 3.5. Endpoints REST d'Arbitrage et d'Analyse
+- **`GET /api/v1/ai/diagnose/?phone_number=+18195550199&attestation=A`** ou **`POST /api/v1/ai/diagnose/`** : Diagnostic unifié explicable.
+- **`POST /api/v1/check/batch/`** : Vérification groupée haute performance (jusqu'à 100 numéros en une seule requête SQL indexée).
+- **`GET /api/v1/metrics/`** : Télémétrie et métriques opérationnelles au format standard OpenMetrics / Prometheus.
 
 ---
 
-## 4. Console Web SOC (Security Operations Center)
+## 4. Console Web d'Administration & Modération (Django)
 
-L'administration Web Django a été entièrement modernisée pour devenir un véritable **Centre de Cyberdéfense Télécom** :
+L'administration Web Django a été aménagée pour offrir à l'équipe du projet une console d'exploitation claire :
 
-1. **Tableau de Bord Exécutif & Opérationnel ([`templates/admin/index.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/index.html))** :
-   - Indicateur de résilience cyber en direct avec jauge SVG dynamique.
-   - Radar de cartographie des indicatifs régionaux canadiens NANP (+1) : Gatineau/Outaouais (819/873), Montréal (514/438), Québec (418/581), Ottawa (613/343), Toronto (416/647).
-   - Graphiques de distribution des menaces et vélocité hebdomadaire via Chart.js.
-   - Centre de triage rapide intégré et simulateur en direct.
-2. **Laboratoire Sandbox & Analyse Heuristique ([`templates/admin/sandbox_dashboard.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/sandbox_dashboard.html))** :
-   - Testeur temps réel de n'importe quel numéro de téléphone ou empreinte SHA-256.
-   - Intégration directe du moteur IA avec affichage du verdict, score de risque, indice de faux positif, entités NLP identifiées et facteurs XAI.
-   - **Bouton d'action en 1 clic** appliquant immédiatement la recommandation de l'IA (*Blanchir et réhabiliter* ou *Bloquer sur tout le réseau*).
-3. **Centre de Triage SOC ([`templates/admin/triage_dashboard.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/triage_dashboard.html))** :
-   - File d'attente en temps réel de tous les signalements avec filtres par catégorie, recherche par empreinte et pastilles intelligentes de diagnostic IA (`🤖 Faux-Positif (xx%)` ou `🤖 Menace (xx%)`).
-4. **Rapport Exécutif de Sécurité ([`templates/admin/executive_report.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/executive_report.html))** :
-   - Synthèse stratégique (Threat Intelligence Executive Briefing) formatée pour impression ou export PDF A4 pour les jurys et la direction.
-5. **Télémétrie en Direct ([`/admin/operations/telemetry/live/`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/shield_api/admin_views.py))** :
-   - Flux JSON temps réel alimentant la salle de contrôle SOC (KPIs, résilience, derniers événements).
-6. **Alternance de Thèmes Dynamique & Contraste Parfait** :
-   - Bascule fluide entre le mode sombre (Cyber SOC) et le mode clair (Haute Lisibilité).
-   - Les graphiques Chart.js adaptent automatiquement leurs couleurs et quadrillages lors du changement de thème.
-   - Contraste typographique et accessibilité certifiés conformes.
+1. **Tableau de Bord Principal ([`templates/admin/index.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/index.html))** :
+   - Indicateurs globaux (numéros en liste noire, avis favorables, comptes utilisateurs).
+   - Répartition géographique des signalements selon les indicatifs régionaux canadiens NANP (+1) : Gatineau/Outaouais (819/873), Montréal (514/438), Québec (418/581), Ottawa (613/343), Toronto (416/647).
+   - Graphiques de distribution des catégories et suivi temporel via Chart.js.
+2. **Simulateur & Analyse Heuristique ([`templates/admin/sandbox_dashboard.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/sandbox_dashboard.html))** :
+   - Testeur permettant de soumettre un numéro ou une empreinte pour observer le calcul du score, la détection lexicale, l'impact STIR/SHAKEN et la recommandation d'action.
+   - Bouton de modération rapide pour appliquer la décision directement en base.
+3. **Centre de Triage Complet ([`templates/admin/triage_dashboard.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/triage_dashboard.html))** :
+   - File de révision en direct des signalements récents avec pastilles d'arbitrage IA, filtrage par catégorie et action en 1 clic.
+   - *Architecture durcie* : Intégration globale de `ShieldNetAIEngine` garantissant le chargement instantané de la console complète sans crash serveur.
+4. **Rapport Récapitulatif ([`templates/admin/executive_report.html`](file:///C:/Projet/Projet%20synthese/shieldnet_backend/templates/admin/executive_report.html))** :
+   - Document de synthèse imprimable résumant l'état de la base et les statistiques pour la présentation du projet.
+5. **Observabilité OpenMetrics & Export Sécurisé** :
+   - Exposition de l'endpoint `/api/v1/metrics/` compatible Prometheus et Grafana.
+   - Export CSV protégé contre les attaques par injection de formules Excel (CWE-1236).
+6. **Thèmes Clair / Sombre** :
+   - Bascule d'affichage pour le confort visuel, avec adaptation automatique des couleurs des graphiques.
 
 ---
 
 ## 5. Fonctionnalités de l'Application Mobile ShieldNet
 
-L'application Flutter intègre une expérience utilisateur soignée couplée à un haut niveau de protection :
+L'application Flutter intègre les fonctionnalités nécessaires à la protection quotidienne :
 
-* **Interception Native Temps Réel** : Enregistrement auprès du gestionnaire Télécom Android (`CallScreeningService`) pour bloquer les appels malveillants avant sonnerie.
-* **Bascule de Visibilité du Mot de Passe (Icône Œil)** : Dans les formulaires de connexion et d'inscription (`auth_bottom_sheet.dart`), l'utilisateur peut afficher ou masquer son mot de passe en un clic pour éviter toute erreur de frappe.
-* **Score de Sérénité & Impact Citoyen** : Indicateur mesurant le nombre d'appels frauduleux neutralisés, le temps économisé et l'impact positif apporté à la communauté.
-* **Liste Blanche d'Urgence (Emergency Whitelist)** : Immunité absolue garantie pour les secours (911, 811, 988) et les contacts personnels désignés, même en mode de blocage strict.
-* **Mode Strict « Contacts Uniquement »** : Filtrage de tout appel non présent dans le carnet d'adresses (idéal pour la protection des personnes âgées ou vulnérables).
-* **Bouclier Nocturne Programmé (Night Shield)** : Activation automatique de la protection silencieuse selon des plages horaires paramétrables.
-* **Inspecteur de Phishing SMS** : Analyse sémantique locale sur le smartphone détectant les SMS suspects (fausses livraisons, avis de coupure bancaire).
-* **Console d'Administration Mobile Embarquée** : Accessible avec un compte `is_staff` (`admin@shieldnet.app`), offrant 5 onglets de gestion de la liste noire, des signalements, des utilisateurs et des journaux d'audit.
-* **Ergonomie Résiliente (Zéro Débordement)** : Conception responsive éprouvée et testée sans débordement (`0 RenderFlex overflow`) sur les écrans très étroits de 320 px.
+* **Interception native** : Enregistrement auprès du gestionnaire Télécom Android (`CallScreeningService`) pour bloquer les appels malveillants avant sonnerie.
+* **Audit Rapide du Journal d'Appels** : Fonctionnalité d'audit instantané dans l'onglet *« Appels Récents »* exécutant un scan réseau groupé (Batch Check) pour identifier immédiatement les fraudeurs passés inaperçus.
+* **Contestation Interactive des Faux-Positifs** : Fiche détaillée au toucher sur n'importe quel numéro bloqué dans l'onglet *« Numéros Bloqués »*, permettant de déposer une contestation citoyenne (santé, livraison, proche, service) et de déclencher la réhabilitation par consensus.
+* **Niveau de protection paramétrable** : Évaluation de la configuration de l'appareil (filtrage activé, base locale synchronisée, verrouillage biométrique).
+* **Liste blanche prioritaire (Urgence)** : Immunité garantie pour les services essentiels (911, 811, 988) et les contacts médicaux ou personnels désignés.
+* **Mode « Contacts Uniquement »** : Filtrage des numéros absents du carnet d'adresses (recommandé pour les personnes vulnérables aux démarchages agressifs).
+* **Bouclier Nocturne** : Plage horaire configurable pour filtrer silencieusement les appels durant la nuit.
+* **Inspecteur de SMS** : Analyse locale des messages reçus pour détecter les liens suspects et les arnaques de livraison ou bancaires.
+* **Console d'administration mobile** : Accessible aux utilisateurs avec statut administrateur (`is_staff`) pour modérer la liste noire directement depuis le téléphone.
+* **Interface responsive** : Mise en page testée sans débordement sur petits écrans (320 px de large).
 
 ---
 
@@ -211,7 +197,12 @@ L'application Flutter intègre une expérience utilisateur soignée couplée à 
 | **Consensus Anti-Sybil** | Algorithme démocratique de réhabilitation (`FalsePositiveConsensusService`) avec quorum strict et unicité de vote. | `services.py`<br>`views.py` |
 | **Journal d'Audit Immuable** | Traçabilité légale horodatée (`AuditLog`) de chaque action de sécurité Web et Mobile. | `models.py`<br>`admin.py` |
 | **Contrôle d'Accès & RBAC** | En-têtes `X-API-Key`, authentification JWT et restriction `is_staff` sur les endpoints sensibles. | `permissions.py`<br>`backends.py` |
-| **Protection Anti-Énumération** | Limitation de débit (*Rate Limiting*) par IP bloquant l'énumération automatisée de la liste noire. | `views.py` |
+| **Anti-Timing Attack (CWE-208)** | Comparaison en temps constant (`hmac.compare_digest`) neutralisant les attaques par canal auxiliaire sur les clés API. | `permissions.py` |
+| **Anti-Injection CSV (CWE-1236)** | Neutralisation stricte des formules malveillantes Excel (`=`, `+`, `-`, `@`) lors des exports du SOC (`sanitize_csv_cell`). | `admin_views.py` |
+| **Anti-ReDoS (Déni de Service Regex)** | Expressions régulières sans chevauchement polynomial pour l'analyse des liens SMS suspects. | `sms_phishing_detector.dart` |
+| **Sécurisation OAuth2 / Anti-Usurpation** | Blocage absolu de la connexion sociale Google vers des comptes administrateurs (`is_staff` / `is_superuser`). | `views.py` |
+| **Protection Anti-Énumération** | Unification des messages d'erreur d'authentification et limitation de débit (*Rate Limiting*) par IP. | `serializers.py`<br>`views.py` |
+| **Bornage de Charge Utile (Anti-DoS)** | Bounded inputs stricts (commentaires $\le 1000$ caractères, numéros $\le 32$ caractères). | `serializers.py`<br>`views.py` |
 
 ### 6.2. Analyse d'Entropie du Plan NANP (+1) et Compromis d'Ingénierie
 
@@ -222,8 +213,8 @@ L'application Flutter intègre une expérience utilisateur soignée couplée à 
 > **Pourquoi le choix de HMAC-SHA256 pour l'interception mobile ?**  
 > Le service Android `CallScreeningService` impose un budget temporel critique (< 100 ms) avant le déclenchement de la sonnerie système. Une fonction à mémoire dure (ex. Argon2id recommandé par l'OWASP) nécessiterait 300 à 800 ms sur processeur mobile d'entrée de gamme, causant un timeout de l'OS. HMAC-SHA256 s'exécute en **0.15 ms**, offrant l'équilibre optimal requis pour un filtrage temps réel sur appareil.
 >
-> 📄 **Pour l'analyse formelle du modèle de menace STRIDE, la formule combinatoire et la roadmap de durcissement (Double Sel KMS / Google Play Integrity), consultez le document d'ingénierie dédié :**  
-> ➡️ [**Rapport de Sécurité & Modèle de Menace (docs/SECURITY_AND_THREAT_MODEL.md)**](file:///C:/Projet/Projet%20synthese/docs/SECURITY_AND_THREAT_MODEL.md)
+> **Pour l'analyse formelle du modèle de menace STRIDE, la formule combinatoire et la roadmap de durcissement (Double Sel KMS / Google Play Integrity), consultez le document d'ingénierie dédié :**  
+> [**Rapport de Sécurité & Modèle de Menace (docs/SECURITY_AND_THREAT_MODEL.md)**](file:///C:/Projet/Projet%20synthese/docs/SECURITY_AND_THREAT_MODEL.md)
 
 ---
 
@@ -300,11 +291,11 @@ flutter run
 
 ---
 
-## 8. Assurance Qualité & Matrice des 104 Tests Automatisés (100% de Réussite)
+## 8. Assurance Qualité & Matrice des 130 Tests Automatisés (100% de Réussite)
 
-Le projet applique une rigueur d'assurance qualité académique et industrielle intégrale : **104 tests automatisés passent avec succès**, avec 0 avertissement du linter.
+Le projet applique une rigueur d'assurance qualité académique et industrielle intégrale : **130 tests automatisés passent avec succès**, avec 0 avertissement du linter (`flutter analyze`).
 
-### 🧪 Tests Backend Django (`python manage.py test shield_api`) — 45/45 Passés (100%)
+### Tests Backend Django (`python manage.py test shield_api`) — 61/61 Passés (100%)
 
 1. **Moteur d'Intelligence Artificielle & XAI (`ShieldNetAIEngineTest`)** :
    - `test_nlp_legitimate_keywords` : Détection sémantique des cliniques, hôpitaux, livreurs et Hydro-Québec (score $> 40$).
@@ -312,11 +303,16 @@ Le projet applique une rigueur d'assurance qualité académique et industrielle 
    - `test_ai_diagnose_fictitious_scam_number` : Identification des numéros fictifs 555-01xx comme menace critique (`ESCALATE_BLOCK`).
    - `test_ai_diagnose_false_positive_rehabilitation` : Arbitrage et réhabilitation automatique d'une clinique médicale (`AUTO_WHITELIST`, confiance $\ge 70\%$, facteurs XAI positifs).
    - `test_ai_diagnose_api_endpoint` : Validation de l'endpoint REST `/api/v1/ai/diagnose/` (GET, POST, validation 400 et sécurité API Key).
-2. **Moteur de Réputation & Algorithmes de Score** :
+   - `test_stir_shaken_attestation_evaluations` : Évaluation heuristique et diagnostic explicable intégrant les attestations télécoms A, B et C.
+2. **Vérification Groupée & Télémétrie Opérationnelle** :
+   - `test_batch_check_numbers_success` : Vérification groupée instantanée (`POST /api/v1/check/batch/`) avec résolution SQL optimisée.
+   - `test_batch_check_validation_rules` : Rejet strict des listes vides, hashes SHA-256 non conformes et dépassements du plafond de 100 requêtes.
+   - `test_prometheus_metrics_endpoint` : Validation du format OpenMetrics standard (`text/plain; version=0.0.4`) et cohérence des jauges.
+3. **Moteur de Réputation & Algorithmes de Score** :
    - `test_process_new_report_creation` : Initialisation du score lors du premier signalement.
    - `test_repetition_increases_risk_score` : Augmentation dynamique et plafonnement du score.
    - `test_whitelisted_number_stays_unblocked` : Garantie d'immunité des numéros blanchis.
-3. **Consensus Démocratique & Résolution des Faux Positifs** :
+4. **Consensus Démocratique & Résolution des Faux Positifs** :
    - `test_single_safe_report_does_not_reach_quorum` : Validation du quorum minimum.
    - `test_automatic_false_positive_detection_by_consensus` : Blanchiment autonome par consensus.
    - `test_admin_safe_feedback_triggers_immediate_consensus` : Arbitrage administratif immédiat.
@@ -325,9 +321,14 @@ Le projet applique une rigueur d'assurance qualité académique et industrielle 
    - `test_submit_safe_report_api` : Endpoint de soumission des avis favorables.
    - `test_consensus_status_and_check_endpoints` : Consultation de l'état du consensus.
    - `test_admin_consensus_audit_api` : Déclenchement de l'audit global de consensualité.
-4. **Sécurité, Cryptographie & Endpoints API REST** :
+5. **Sécurité, Cryptographie & Durcissement OWASP** :
    - `test_reject_request_without_api_key` : Rejet strict des requêtes sans clé d'API.
-   - `test_submit_report_api` : Validation de l'endpoint de signalement spam.
+   - `test_timing_attack_mitigation` : Comparaison `hmac.compare_digest` à temps constant sur les clés API (CWE-208).
+   - `test_csv_export_neutralizes_formula_injection` : Neutralisation des injections de formules Excel dans les exports CSV (CWE-1236).
+   - `test_admin_account_takeover_prevention` : Interdiction aux comptes staff/superuser de se connecter par OAuth non vérifié.
+   - `test_user_enumeration_prevention` : Uniformisation des messages d'authentification contre l'énumération de comptes.
+   - `test_comment_payload_size_enforced` : Bounded inputs stricts (1000 caractères max) contre les attaques par déni de service.
+   - `test_submit_report_api` : Validation de l'endpoint de signalement spam avec transmission des commentaires.
    - `test_check_number_api_spam` : Vérification instantanée par empreinte HMAC.
    - `test_blacklist_download_api` : Téléchargement et filtrage de la liste certifiée.
    - `test_user_registration_and_email_login` : Inscription et authentification JWT.
@@ -335,7 +336,8 @@ Le projet applique une rigueur d'assurance qualité académique et industrielle 
    - `test_dedicated_admin_email_login_web_and_mobile` : Authentification unifiée `admin@shieldnet.app`.
    - `test_sha256_hex_validator_rejects_invalid_hash` : Rejet des formats SHA-256 non conformes.
    - `test_composite_indexes_present_on_models` : Vérification de la présence des index composites B-Tree.
-5. **Console Web SOC, Thèmes & Audit** :
+6. **Console Web SOC, Thèmes & Audit** :
+   - `test_admin_triage_dashboard_view` : Fiabilisation complète de la console de triage avec chargement global de `ShieldNetAIEngine`.
    - `test_admin_stats_and_moderation` : Vérification des métriques de supervision.
    - `test_admin_full_mobile_management_endpoints` : Couverture complète des endpoints d'administration mobile.
    - `test_audit_logs_recorded_and_listed` : Traçabilité inaltérable des journaux d'audit (`AuditLog`).
@@ -345,22 +347,25 @@ Le projet applique une rigueur d'assurance qualité académique et industrielle 
 
 ---
 
-### 📱 Tests Frontend Flutter (`flutter test`) — 59/59 Passés (100%)
+### Tests Frontend Flutter (`flutter test`) — 69/69 Passés (100%)
 
-1. **Cryptographie & Filtrage Télécom** :
+1. **Réseau, Synchronisation & Batch Check (`api_service_test.dart`)** :
+   - Synchronisation différentielle Delta et complète avec SQLite.
+   - Signalement de spam unitaire avec persistance locale immédiate.
+   - **Vérification groupée (`checkNumbersBatch`)** : Gestion de liste vide sans requête, traitement et mapping des résultats multiples, résilience aux pannes réseau.
+   - **Contestation citoyenne (`submitSafeReport`)** : Soumission directe par `phoneHash` et `maskedNumber` avec prise en compte du consensus.
+2. **Cryptographie & Filtrage Télécom** :
    - `crypto_utils_test.dart` : Normalisation E.164 (+1), déterminisme HMAC-SHA256, masquage visuel.
    - `automated_spam_verifier_test.dart` : Préservation des numéros réguliers, détection des numéros surtaxés (1-900).
    - `widget_test.dart` : Détection de spoofing, cycle de vie et anonymisation.
-2. **Accessibilité & Ergonomie Responsive** :
-   - `auth_bottom_sheet_test.dart` :
-     - Résilience à 320 px sans débordement (`0 RenderFlex overflow`).
-     - **Bascule de visibilité du mot de passe (icône œil) testée et validée**.
+3. **Accessibilité & Ergonomie Responsive** :
+   - `auth_bottom_sheet_test.dart` : Résilience à 320 px sans débordement (`0 RenderFlex overflow`) et bascule de visibilité du mot de passe (icône œil).
    - `serenity_and_citizen_test.dart` : Cartes d'impact citoyen et score de sérénité adaptatives sur écran étroit.
-3. **Fonctionnalités Métier Avancées** :
+4. **Fonctionnalités Métier & Détection Locale** :
    - `emergency_whitelist_test.dart` : Détection instantanée des urgences (911, 811, 988), ajout/suppression de contacts d'urgence.
    - `contacts_only_mode_test.dart` : Mode strict filtrant tous les appels hors carnet d'adresses.
    - `night_shield_test.dart` : Activation silencieuse du bouclier nocturne.
-   - `sms_phishing_detector_test.dart` : Détection heuristique des SMS frauduleux (liens et mots-clés bancaires).
+   - `sms_phishing_detector_test.dart` : Détection heuristique des SMS frauduleux (liens et mots-clés bancaires) avec regex anti-ReDoS.
    - `sync_and_reconciliation_test.dart` : Réconciliation de la base de données SQLite.
    - `background_sync_service_test.dart` : Persistance des préférences d'intervalles et synchronisation périodique.
 

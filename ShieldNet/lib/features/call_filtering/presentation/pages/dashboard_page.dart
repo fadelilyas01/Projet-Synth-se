@@ -12,7 +12,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../controllers/blacklist_controller.dart';
 import '../../../../core/services/night_shield_service.dart';
-import '../../../../core/services/citizen_impact_service.dart';
 import '../../domain/services/serenity_score_calculator.dart';
 import '../widgets/clipboard_banner.dart';
 import '../widgets/action_hub_row.dart';
@@ -35,14 +34,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
   final _quickCheckController = TextEditingController();
   String? _detectedClipboardNumber;
   String? _dismissedClipboardNumber;
-  CitizenImpactData? _impactData;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadInterceptedMetrics();
-    _loadImpactData();
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkClipboard());
   }
 
@@ -58,7 +55,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
     if (state == AppLifecycleState.resumed) {
       ref.read(protectionStatusProvider.notifier).checkStatus();
       _loadInterceptedMetrics();
-      _loadImpactData();
+      ref.invalidate(citizenImpactProvider);
       _checkClipboard();
     }
   }
@@ -79,13 +76,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
           });
         }
       }
-    } catch (_) {}
-  }
-
-  Future<void> _loadImpactData() async {
-    try {
-      final data = await CitizenImpactService.getImpactData(localBlockedSpams: _interceptedCallsCount);
-      if (mounted) setState(() => _impactData = data);
     } catch (_) {}
   }
 
@@ -181,73 +171,85 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    final checkUseCase = ref.read(checkNumberUseCaseProvider);
-    final analysisEither = await checkUseCase(rawPhone);
+    try {
+      final checkUseCase = ref.read(checkNumberUseCaseProvider);
+      final analysisEither = await checkUseCase(rawPhone);
 
-    if (!mounted) return;
-    Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context);
 
-    analysisEither.fold(
-      (failure) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(failure.message), backgroundColor: AppTheme.accentRed),
-        );
-      },
-      (analysis) {
-        final isSpam = analysis.isSpam;
-        final isWhitelisted = analysis.isWhitelisted;
+      analysisEither.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(failure.message), backgroundColor: AppTheme.accentRed),
+          );
+        },
+        (analysis) {
+          final isSpam = analysis.isSpam;
+          final isWhitelisted = analysis.isWhitelisted;
 
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                Icon(
-                  isWhitelisted
-                      ? Icons.verified_user_rounded
-                      : (isSpam ? Icons.warning_amber_rounded : Icons.check_circle_rounded),
-                  color: isWhitelisted
-                      ? AppTheme.primaryColor
-                      : (isSpam ? AppTheme.accentRed : AppTheme.accentGreen),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Row(
+                children: [
+                  Icon(
                     isWhitelisted
-                        ? (l10n?.dialogVerified ?? 'Numéro Vérifié')
-                        : (isSpam ? (l10n?.dialogSpamDetected ?? 'Attention : Spam Détecté') : (l10n?.dialogSafeNumber ?? 'Numéro Sûr')),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ? Icons.verified_user_rounded
+                        : (isSpam ? Icons.warning_amber_rounded : Icons.check_circle_rounded),
+                    color: isWhitelisted
+                        ? AppTheme.primaryColor
+                        : (isSpam ? AppTheme.accentRed : AppTheme.accentGreen),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      isWhitelisted
+                          ? (l10n?.dialogVerified ?? 'Numéro Vérifié')
+                          : (isSpam ? (l10n?.dialogSpamDetected ?? 'Attention : Spam Détecté') : (l10n?.dialogSafeNumber ?? 'Numéro Sûr')),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    CryptoUtils.maskPhoneNumber(rawPhone),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    isWhitelisted
+                        ? (l10n?.dialogVerifiedDesc ?? 'Ce numéro est vérifié et certifié par l\'administrateur.')
+                        : (isSpam
+                            ? (l10n?.dialogSpamDesc ?? 'Ce numéro a été identifié comme indésirable.')
+                            : (l10n?.dialogSafeDesc ?? 'Aucun signalement malveillant pour ce numéro.')),
+                    style: const TextStyle(fontSize: 13, height: 1.4),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n?.btnUnderstood ?? 'Compris')),
               ],
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  CryptoUtils.maskPhoneNumber(rawPhone),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  isWhitelisted
-                      ? (l10n?.dialogVerifiedDesc ?? 'Ce numéro est vérifié et certifié par l\'administrateur.')
-                      : (isSpam
-                          ? (l10n?.dialogSpamDesc ?? 'Ce numéro a été identifié comme indésirable.')
-                          : (l10n?.dialogSafeDesc ?? 'Aucun signalement malveillant pour ce numéro.')),
-                  style: const TextStyle(fontSize: 13, height: 1.4),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n?.btnUnderstood ?? 'Compris')),
-            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la vérification du numéro: $e'),
+            backgroundColor: AppTheme.accentRed,
           ),
         );
-      },
-    );
+      }
+    }
   }
 
   @override
@@ -256,6 +258,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
     final blacklistAsync = ref.watch(blacklistControllerProvider);
     final isContactsOnly = ref.watch(contactsOnlyProvider);
     final nightShieldState = ref.watch(nightShieldProvider);
+    final impactAsync = ref.watch(citizenImpactProvider(_interceptedCallsCount));
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
@@ -286,7 +289,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(blacklistControllerProvider.notifier).syncWithServer();
-          _loadImpactData();
+          ref.invalidate(citizenImpactProvider);
         },
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
@@ -310,7 +313,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
               const SizedBox(height: 16),
             ],
 
-            // 1. CARTE DE PROTECTION "ZEN"
+            // Carte principale de statut de protection
             protectionState.when(
               data: (isActive) => ZenShieldCard(
                 isActive: isActive,
@@ -346,7 +349,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             ),
             const SizedBox(height: 16),
 
-            // 2. SCORE DE SÉRÉNITÉ
+            // Diagnostic et niveau de sérénité
             SerenityScoreCard(
               result: serenityResult,
               onOpenSettings: () {
@@ -355,11 +358,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             ),
             const SizedBox(height: 16),
 
-            // 3. ACTIONS RAPIDES
+            // Raccourcis d'actions immédiates
             ActionHubRow(onVerifyNumber: () => _showQuickVerificationDialog(context)),
             const SizedBox(height: 20),
 
-            // 4. STATISTIQUES
+            // Compteurs statistiques d'activité locale
             Row(
               children: [
                 Expanded(
@@ -383,16 +386,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             ),
             const SizedBox(height: 20),
 
-            // 5. IMPACT CITOYEN
-            if (_impactData != null) ...[
-              CitizenImpactCard(
-                data: _impactData!,
-                onReportSpam: () => _showQuickVerificationDialog(context),
+            // Engagement communautaire et badges
+            impactAsync.maybeWhen(
+              data: (impactData) => Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: CitizenImpactCard(
+                  data: impactData,
+                  onReportSpam: () => _showQuickVerificationDialog(context),
+                ),
               ),
-              const SizedBox(height: 24),
-            ],
+              orElse: () => const SizedBox(),
+            ),
 
-            // 6. RÉCENTS SPAMS CONNUS
+            // Historique des derniers spams interceptés
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

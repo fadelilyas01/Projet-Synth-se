@@ -231,7 +231,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
               children: [
-                // 1. CARTE INFORMATIVE SUR L'IMMUNITÉ
+                // Note d'information sur la politique d'exclusion stricte
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -275,7 +275,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                 ),
                 const SizedBox(height: 20),
 
-                // 2. CONTACTS PERSONNALISÉS
+                // Section des numéros personnels ajoutés par l'utilisateur
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -339,7 +339,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
 
                 const SizedBox(height: 24),
 
-                // 3. SERVICES OFFICIELS NORD-AMÉRICAINS (Verrouillés Système)
+                // Services publics d'urgence préconfigurés (non modifiables)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

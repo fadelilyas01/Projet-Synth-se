@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/services/serenity_score_calculator.dart';
 
-/// Carte visuelle du Score de Sérénité Numérique ("Peace of Mind Index")
+/// Carte récapitulative du niveau de protection de l'appareil
 class SerenityScoreCard extends StatelessWidget {
   final SerenityScoreResult result;
   final VoidCallback? onRefresh;

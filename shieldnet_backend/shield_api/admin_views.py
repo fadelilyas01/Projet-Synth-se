@@ -8,13 +8,14 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from django.utils import timezone
 from .models import BlacklistedNumber, SpamReport, SafeReport, AuditLog, AuditLogAction
 from .services import hash_phone_number, mask_phone_number, AutomatedSpamVerifier, FalsePositiveConsensusService, DatabaseSanitizerService
+from .ai_engine import ShieldNetAIEngine
 
 @staff_member_required
 @require_http_methods(["GET", "POST"])
 def sandbox_check_view(request):
     """
-    Bac à sable d'analyse et testeur de réputation de numéro en temps réel.
-    Calcule l'empreinte HMAC-SHA256 et diagnostique le statut dans la base de données.
+    Testeur de numéro et analyse de réputation.
+    Calcule l'empreinte HMAC-SHA256 et vérifie le statut dans la base de données.
     """
     if request.method == "POST":
         try:
@@ -25,6 +26,7 @@ def sandbox_check_view(request):
     else:
         phone_number = request.GET.get('phone_number', '').strip()
 
+    phone_number = phone_number[:32]
     if not phone_number:
         return JsonResponse({'error': 'Veuillez fournir un numéro de téléphone à analyser.'}, status=400)
 
@@ -35,8 +37,7 @@ def sandbox_check_view(request):
     # Évaluation algorithmique heuristique
     heuristic = AutomatedSpamVerifier.evaluate_number(phone_hash, phone_number)
 
-    # Diagnostic d'Intelligence Artificielle (XAI, arbitrage faux positif, NLP)
-    from .ai_engine import ShieldNetAIEngine
+    # Analyse du numéro (mots-clés, vélocité, faux-positifs)
     ai_diag = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash)
 
     # Recherche en base de données
@@ -98,7 +99,7 @@ def sandbox_action_view(request):
     except Exception:
         data = request.POST
 
-    phone_number = data.get('phone_number', '').strip()
+    phone_number = data.get('phone_number', '').strip()[:32]
     action = data.get('action', '').strip()  # 'block' ou 'whitelist'
 
     if not phone_number or action not in ['block', 'whitelist']:
@@ -147,11 +148,22 @@ def sandbox_action_view(request):
         'is_whitelisted': record.is_whitelisted,
     })
 
+def sanitize_csv_cell(val) -> str:
+    """
+    Neutralise les injections de formules CSV (CWE-1236 / OWASP ASVS).
+    Empêche l'exécution arbitraire de commandes dans Microsoft Excel / LibreOffice.
+    """
+    s = str(val) if val is not None else ''
+    if s and s[0] in ('=', '+', '-', '@', '\t', '\r'):
+        return f"'{s}"
+    return s
+
 @staff_member_required
 @require_GET
 def export_blacklist_csv_view(request):
     """
     Exporte la liste noire intégrale en format CSV pour intégration dans les systèmes PBX / Asterisk.
+    Sécurisé contre les injections de formules CSV (CWE-1236).
     """
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="shieldnet_blacklist_{timezone.now().strftime("%Y%m%d")}.csv"'
@@ -174,9 +186,9 @@ def export_blacklist_csv_view(request):
 
     for num in BlacklistedNumber.objects.all().order_by('-updated_at'):
         writer.writerow([
-            num.phone_hash,
-            num.masked_number or 'Inconnu',
-            num.get_category_display(),
+            sanitize_csv_cell(num.phone_hash),
+            sanitize_csv_cell(num.masked_number or 'Inconnu'),
+            sanitize_csv_cell(num.get_category_display()),
             num.risk_score,
             num.reports_count,
             num.safe_reports_count,

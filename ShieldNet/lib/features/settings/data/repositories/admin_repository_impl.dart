@@ -3,8 +3,7 @@ import '../../domain/entities/admin_stats.dart';
 import '../../domain/entities/audit_log_entry.dart';
 import '../../domain/repositories/admin_repository.dart';
 
-/// Implémentation concrète du dépôt d'administration
-/// Délègue les appels réseau à l'AuthService existant
+// Dépôt pour les opérations de la console d'administration
 class AdminRepositoryImpl implements AdminRepository {
   final AuthService _authService;
 

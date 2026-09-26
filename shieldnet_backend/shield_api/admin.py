@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import BlacklistedNumber, SpamReport, SafeReport, AuditLog, AuditLogAction
 
-admin.site.site_header = "ShieldNet Enterprise — Security Operations Center"
-admin.site.site_title = "ShieldNet Console SOC"
-admin.site.index_title = "Tableau de Bord de Modération & Cybersécurité"
+admin.site.site_header = "ShieldNet — Administration"
+admin.site.site_title = "ShieldNet Admin"
+admin.site.index_title = "Tableau de bord de modération"
 
 @admin.register(BlacklistedNumber)
 class BlacklistedNumberAdmin(admin.ModelAdmin):
@@ -204,9 +204,7 @@ class AuditLogAdmin(admin.ModelAdmin):
     source_badge.short_description = "Origine"
 
 
-# =====================================================================
-# Injection des KPI et Métriques SOC en Temps Réel sur l'Index Admin
-# =====================================================================
+# Métriques pour le tableau de bord d'administration
 original_admin_index = admin.site.index
 
 def custom_admin_index(request, extra_context=None):

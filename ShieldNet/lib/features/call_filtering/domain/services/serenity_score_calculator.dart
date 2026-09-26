@@ -41,7 +41,7 @@ class SerenityScoreCalculator {
     int total = 0;
     final recs = <SerenityRecommendation>[];
 
-    // 1. Filtrage d'appels natif (30 pts)
+    // Filtrage d'appels natif (pondération: 30 pts)
     if (isCallScreeningActive) {
       total += 30;
     } else {
@@ -53,7 +53,7 @@ class SerenityScoreCalculator {
       ));
     }
 
-    // 2. Base hors-ligne à jour (20 pts)
+    // Fraîcheur de la base hors-ligne locale (pondération: 20 pts)
     if (isCacheFresh) {
       total += 20;
     } else {
@@ -65,7 +65,7 @@ class SerenityScoreCalculator {
       ));
     }
 
-    // 3. Blocage automatique activé (20 pts)
+    // Politique de rejet automatique des appels à haut risque (pondération: 20 pts)
     if (isAutoBlockEnabled) {
       total += 20;
     } else {
@@ -77,7 +77,7 @@ class SerenityScoreCalculator {
       ));
     }
 
-    // 4. Verrouillage biométrique (15 pts)
+    // Verrouillage de l'application par biométrie (pondération: 15 pts)
     if (isBiometricEnabled) {
       total += 15;
     } else {
@@ -89,13 +89,13 @@ class SerenityScoreCalculator {
       ));
     }
 
-    // 5. Mode Contacts Uniquement (15 pts)
+    // Filtrage strict limité au carnet d'adresses (pondération: 15 pts)
     if (isContactsOnlyEnabled) {
       total += 15;
     } else {
       recs.add(const SerenityRecommendation(
         title: 'Activez le mode Contacts Uniquement',
-        description: 'Pour une sérénité totale, seuls vos contacts enregistrés peuvent faire sonner l\'appareil.',
+        description: 'Pour une protection complète, seuls vos contacts enregistrés peuvent faire sonner l\'appareil.',
         scoreBonus: 15,
         icon: Icons.contact_phone_rounded,
       ));
@@ -106,7 +106,7 @@ class SerenityScoreCalculator {
     Color color;
 
     if (total >= 90) {
-      title = 'Sérénité Maximale';
+      title = 'Protection Optimale';
       color = const Color(0xFF10B981); // Emerald Green
     } else if (total >= 70) {
       title = 'Protection Élevée';

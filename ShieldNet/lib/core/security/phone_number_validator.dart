@@ -25,22 +25,22 @@ class PhoneNumberValidator {
 
     final nationalNumber = digitsOnly.substring(1); // 10 chiffres sans le +1
 
-    // 1. Détection des chiffres répétitifs (ex: 1111111111, 8190000000, 5149999999)
+    // Chiffres consécutifs identiques (ex: 8190000000 ou spoofing VoIP à motif répétitif)
     if (RegExp(r'(\d)\1{6,}').hasMatch(nationalNumber)) {
       return true;
     }
 
-    // 2. Détection des séquences répétitives ou générées (ex: 1234567890, 0123456789)
+    // Séquences triviales souvent injectées par des numéroteurs automatiques
     if (nationalNumber == '1234567890' || nationalNumber == '0123456789' || nationalNumber == '9876543210') {
       return true;
     }
 
-    // 3. Détection des indicatifs réservés/invalides (ex: 555-0100 à 555-0199 réservés pour la fiction)
+    // Préfixe central 555 (plage réservée fiction et tests télécoms nord-américains)
     if (nationalNumber.substring(3, 6) == '555') {
       return true;
     }
 
-    // 4. Détection des numéros surtaxés connus (ex: 900, 976)
+    // Indicatifs de services surtaxés premium (900, 976)
     final areaCode = nationalNumber.substring(0, 3);
     if (areaCode == '900' || areaCode == '976') {
       return true;

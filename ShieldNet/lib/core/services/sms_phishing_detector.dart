@@ -35,12 +35,45 @@ class SmsPhishingDetector {
     'tiny.cc',
   ];
 
+  /// Domaines gouvernementaux et institutionnels canadiens / québécois officiellement vérifiés
+  static final Set<String> _verifiedOfficialDomains = {
+    'quebec.ca',
+    'gouv.qc.ca',
+    'canada.ca',
+    'gc.ca',
+    'desjardins.com',
+    'postescanada.ca',
+    'canadapost.ca',
+    'canadapost-postescanada.ca',
+    'hydroquebec.com',
+    'revenuquebec.ca',
+    'sq.gouv.qc.ca',
+    'rcmp-grc.gc.ca',
+    'ramq.gouv.qc.ca',
+    'saaq.gouv.qc.ca',
+  };
+
+  /// Marques protégées soumises à la détection de typosquatting et d'usurpation de nom d'hôte
+  static const List<String> _protectedBrandKeywords = [
+    'desjardins',
+    'hydroquebec',
+    'interac',
+    'postescanada',
+    'canadapost',
+    'revenuquebec',
+    'servicecanada',
+  ];
+
   static final Map<String, int> _deliveryKeywords = {
     'colis': 20,
     'livraison': 15,
     'chronopost': 25,
     'colissimo': 25,
     'mondial relay': 25,
+    'postes canada': 25,
+    'canada post': 25,
+    'purolator': 25,
+    'ups': 25,
     'fedex': 25,
     'dhl': 25,
     'frais de port': 25,
@@ -50,6 +83,12 @@ class SmsPhishingDetector {
   };
 
   static final Map<String, int> _administrativeKeywords = {
+    'revenu quebec': 35,
+    'arc': 30,
+    'cra': 30,
+    'saaq': 35,
+    'ramq': 35,
+    'service canada': 35,
     'ameli': 35,
     'carte vitale': 35,
     'assurance maladie': 30,
@@ -64,6 +103,15 @@ class SmsPhishingDetector {
   };
 
   static final Map<String, int> _bankingKeywords = {
+    'interac': 35,
+    'virement interac': 35,
+    'desjardins': 35,
+    'accesd': 35,
+    'rbc': 30,
+    'td': 25,
+    'bmo': 25,
+    'cibc': 25,
+    'banque nationale': 30,
     'banque': 25,
     'compte bloque': 35,
     'compte suspendu': 35,
@@ -96,6 +144,80 @@ class SmsPhishingDetector {
     return str;
   }
 
+  /// Calcule la distance de Levenshtein entre deux chaînes
+  static int _levenshtein(String s, String t) {
+    if (s == t) return 0;
+    if (s.isEmpty) return t.length;
+    if (t.isEmpty) return s.length;
+
+    final List<int> v0 = List<int>.generate(t.length + 1, (i) => i);
+    final List<int> v1 = List<int>.filled(t.length + 1, 0);
+
+    for (int i = 0; i < s.length; i++) {
+      v1[0] = i + 1;
+      for (int j = 0; j < t.length; j++) {
+        final cost = (s[i] == t[j]) ? 0 : 1;
+        v1[j + 1] = [v1[j] + 1, v0[j + 1] + 1, v0[j] + cost].reduce((a, b) => a < b ? a : b);
+      }
+      for (int j = 0; j <= t.length; j++) {
+        v0[j] = v1[j];
+      }
+    }
+    return v0[t.length];
+  }
+
+  /// Extrait l'hôte d'une URL brute
+  static String? _extractHost(String rawUrl) {
+    try {
+      var uriStr = rawUrl.trim();
+      if (!uriStr.startsWith('http://') && !uriStr.startsWith('https://')) {
+        uriStr = 'https://$uriStr';
+      }
+      final uri = Uri.parse(uriStr);
+      return uri.host.toLowerCase();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Vérifie si un hôte appartient à un domaine institutionnel officiel certifié
+  static bool _isVerifiedDomain(String host) {
+    for (final domain in _verifiedOfficialDomains) {
+      if (host == domain || host.endsWith('.$domain')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Détecte le typosquatting ou l'usurpation de marque dans un nom d'hôte
+  static String? _detectTyposquatting(String host) {
+    if (_isVerifiedDomain(host)) {
+      return null;
+    }
+
+    final hostClean = host.replaceAll(RegExp(r'\.(com|ca|org|net|xyz|top|info|site|online|app)$'), '');
+    final tokens = hostClean.split(RegExp(r'[\.\-]'));
+
+    for (final brand in _protectedBrandKeywords) {
+      // 1. Usurpation directe par sous-domaine ou nom composé frauduleux
+      if (hostClean.contains(brand)) {
+        return 'Domaine usurpant la marque officielle "$brand" hors de son infrastructure certifiée.';
+      }
+
+      // 2. Typosquatting par substitution typographique (Levenshtein distance 1 ou 2)
+      for (final token in tokens) {
+        if (token.length >= 5 && (token.length - brand.length).abs() <= 2) {
+          final dist = _levenshtein(token, brand);
+          if (dist > 0 && dist <= 2) {
+            return 'Domaine trompeur ressemblant à "$brand" par mutation typographique (Typosquatting : "$token").';
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   /// Analyse le contenu d'un SMS ou message
   static PhishingAnalysisResult analyze(String message) {
     if (message.trim().isEmpty) {
@@ -111,25 +233,79 @@ class SmsPhishingDetector {
     }
 
     final normalized = _normalize(message);
-    int totalRisk = 0;
-    final redFlags = <String>[];
-    final recommendations = <String>[];
 
-    // 1. Extraction et analyse des liens URL
+    // Extraction heuristique des liens (expression régulière non ambiguë immunisée ReDoS)
     final urlRegex = RegExp(
-      r'(https?:\/\/[^\s]+|(?:www\.)[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)',
+      r'(https?:\/\/[^\s]+|(?:www\.)[^\s]+|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?)',
       caseSensitive: false,
     );
     final rawMatches = urlRegex.allMatches(message).map((m) => m.group(0)!).toList();
     final urls = rawMatches.where((u) => u.contains('.')).toList();
 
+    // 1. Classification transactionnelle 2FA/OTP (Protection contre les faux positifs)
+    final isOtpPattern = RegExp(r'\b\d{4,8}\b').hasMatch(message) &&
+        (normalized.contains('code') || normalized.contains('otp') || normalized.contains('usage unique') || normalized.contains('mot de passe')) &&
+        (normalized.contains('confirmation') ||
+            normalized.contains('verification') ||
+            normalized.contains('securite') ||
+            normalized.contains('temporaire') ||
+            normalized.contains('ne partagez') ||
+            normalized.contains('ne transmettez') ||
+            normalized.contains('valide') ||
+            normalized.contains('expire'));
+
+    final hasExtortionOrThreat = normalized.contains('carte cadeau') ||
+        normalized.contains('bitcoin') ||
+        normalized.contains('mandat') ||
+        normalized.contains('arrestation') ||
+        normalized.contains('amende') ||
+        normalized.contains('bloque');
+
+    if (urls.isEmpty && isOtpPattern && !hasExtortionOrThreat) {
+      return const PhishingAnalysisResult(
+        riskScore: 0,
+        level: PhishingRiskLevel.safe,
+        verdictTitle: "Code d'Authentification Légitime (2FA/OTP)",
+        verdictDescription: 'Ce message correspond à un code temporaire à usage unique sans lien suspect.',
+        extractedUrls: [],
+        detectedRedFlags: [],
+        recommendations: [
+          'Ne communiquez jamais ce code de sécurité à un tiers.',
+          'Si vous n\'êtes pas à l\'origine de cette demande, sécurisez vos accès.',
+        ],
+      );
+    }
+
+    int totalRisk = 0;
+    final redFlags = <String>[];
+    final recommendations = <String>[];
+
     bool hasShortener = false;
     bool hasIpUrl = false;
     bool hasSuspiciousTld = false;
+    bool hasTyposquatting = false;
+    int verifiedUrlCount = 0;
 
     for (final url in urls) {
       final lowUrl = url.toLowerCase();
-      // Détection des raccourcisseurs
+      final host = _extractHost(url);
+
+      if (host != null && _isVerifiedDomain(host)) {
+        verifiedUrlCount++;
+        continue;
+      }
+
+      // Détection de Typosquatting / Usurpation de marque
+      if (host != null) {
+        final typosquatDesc = _detectTyposquatting(host);
+        if (typosquatDesc != null) {
+          hasTyposquatting = true;
+          totalRisk += 55;
+          redFlags.add(typosquatDesc);
+        }
+      }
+
+      // Repérage des services de redirection / raccourcissement
       for (final shortener in _urlShorteners) {
         if (lowUrl.contains(shortener)) {
           hasShortener = true;
@@ -139,14 +315,14 @@ class SmsPhishingDetector {
         }
       }
 
-      // Détection d'URL par IP brute
+      // Adresses IPv4 directes (hôtes éphémères)
       if (RegExp(r'https?:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}').hasMatch(lowUrl)) {
         hasIpUrl = true;
         totalRisk += 45;
         redFlags.add('Lien pointant directement vers une adresse IP numérique brute.');
       }
 
-      // Extensions suspectes courantes en hameçonnage
+      // Extensions de complaisance fréquemment abusées
       final suspiciousExtensions = ['.xyz', '.top', '.club', '.buzz', '.rest', '.sbs', '.cfd', '.click', '.tk', '.ga', '.ml'];
       for (final ext in suspiciousExtensions) {
         if (lowUrl.contains(ext)) {
@@ -158,7 +334,7 @@ class SmsPhishingDetector {
       }
     }
 
-    // 2. Mots-clés de fausse livraison
+    // Indices de colis / fausse livraison
     for (final entry in _deliveryKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
@@ -166,7 +342,7 @@ class SmsPhishingDetector {
       }
     }
 
-    // 3. Mots-clés administratifs / organismes publics
+    // Indices d'usurpation institutionnelle ou fiscale
     for (final entry in _administrativeKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
@@ -174,7 +350,7 @@ class SmsPhishingDetector {
       }
     }
 
-    // 4. Mots-clés bancaires / mots de passe
+    // Indices de sécurité bancaire et capture d'identifiants
     for (final entry in _bankingKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
@@ -182,7 +358,7 @@ class SmsPhishingDetector {
       }
     }
 
-    // 5. Mots-clés d'urgence
+    // Formulation incitant à l'urgence immédiate
     for (final entry in _urgencyKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
@@ -190,9 +366,16 @@ class SmsPhishingDetector {
       }
     }
 
-    // Combinaison Lien + Mots-clés = Danger démultiplié
-    if (urls.isNotEmpty && (redFlags.isNotEmpty)) {
+    // Majoration si un lien externe non vérifié est associé à au moins un signal suspect
+    final hasUnverifiedUrls = (urls.length - verifiedUrlCount) > 0;
+    if (hasUnverifiedUrls && redFlags.isNotEmpty) {
       totalRisk += 20;
+    }
+
+    // Atténuation si les seuls liens sont des domaines officiels vérifiés
+    if (urls.isNotEmpty && !hasUnverifiedUrls && !hasTyposquatting) {
+      totalRisk = (totalRisk * 0.25).round();
+      redFlags.removeWhere((flag) => flag.contains('Usurpation d\'organisme officiel'));
     }
 
     // Calcul du score plafonné
@@ -202,14 +385,20 @@ class SmsPhishingDetector {
     String verdictTitle;
     String verdictDesc;
 
-    if (finalScore >= 65 || hasIpUrl || (hasShortener && urls.isNotEmpty && redFlags.length >= 2) || hasSuspiciousTld) {
+    final bool hasCriticalRisk = finalScore >= 65 ||
+        hasIpUrl ||
+        hasTyposquatting ||
+        (hasShortener && urls.isNotEmpty && redFlags.length >= 2) ||
+        hasSuspiciousTld;
+
+    if (hasCriticalRisk) {
       level = PhishingRiskLevel.dangerous;
       verdictTitle = 'Hameçonnage Très Probable';
       verdictDesc = 'Ce message présente tous les indicateurs d\'une tentative d\'escroquerie ou de vol d\'identifiants.';
       recommendations.add('Ne cliquez surtout sur aucun lien présent dans ce message.');
       recommendations.add('Ne communiquez jamais vos coordonnées bancaires ou mots de passe par SMS.');
       recommendations.add('Bloquez l\'expéditeur et supprimez le message.');
-    } else if (finalScore >= 30 || urls.isNotEmpty) {
+    } else if (finalScore >= 30 || hasUnverifiedUrls) {
       level = PhishingRiskLevel.suspicious;
       verdictTitle = 'Message Suspect';
       verdictDesc = 'Ce message contient des formulations ou des liens inhabituels justifiant une vigilance accrue.';
@@ -217,8 +406,10 @@ class SmsPhishingDetector {
       recommendations.add('Prenez garde aux demandes de paiement ou de mise à jour d\'adresse.');
     } else {
       level = PhishingRiskLevel.safe;
-      verdictTitle = 'Message Sécuritaire';
-      verdictDesc = 'Aucun indicateur majeur d\'escroquerie ou de hameçonnage n\'a été détecté dans ce message.';
+      verdictTitle = verifiedUrlCount > 0 ? 'Message Officiel Vérifié' : 'Message Sécuritaire';
+      verdictDesc = verifiedUrlCount > 0
+          ? 'Ce message provient d\'un domaine officiel reconnu et ne présente aucun indicateur de fraude.'
+          : 'Aucun indicateur majeur d\'escroquerie ou de hameçonnage n\'a été détecté dans ce message.';
       recommendations.add('Restez vigilant si un correspondant inconnu vous demande de l\'argent ou des informations privées.');
     }
 

@@ -10,6 +10,7 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/services/citizen_impact_service.dart';
+import '../../../../core/network/api_service.dart';
 import '../controllers/blacklist_controller.dart';
 import '../../domain/entities/blacklisted_entry.dart';
 
@@ -24,6 +25,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
   late TabController _tabController;
   List<call_log.CallLogEntry> _recentCalls = [];
   bool _isLoadingCalls = true;
+  bool _isAuditingCalls = false;
   String _searchFilter = '';
 
   String _formatRelativeTime(int? timestampMs, AppLocalizations? l10n) {
@@ -142,8 +144,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                           setModalState(() => isSubmitting = true);
                           final messenger = ScaffoldMessenger.of(context);
                           final navigator = Navigator.of(ctx);
-                          final reportUseCase = ref.read(reportSpamUseCaseProvider);
-                          final result = await reportUseCase(
+                          final result = await ref.read(blacklistProvider.notifier).reportSpam(
                             rawPhoneNumber: rawNumber,
                             category: selectedCategory,
                           );
@@ -185,13 +186,318 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
     );
   }
 
-  Widget _buildChoiceChip(String label, String value, String current, ValueChanged<String> onSelected) {
+  Widget _buildChoiceChip(String label, String value, String current, ValueChanged<String> onSelected, {Color? activeColor}) {
     final selected = current == value;
     return ChoiceChip(
       label: Text(label, style: TextStyle(color: selected ? Colors.white : null, fontSize: 12)),
       selected: selected,
-      selectedColor: AppTheme.accentRed,
+      selectedColor: activeColor ?? AppTheme.accentRed,
       onSelected: (_) => onSelected(value),
+    );
+  }
+
+  Future<void> _auditRecentCalls() async {
+    if (_isAuditingCalls) return;
+    setState(() => _isAuditingCalls = true);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final numbersToAudit = _recentCalls
+          .map((c) => c.number?.trim() ?? '')
+          .where((phoneNum) => phoneNum.isNotEmpty && phoneNum.length >= 7)
+          .toSet()
+          .toList();
+
+      if (numbersToAudit.isEmpty) {
+        if (mounted) setState(() => _isAuditingCalls = false);
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Aucun numéro vérifiable dans le journal récent.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      final results = await ApiService().checkNumbersBatch(numbersToAudit);
+      if (mounted) setState(() => _isAuditingCalls = false);
+
+      if (results != null) {
+        int spamCount = 0;
+        results.forEach((phoneStr, data) {
+          if (data['is_spam'] == true || (data['risk_score'] as int? ?? 0) >= 50) {
+            spamCount++;
+          }
+        });
+
+        if (spamCount > 0) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text('Audit terminé : $spamCount numéro(s) suspect(s) identifié(s) dans votre journal.'),
+              backgroundColor: AppTheme.accentRed,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        } else {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text('Audit terminé : Vos ${numbersToAudit.length} appels récents sont sains.'),
+              backgroundColor: AppTheme.accentGreen,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      } else {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Impossible d\'effectuer l\'audit réseau.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isAuditingCalls = false);
+      AppLogger.log('[ActivityPage] Erreur audit appels: $e');
+    }
+  }
+
+  void _showBlockedDetailsModal(BuildContext context, BlacklistedEntry item) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        final catColor = _getCategoryColor(item.category);
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      item.category.toUpperCase(),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: catColor),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                item.maskedNumber.isNotEmpty ? item.maskedNumber : 'Numéro protégé',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.accentRed),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Score de risque : ${item.riskScore}% (${item.reportsCount} signalement(s))',
+                    style: const TextStyle(fontSize: 13, color: AppTheme.accentRed, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'Ce numéro est actuellement filtré par ShieldNet. S\'il s\'agit d\'un médecin, d\'un livreur ou d\'un proche légitime, vous pouvez contester ce blocage pour accélérer sa réhabilitation.',
+                  style: TextStyle(fontSize: 13, height: 1.4),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.verified_outlined, size: 18, color: AppTheme.accentGreen),
+                      label: const Text(
+                        'Contester (Faux positif)',
+                        style: TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _showContestModal(context, item);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showContestModal(BuildContext context, BlacklistedEntry item) {
+    String selectedReason = 'service';
+    final commentController = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 24,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Contestation de Faux-Positif',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  item.maskedNumber,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Nature de l\'appel légitime :',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildChoiceChip('Service / Entreprise', 'service', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip('Personnel / Proche', 'personal', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip('Livraison / Colis', 'delivery', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip('Santé / Médical', 'medical', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip('Erreur de signalement', 'mistake', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: commentController,
+                  maxLength: 500,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    hintText: 'Précisions utiles (ex: cabinet de mon médecin traitant)',
+                    hintStyle: const TextStyle(fontSize: 13),
+                    isDense: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentGreen,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          setModalState(() => isSubmitting = true);
+                          final messenger = ScaffoldMessenger.of(context);
+                          final nav = Navigator.of(ctx);
+
+                          try {
+                            final res = await ApiService().submitSafeReport(
+                              phoneHash: item.phoneHash,
+                              maskedNumber: item.maskedNumber,
+                              reason: selectedReason,
+                              comment: commentController.text.trim(),
+                            );
+
+                            nav.pop();
+                            if (res != null) {
+                              await CitizenImpactService.incrementReportsCount();
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Avis légitime transmis ! Le consensus communautaire évalue la réhabilitation.'),
+                                  backgroundColor: AppTheme.accentGreen,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              ref.read(blacklistProvider.notifier).syncWithServer();
+                            } else {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Impossible d\'enregistrer votre contestation.'),
+                                  backgroundColor: AppTheme.accentRed,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            nav.pop();
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text('Erreur: $e'),
+                                backgroundColor: AppTheme.accentRed,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text(
+                          'Transmettre la contestation',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -285,14 +591,73 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
 
     final blockedHashes = blockedList.map((b) => b.phoneHash).toSet();
 
+    final auditHeader = Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.security_update_good_rounded, color: AppTheme.primaryColor, size: 18),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Audit de sécurité du journal',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                Text(
+                  'Vérifie vos 50 derniers appels via le Cloud',
+                  style: TextStyle(color: Colors.grey, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: _isAuditingCalls ? null : _auditRecentCalls,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: _isAuditingCalls
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(
+                    'Lancer',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+          ),
+        ],
+      ),
+    );
+
     return RefreshIndicator(
       onRefresh: _loadCallHistory,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        itemCount: _recentCalls.length,
+        itemCount: _recentCalls.length + 1,
         separatorBuilder: (context, index) => const SizedBox(height: 10),
         itemBuilder: (ctx, index) {
-          final call = _recentCalls[index];
+          if (index == 0) {
+            return auditHeader;
+          }
+          final call = _recentCalls[index - 1];
           final rawNum = call.number ?? '';
           final hash = rawNum.isNotEmpty ? CryptoUtils.hashPhoneNumber(rawNum) : '';
           final isBlocked = blockedHashes.contains(hash);
@@ -465,6 +830,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                             border: Border.all(color: borderColor),
                           ),
                           child: ListTile(
+                            onTap: () => _showBlockedDetailsModal(context, item),
                             leading: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(

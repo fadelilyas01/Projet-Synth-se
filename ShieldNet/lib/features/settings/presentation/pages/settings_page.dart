@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/providers/app_providers.dart';
 import '../../../../core/services/background_sync_service.dart';
@@ -21,58 +20,27 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  bool _autoBlockEnabled = true;
-  bool _smsAnalysisEnabled = true;
-  bool _contactsOnlyEnabled = false;
-  bool _autoSyncEnabled = true;
   bool _isSyncing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPreferences();
-  }
-
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    final autoBlock = prefs.getBool('settings_auto_block') ?? true;
-    final sms = prefs.getBool('settings_sms_analysis') ?? true;
-    final contactsOnly = prefs.getBool('settings_contacts_only') ?? false;
-    final autoSync = await BackgroundSyncService.instance.isAutoSyncEnabled();
-
-    if (mounted) {
-      setState(() {
-        _autoBlockEnabled = autoBlock;
-        _smsAnalysisEnabled = sms;
-        _contactsOnlyEnabled = contactsOnly;
-        _autoSyncEnabled = autoSync;
-      });
-    }
-  }
 
   Future<void> _toggleAutoBlock(bool val) async {
     if (val) {
       final status = await Permission.phone.request();
       if (status.isGranted) {
-        setState(() => _autoBlockEnabled = true);
-        await ref.read(protectionStatusProvider.notifier).updateAutoBlock(true);
+        await ref.read(appSettingsProvider.notifier).setAutoBlock(true);
       }
     } else {
-      setState(() => _autoBlockEnabled = false);
-      await ref.read(protectionStatusProvider.notifier).updateAutoBlock(false);
+      await ref.read(appSettingsProvider.notifier).setAutoBlock(false);
     }
   }
 
   Future<void> _toggleSms(bool val) async {
-    setState(() => _smsAnalysisEnabled = val);
-    await ref.read(protectionStatusProvider.notifier).updateSmsAnalysis(val);
+    await ref.read(appSettingsProvider.notifier).setSmsAnalysis(val);
   }
 
   Future<void> _toggleContactsOnly(bool val) async {
     if (val) {
       final status = await Permission.contacts.request();
       if (status.isGranted) {
-        setState(() => _contactsOnlyEnabled = true);
         await ref.read(contactsOnlyProvider.notifier).toggle(true);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -93,14 +61,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         }
       }
     } else {
-      setState(() => _contactsOnlyEnabled = false);
       await ref.read(contactsOnlyProvider.notifier).toggle(false);
     }
   }
 
   Future<void> _toggleAutoSync(bool val) async {
-    setState(() => _autoSyncEnabled = val);
-    await BackgroundSyncService.instance.setAutoSyncEnabled(val);
+    await ref.read(appSettingsProvider.notifier).setAutoSync(val);
   }
 
   Future<void> _syncNow([AppLocalizations? l10n]) async {
@@ -131,27 +97,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<bool>>(protectionStatusProvider, (_, next) {
-      next.whenData((_) async {
-        if (mounted) {
-          final prefs = await SharedPreferences.getInstance();
-          final autoBlock = prefs.getBool('settings_auto_block') ?? true;
-          final sms = prefs.getBool('settings_sms_analysis') ?? true;
-          if (_autoBlockEnabled != autoBlock || _smsAnalysisEnabled != sms) {
-            setState(() {
-              _autoBlockEnabled = autoBlock;
-              _smsAnalysisEnabled = sms;
-            });
-          }
-        }
-      });
-    });
-
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(authNotifierProvider);
     final themeMode = ref.watch(themeModeProvider);
     final currentLocale = ref.watch(localeProvider);
     final nightShield = ref.watch(nightShieldProvider);
+    final contactsOnly = ref.watch(contactsOnlyProvider);
+    final settings = ref.watch(appSettingsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
@@ -163,32 +115,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
-          // 1. COMPTE UTILISATEUR
+          // Profil utilisateur et état d'authentification
           _buildUserAccountCard(user, cardBg, borderColor, isDark, l10n),
           const SizedBox(height: 16),
 
-          // 2. SÉCURITÉ
+          // Options de sécurité et de filtrage
           _buildSectionHeader(l10n?.sectionSecurity ?? 'SÉCURITÉ'),
           _buildCard(
             cardBg: cardBg,
             borderColor: borderColor,
             children: [
               SwitchListTile(
-                value: _autoBlockEnabled,
+                value: settings.autoBlock,
                 onChanged: _toggleAutoBlock,
                 title: Text(l10n?.settingCallFiltering ?? 'Filtrage d\'appels', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 secondary: const Icon(Icons.shield, color: AppTheme.accentGreen, size: 24),
               ),
               const Divider(height: 1, indent: 56),
               SwitchListTile(
-                value: _smsAnalysisEnabled,
+                value: settings.smsAnalysis,
                 onChanged: _toggleSms,
                 title: Text(l10n?.settingSmsFiltering ?? 'Filtrage des SMS', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 secondary: const Icon(Icons.sms, color: AppTheme.primaryColor, size: 24),
               ),
               const Divider(height: 1, indent: 56),
               SwitchListTile(
-                value: _contactsOnlyEnabled,
+                value: contactsOnly,
                 onChanged: _toggleContactsOnly,
                 title: Text(l10n?.settingContactsOnly ?? 'Mode Contacts Uniquement', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 subtitle: Text(l10n?.settingContactsOnlyDesc ?? 'Ne laisser sonner que vos contacts enregistrés', style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -235,7 +187,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
               const Divider(height: 1, indent: 56),
               SwitchListTile(
-                value: _autoSyncEnabled,
+                value: settings.autoSync,
                 onChanged: _toggleAutoSync,
                 title: Text(l10n?.settingBgSync ?? 'Sync en arrière-plan', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 secondary: const Icon(Icons.sync, color: AppTheme.primaryColor, size: 24),
@@ -256,7 +208,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
-          // 3. PRÉFÉRENCES
+          // Préférences d'affichage et de langue
           _buildSectionHeader(l10n?.sectionPreferences ?? 'PRÉFÉRENCES'),
           _buildCard(
             cardBg: cardBg,
@@ -304,7 +256,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
-          // 4. ADMINISTRATION (Si l'utilisateur est admin)
+          // Espace modération pour les comptes administrateurs
           if (user != null && user.isAdmin) ...[
             _buildSectionHeader(l10n?.sectionAdmin ?? 'ADMINISTRATION'),
             _buildCard(
@@ -327,7 +279,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 16),
           ],
 
-          // 5. FOOTER
+          // Informations de version et licence
           const Center(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0),

@@ -1,0 +1,34 @@
+# =====================================================================
+# ShieldNet Backend — Local .gitignore
+# =====================================================================
+
+# Fichiers de configuration et secrets d'environnement
+.env
+.env.*
+!.env.example
+
+# Base de données de développement local
+db.sqlite3
+*.sqlite3
+*.sqlite3-journal
+
+# Fichiers compilés Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Fichiers statiques et médias générés
+staticfiles/
+media/
+
+# Rapports de couverture et tests
+.pytest_cache/
+htmlcov/
+.coverage
+*.log

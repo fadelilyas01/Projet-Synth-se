@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>{% block title %}{{ title }} | ShieldNet Enterprise SOC{% endblock %}</title>
+  <title>{% block title %}{{ title }} | ShieldNet Admin{% endblock %}</title>
 
   <!-- Google Fonts : Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,14 +14,14 @@
   <link rel="stylesheet" href="{% block stylesheet %}{% static 'admin/css/base.css' %}{% endblock %}">
   {% block extrastyle %}{% endblock %}
 
-  <!-- Stylesheet Cyber SOC Ultra-Premium (Senior Design System Overrides - Priorité Absolue) -->
+  <!-- Stylesheet personnalisée de l'interface d'administration -->
   <link rel="stylesheet" href="{% static 'shield_api/admin_premium.css' %}?v={% now 'U' %}">
   {% block extrahead %}{% endblock %}
 
-  <!-- Chart.js pour la télémétrie SOC -->
+  <!-- Chart.js pour les graphiques de signalements -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-  <!-- Moteur Universel de Gestion du Thème Sombre / Clair (Dual-Engine Sync) -->
+  <!-- Gestion du thème clair / sombre -->
   <script>
     function applyAdminTheme(theme) {
       const isLight = theme === 'light';
@@ -127,9 +127,9 @@
           </div>
           <div class="brand-info">
             <div class="brand-name">
-              ShieldNet <span class="brand-tag">SOC</span>
+              ShieldNet <span class="brand-tag">Admin</span>
             </div>
-            <div class="brand-sub">Cyber Télécom • UQO</div>
+            <div class="brand-sub">Projet de Synthèse • UQO</div>
           </div>
         </a>
       </div>
@@ -139,15 +139,15 @@
         <div class="nav-section-label">Supervision</div>
         <a href="{% url 'admin:index' %}" class="nav-item {% if request.path == '/admin/' %}active{% endif %}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
-          <span>Tableau de Bord SOC</span>
+          <span>Tableau de Bord</span>
         </a>
         <a href="/admin/operations/triage/" class="nav-item {% if '/operations/triage/' in request.path %}active{% endif %}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-          <span>Centre de Triage</span>
+          <span>Modération des Signalements</span>
         </a>
         <a href="/admin/operations/sandbox/" class="nav-item {% if '/operations/sandbox/' in request.path %}active{% endif %}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-          <span>Simulateur Sandbox</span>
+          <span>Testeur de Numéros</span>
         </a>
 
         <div class="nav-section-label">Registres & Données</div>
@@ -179,7 +179,7 @@
         </a>
         <a href="/admin/operations/report/executive/" target="_blank" class="nav-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-          <span>Rapport Exécutif PDF</span>
+          <span>Rapport d'Activité PDF</span>
         </a>
         <a href="/api/v1/docs/" target="_blank" class="nav-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>

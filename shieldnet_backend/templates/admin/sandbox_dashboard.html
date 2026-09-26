@@ -6,23 +6,23 @@
 {% block content %}
 <div class="soc-page-container">
 
-  <!-- En-tête du Laboratoire Sandbox -->
+  <!-- En-tête du Testeur de Numéros -->
   <div class="sandbox-header-card">
     <div class="header-left">
       <div class="header-icon-badge purple">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
       </div>
       <div>
-        <h1 class="page-main-title">Laboratoire Sandbox & Analyse Heuristique</h1>
-        <p class="page-subtitle">Testeur d'empreinte HMAC-SHA256, détection d'anomalies télécoms et simulation de réputation en direct</p>
+        <h1 class="page-main-title">Testeur de Numéros (Laboratoire Sandbox)</h1>
+        <p class="page-subtitle">Calcul du hash HMAC-SHA256, validation du format et simulation du score de réputation</p>
       </div>
     </div>
     <div class="header-right" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <span class="soc-pill soc-pill-blue">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        Moteur Cryptographique E.164
+        Format E.164
       </span>
-      <a href="{% url 'admin:index' %}" class="ops-btn ops-btn-return" title="Retourner au Tableau de Bord SOC">
+      <a href="{% url 'admin:index' %}" class="ops-btn ops-btn-return" title="Retourner au tableau de bord">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         <span>Retour au Tableau de Bord SOC</span>
       </a>
@@ -100,7 +100,7 @@
       <ul id="sb-anomalies-list" class="sb-anomalies-list"></ul>
     </div>
 
-    <!-- Moteur d'Arbitrage & IA Explicable (ShieldNet AI Engine & XAI) -->
+    <!-- Module d'Arbitrage et d'Analyse des Signalements -->
     <div id="sb-ai-container" style="display: none; margin-top: 20px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; padding: 20px;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -109,14 +109,14 @@
           </div>
           <div>
             <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-              <span>Moteur d'Arbitrage Prédictif & XAI (ShieldNet AI Engine)</span>
+              <span>Moteur d'Arbitrage & Détection des Faux Positifs</span>
               <span id="sb-ai-latency" class="soc-pill soc-pill-blue" style="font-size: 11px;">0 ms</span>
             </div>
-            <div style="font-size: 12px; color: var(--text-muted);">Résolution sémantique des faux positifs & interception proactive des arnaques</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Résolution sémantique des faux positifs & analyse des signalements</div>
           </div>
         </div>
         <div id="sb-ai-verdict-badge" class="badge-safe" style="font-size: 12px; padding: 6px 14px; font-weight: 700;">
-          VERDICT IA
+          VERDICT
         </div>
       </div>
 
@@ -130,43 +130,43 @@
           </div>
         </div>
         <div class="sb-metric-box">
-          <span class="sb-metric-label">Score de Risque IA :</span>
+          <span class="sb-metric-label">Score de Risque Estimé :</span>
           <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
             <span id="sb-ai-risk-score" style="font-size: 20px; font-weight: 800; color: #ef4444;">0 / 100</span>
-            <span style="font-size: 11px; color: var(--text-muted);">(Composite)</span>
+            <span style="font-size: 11px; color: var(--text-muted);">(Calculé)</span>
           </div>
         </div>
         <div class="sb-metric-box">
-          <span class="sb-metric-label">Entités Détectées (NLP) :</span>
+          <span class="sb-metric-label">Mots-clés Détectés :</span>
           <div id="sb-ai-entities" style="font-size: 13px; font-weight: 600; color: var(--text-main); margin-top: 4px;">
             Aucune
           </div>
         </div>
         <div class="sb-metric-box">
-          <span class="sb-metric-label">Recommandation d'Action :</span>
+          <span class="sb-metric-label">Recommandation :</span>
           <div id="sb-ai-rec" style="font-size: 13px; font-weight: 700; margin-top: 4px;">
             -
           </div>
         </div>
       </div>
 
-      <!-- Description et Explication Causale XAI -->
+      <!-- Description et Explication -->
       <div style="margin-bottom: 14px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Explication du Diagnostic :</div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Explication de l'évaluation :</div>
         <div id="sb-ai-desc" style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;"></div>
       </div>
 
-      <!-- Facteurs d'Attribution Causale XAI (Explainable AI) -->
+      <!-- Critères de Décision -->
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Facteurs d'Attribution XAI (Pondération Causale) :</div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Critères pris en compte :</div>
         <div id="sb-ai-xai-factors" style="display: flex; flex-direction: column; gap: 6px;"></div>
       </div>
 
       <!-- Action Recommandée en 1 Clic -->
       <div id="sb-ai-action-banner" style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-        <span id="sb-ai-action-text" style="font-size: 12px; color: var(--text-muted);">Recommandation automatisée prête à être appliquée.</span>
+        <span id="sb-ai-action-text" style="font-size: 12px; color: var(--text-muted);">Recommandation prête à être appliquée.</span>
         <button type="button" id="sb-ai-action-btn" class="ops-btn ops-btn-primary" style="display: none;" onclick="applyAIRecommendation()">
-          Appliquer la Recommandation IA
+          Appliquer la recommandation
         </button>
       </div>
     </div>
@@ -339,16 +339,23 @@ function runSandboxAudit() {
       // Description explicative
       document.getElementById('sb-ai-desc').textContent = ai.verdict_description;
 
-      // Facteurs d'attribution causale XAI (Explainable AI)
+      // Facteurs explicatifs du score
       const xaiContainer = document.getElementById('sb-ai-xai-factors');
       xaiContainer.innerHTML = '';
       if (ai.xai_factors && ai.xai_factors.length > 0) {
         ai.xai_factors.forEach(f => {
           const fDiv = document.createElement('div');
           fDiv.style.cssText = `display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 6px; font-size: 12px; background: ${f.direction === 'positive' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border-left: 3px solid ${f.direction === 'positive' ? '#10b981' : '#ef4444'};`;
+          const factorIcon = f.direction === 'positive'
+            ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>'
+            : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+          const factorLabel = f.direction === 'positive' ? 'RÉHABILITATION' : 'MENACE';
+
           fDiv.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 700; color: ${f.direction === 'positive' ? '#10b981' : '#ef4444'};">${f.direction === 'positive' ? '🛡️ RÉHABILITATION' : '⚠️ MENACE'}</span>
+              <span style="font-weight: 700; color: ${f.direction === 'positive' ? '#10b981' : '#ef4444'}; display: inline-flex; align-items: center; gap: 4px;">
+                ${factorIcon} ${factorLabel}
+              </span>
               <span style="color: var(--text-main);">${f.factor}</span>
             </div>
             <strong style="color: ${f.direction === 'positive' ? '#10b981' : '#ef4444'};">${f.weight > 0 ? '+' : ''}${f.weight}%</strong>
@@ -365,7 +372,10 @@ function runSandboxAudit() {
       if (ai.recommendation === 'AUTO_WHITELIST') {
         actionBtn.style.display = 'inline-flex';
         actionBtn.className = 'ops-btn ops-btn-primary';
-        actionBtn.innerHTML = '🛡️ Appliquer : Blanchir & Réhabiliter Immédiatement';
+        actionBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+          <span>Appliquer : Blanchir & Réhabiliter Immédiatement</span>
+        `;
         actionBtn.onclick = () => executeSandboxAction('whitelist');
         actionText.textContent = `Confiance IA de ${ai.false_positive_confidence}% pour la réhabilitation immédiate de ce service essentiel.`;
       } else if (ai.recommendation === 'ESCALATE_BLOCK') {
@@ -373,7 +383,10 @@ function runSandboxAudit() {
         actionBtn.className = 'ops-btn';
         actionBtn.style.background = '#ef4444';
         actionBtn.style.color = '#fff';
-        actionBtn.innerHTML = '🚫 Appliquer : Bloquer en Liste Noire d\'Urgence';
+        actionBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+          <span>Appliquer : Bloquer en Liste Noire d'Urgence</span>
+        `;
         actionBtn.onclick = () => executeSandboxAction('block');
         actionText.textContent = `Score de risque critique (${ai.composite_risk_score}/100) — Menace imminente ou usurpation avérée.`;
       } else {

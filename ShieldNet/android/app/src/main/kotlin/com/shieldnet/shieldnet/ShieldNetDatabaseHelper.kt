@@ -61,9 +61,15 @@ object ShieldNetDatabaseHelper {
                 return salt
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Lecture Keystore impossible, utilisation du sel par défaut: ${e.message}")
+            Log.w(TAG, "Lecture Keystore impossible: ${e.message}")
         }
-        return DEFAULT_SALT
+        val isDebuggable = (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        return if (isDebuggable) {
+            DEFAULT_SALT
+        } else {
+            Log.e(TAG, "Sécurité: Sel absent du Keystore en environnement de production.")
+            ""
+        }
     }
 
     /**

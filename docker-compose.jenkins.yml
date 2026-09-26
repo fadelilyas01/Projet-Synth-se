@@ -1,0 +1,26 @@
+services:
+  # -------------------------------------------------------------------
+  # Serveur d'Intégration Continue Jenkins LTS (Projet de Synthèse UQO)
+  # -------------------------------------------------------------------
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: shieldnet_jenkins
+    restart: unless-stopped
+    user: root
+    ports:
+      - "8080:8080"      # Interface Web Jenkins (Dashboard CI/CD)
+      - "50000:50000"    # Port de communication pour agents distants JNLP
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock  # Accès au démon Docker hôte
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=true -Duser.timezone=America/Toronto
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/login || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  jenkins_data:
+    name: shieldnet_jenkins_data

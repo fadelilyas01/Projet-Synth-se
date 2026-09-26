@@ -28,7 +28,7 @@ class SpamReportCreateSerializer(serializers.Serializer):
     phone_hash = serializers.CharField(max_length=64, min_length=64)
     masked_number = serializers.CharField(max_length=30, required=False, allow_blank=True)
     category = serializers.ChoiceField(choices=BlacklistedNumber._meta.get_field('category').choices)
-    comment = serializers.CharField(required=False, allow_blank=True)
+    comment = serializers.CharField(required=False, allow_blank=True, max_length=1000)
 
     def validate_phone_hash(self, value):
         # Vérification stricte du format SHA-256 (64 caractères hexadécimaux)
@@ -43,7 +43,7 @@ class SafeReportCreateSerializer(serializers.Serializer):
     phone_hash = serializers.CharField(max_length=64, min_length=64)
     masked_number = serializers.CharField(max_length=30, required=False, allow_blank=True)
     reason = serializers.ChoiceField(choices=SafeReasonChoices.choices, default=SafeReasonChoices.LEGITIMATE_SERVICE)
-    comment = serializers.CharField(required=False, allow_blank=True)
+    comment = serializers.CharField(required=False, allow_blank=True, max_length=1000)
 
     def validate_phone_hash(self, value):
         if not re.match(r'^[a-fA-F0-9]{64}$', value):
@@ -69,6 +69,26 @@ class CheckNumberResponseSerializer(serializers.Serializer):
     consensus_score = serializers.FloatField(default=0.0)
     is_whitelisted = serializers.BooleanField(default=False)
     whitelist_reason = serializers.CharField(allow_null=True, required=False)
+
+class BatchCheckRequestSerializer(serializers.Serializer):
+    """
+    Sérialiseur pour la vérification groupée d'empreintes SHA-256 (jusqu'à 100 numéros).
+    Permet au mobile de scanner en une seule requête son journal d'appels.
+    """
+    hashes = serializers.ListField(
+        child=serializers.CharField(max_length=64, min_length=64),
+        max_length=100,
+        allow_empty=False
+    )
+
+    def validate_hashes(self, value):
+        cleaned = []
+        for h in value:
+            h_str = h.strip().lower()
+            if not re.match(r'^[a-f0-9]{64}$', h_str):
+                raise serializers.ValidationError(f"L'empreinte '{h}' n'est pas un hash SHA-256 hexadécimal valide.")
+            cleaned.append(h_str)
+        return list(set(cleaned))
 
 from django.contrib.auth.models import User
 
@@ -122,11 +142,8 @@ class EmailLoginSerializer(serializers.Serializer):
         if not user:
             user = User.objects.filter(username__iexact=email).first()
 
-        if not user:
-            raise serializers.ValidationError("Aucun compte n'existe avec cet email. Veuillez créer un compte ou vous connecter avec Google.")
-
-        if not user.check_password(password):
-            raise serializers.ValidationError("Mot de passe incorrect.")
+        if not user or not user.check_password(password):
+            raise serializers.ValidationError("Adresse email ou mot de passe incorrect.")
 
         if not user.is_active:
             raise serializers.ValidationError("Ce compte utilisateur est inactif.")

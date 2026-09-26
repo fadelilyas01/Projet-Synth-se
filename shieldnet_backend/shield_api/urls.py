@@ -22,15 +22,19 @@ from .views import (
     AdminSafeReportsListView,
     HealthCheckView,
     AIDiagnoseView,
+    BatchCheckNumberView,
+    PrometheusMetricsView,
 )
 
 urlpatterns = [
+    path('metrics/', PrometheusMetricsView.as_view(), name='prometheus-metrics'),
     path('ai/diagnose/', AIDiagnoseView.as_view(), name='ai-diagnose'),
     path('health/', HealthCheckView.as_view(), name='health-check'),
     path('sync/status/', SyncStatusView.as_view(), name='sync-status'),
     path('blacklist/', BlacklistDownloadView.as_view(), name='blacklist-download'),
     path('reports/', SubmitReportView.as_view(), name='submit-report'),
     path('reports/safe/', SubmitSafeReportView.as_view(), name='submit-safe-report'),
+    path('check/batch/', BatchCheckNumberView.as_view(), name='batch-check-number'),
     path('check/<str:phone_hash>/', CheckNumberView.as_view(), name='check-number'),
     path('consensus/<str:phone_hash>/', ConsensusStatusView.as_view(), name='consensus-status'),
     path('auth/register/', RegisterView.as_view(), name='auth-register'),

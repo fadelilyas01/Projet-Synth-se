@@ -27,5 +27,17 @@ void main() {
       expect(CryptoUtils.maskPhoneNumber('+18191234567'), '+1819 *** **67');
       expect(CryptoUtils.maskPhoneNumber('123'), '***'); // Numéro trop court
     });
+
+    test('La normalisation sur chaîne vide ou sans chiffres doit retourner une chaîne vide', () {
+      expect(CryptoUtils.normalizePhoneNumber(''), '');
+      expect(CryptoUtils.normalizePhoneNumber('   '), '');
+      expect(CryptoUtils.normalizePhoneNumber('abc'), '');
+    });
+
+    test('resolveSalt fournit un sel valide en environnement de test', () {
+      final salt = CryptoUtils.resolveSalt();
+      expect(salt, isNotEmpty);
+      expect(salt.length, greaterThanOrEqualTo(8));
+    });
   });
 }

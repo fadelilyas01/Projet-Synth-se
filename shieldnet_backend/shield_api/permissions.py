@@ -1,3 +1,4 @@
+import hmac
 from rest_framework import permissions
 from django.conf import settings
 
@@ -6,19 +7,20 @@ class HasAPIKeyOrAuthenticated(permissions.BasePermission):
     Règle de sécurité ShieldNet :
     Permet l'accès si l'utilisateur est un administrateur connecté (Django Admin / Session / JWT)
     OU si la requête inclut l'en-tête secret 'X-API-Key' correspondant à l'application mobile.
+    Vérification en temps constant (hmac.compare_digest) pour immunité contre les attaques par canal auxiliaire (timing attacks).
     """
     message = "Accès refusé : En-tête 'X-API-Key' manquant ou invalide, ou authentification requise."
 
     def has_permission(self, request, view):
-        # 1. Accès autorisé pour tout utilisateur authentifié (Admin / Staff / JWT)
+        # Accès accordé d'office si la session ou le token JWT est valide
         if request.user and request.user.is_authenticated:
             return True
 
-        # 2. Vérification de la clé API partagée envoyée par l'application Flutter
+        # Contrôle de la clé API partagée configurée pour l'application cliente mobile
         api_key = request.headers.get('X-API-Key')
-        expected_key = getattr(settings, 'API_KEY', 'ShieldNet_Secret_Token_UQO_2026')
+        expected_key = getattr(settings, 'API_KEY', None)
 
-        if api_key and api_key == expected_key:
+        if api_key and expected_key and hmac.compare_digest(api_key, expected_key):
             return True
 
         return False

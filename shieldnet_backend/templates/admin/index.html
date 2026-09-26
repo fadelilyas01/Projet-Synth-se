@@ -233,9 +233,15 @@
             </span>
             {% if item.ai %}
               {% if item.ai.recommendation == 'AUTO_WHITELIST' %}
-                <span class="badge-safe" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-block;">🤖 Faux-Positif ({{ item.ai.false_positive_confidence }}%)</span>
+                <span class="badge-safe" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+                  <span>Faux-Positif ({{ item.ai.false_positive_confidence }}%)</span>
+                </span>
               {% elif item.ai.recommendation == 'ESCALATE_BLOCK' %}
-                <span class="badge-critical" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-block;">🤖 Menace ({{ item.ai.composite_risk_score }}%)</span>
+                <span class="badge-critical" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  <span>Menace ({{ item.ai.composite_risk_score }}%)</span>
+                </span>
               {% endif %}
             {% endif %}
           </td>
@@ -341,15 +347,15 @@
 
       <div id="sb-anomalies-box" style="margin-top: 12px; font-size: 11px; color: var(--accent-red); display: none; padding: 8px 12px; background: var(--accent-red-bg); border-radius: 6px; border: 1px solid var(--accent-red);"></div>
 
-      <!-- Arbitrage IA ShieldNet & XAI -->
+      <!-- Diagnostic & Détection des faux positifs -->
       <div id="sb-ai-badge-row" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 11px; font-weight: 700; color: var(--accent-blue);">ShieldNet AI Engine :</span>
+          <span style="font-size: 11px; font-weight: 700; color: var(--accent-blue);">Diagnostic du modèle :</span>
           <span id="sb-ai-verdict" class="badge-safe" style="font-size: 11px;">-</span>
           <span id="sb-ai-fp-pct" style="font-size: 11px; color: var(--text-muted);"></span>
         </div>
         <a href="/admin/operations/sandbox/" class="ops-btn" style="font-size: 11px; padding: 4px 10px;">
-          Voir Explications XAI Détaillées &rarr;
+          Voir l'analyse détaillée &rarr;
         </a>
       </div>
     </div>

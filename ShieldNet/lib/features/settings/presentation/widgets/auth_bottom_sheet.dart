@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/auth_provider.dart';
@@ -347,36 +348,38 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
               ),
             ),
             if (_isLogin) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _emailController.text = 'admin@shieldnet.app';
-                      _passwordController.text = 'admin123';
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.vpn_key_rounded, size: 14, color: AppTheme.accentOrange),
-                        SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            'Identifiants Démo Admin (admin@shieldnet.app)',
-                            style: TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
-                            overflow: TextOverflow.ellipsis,
+              if (kDebugMode) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _emailController.text = 'admin@shieldnet.app';
+                        _passwordController.text = 'admin123';
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.vpn_key_rounded, size: 14, color: AppTheme.accentOrange),
+                          SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              'Identifiants Démo Admin (admin@shieldnet.app)',
+                              style: TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
             const SizedBox(height: 20),
             ElevatedButton(

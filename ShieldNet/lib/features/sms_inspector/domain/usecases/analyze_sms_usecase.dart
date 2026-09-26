@@ -1,10 +1,7 @@
 import '../../../../core/services/sms_phishing_detector.dart';
 
-/// Use case encapsulant l'analyse de phishing d'un message SMS.
-///
-/// Respecte le principe Single Responsibility : une seule responsabilité,
-/// une seule raison de changer. Les widgets de présentation appellent
-/// ce use case au lieu d'invoquer directement le détecteur.
+// Détection heuristique de phishing SMS
+// L'analyse s'exécute entièrement en local sans transmission réseau
 class AnalyzeSmsUseCase {
   /// Analyse le contenu d'un SMS et retourne le résultat de détection de phishing.
   ///

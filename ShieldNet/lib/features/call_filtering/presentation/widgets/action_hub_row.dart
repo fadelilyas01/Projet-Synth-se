@@ -20,7 +20,7 @@ class ActionHubRow extends StatelessWidget {
 
     return Row(
       children: [
-        // 1. Bouton Vérifier un Numéro
+        // Recherche directe dans la base de réputation
         Expanded(
           child: _buildActionButton(
             context: context,
@@ -39,7 +39,7 @@ class ActionHubRow extends StatelessWidget {
         ),
         const SizedBox(width: 12),
 
-        // 2. Bouton Inspecteur SMS & Phishing
+        // Analyseur de SMS et de liens d'hameçonnage
         Expanded(
           child: _buildActionButton(
             context: context,

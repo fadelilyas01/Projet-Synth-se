@@ -1,4 +1,4 @@
-# 🏛️ Architecture Logicielle & Spécification UML — ShieldNet
+# Architecture Logicielle & Spécification UML — ShieldNet
 
 Ce document constitue la **spécification architecturale officielle** du système **ShieldNet**, conçu dans le cadre du projet de synthèse (Génie Logiciel & Cybersécurité). Il détaille l'organisation des couches logicielles, les diagrammes de composants et le modèle de classes UML conforme aux principes **SOLID** et **Clean Architecture**.
 

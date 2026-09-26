@@ -40,5 +40,45 @@ void main() {
       expect(result.riskScore, greaterThanOrEqualTo(30));
       expect(result.extractedUrls, contains('http://super-promo.xyz'));
     });
+
+    test('Un SMS de code 2FA/OTP légitime ne doit pas déclencher de faux positif', () {
+      const message = 'Desjardins: Votre code de confirmation temporaire est 849201. Valide 5 minutes. Ne le transmettez a personne.';
+      final result = SmsPhishingDetector.analyze(message);
+
+      expect(result.level, equals(PhishingRiskLevel.safe));
+      expect(result.riskScore, equals(0));
+      expect(result.verdictTitle, contains('2FA/OTP'));
+      expect(result.extractedUrls, isEmpty);
+      expect(result.detectedRedFlags, isEmpty);
+    });
+
+    test('Un lien officiel gouvernemental québécois certifié doit être reconnu sans alerte abusive', () {
+      const message = 'Avis Revenu Québec: votre avis de cotisation est disponible sur https://www.revenuquebec.ca/fr/espace-citoyens';
+      final result = SmsPhishingDetector.analyze(message);
+
+      expect(result.level, equals(PhishingRiskLevel.safe));
+      expect(result.riskScore, lessThanOrEqualTo(25));
+      expect(result.verdictTitle, equals('Message Officiel Vérifié'));
+      expect(result.extractedUrls, contains('https://www.revenuquebec.ca/fr/espace-citoyens'));
+      expect(result.detectedRedFlags.any((f) => f.contains('Usurpation d\'organisme')), isFalse);
+    });
+
+    test('Une tentative de typosquatting avec mutation de marque doit être classée Dangereuse', () {
+      const message = 'Desjardins: Activite inhabituelle detectee. Mettez a jour vos acces sur https://desjard1ns-accesd.com/login';
+      final result = SmsPhishingDetector.analyze(message);
+
+      expect(result.level, equals(PhishingRiskLevel.dangerous));
+      expect(result.riskScore, greaterThanOrEqualTo(65));
+      expect(result.detectedRedFlags.any((f) => f.contains('Typosquatting') || f.contains('usurpant')), isTrue);
+    });
+
+    test('Un domaine composé frauduleux usurpant Hydro-Québec doit être détecté', () {
+      const message = 'Hydro-Québec: Solde impaye de 145.20. Reglez maintenant sur https://hydroquebec-facturation.net';
+      final result = SmsPhishingDetector.analyze(message);
+
+      expect(result.level, equals(PhishingRiskLevel.dangerous));
+      expect(result.riskScore, greaterThanOrEqualTo(65));
+      expect(result.detectedRedFlags.any((f) => f.contains('usurpant la marque officielle')), isTrue);
+    });
   });
 }

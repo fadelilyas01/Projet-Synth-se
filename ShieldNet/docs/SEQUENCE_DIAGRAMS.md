@@ -1,4 +1,4 @@
-# ⏱️ Diagrammes de Séquence des Flux Critiques — ShieldNet
+# Diagrammes de Séquence des Flux Critiques — ShieldNet
 
 Ce document détaille les flux temporels et décisionnels des 4 processus critiques du système **ShieldNet**. Chaque diagramme illustre les interactions chronologiques entre l'utilisateur, l'OS Android, le runtime Flutter, le module natif Kotlin et le backend central Django.
 
@@ -11,11 +11,11 @@ Ce flux représente l'exigence de performance la plus stricte du projet : évalu
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Caller as 📞 Appelant
-    participant AndroidOS as 📱 Android Telecom Framework
-    participant NativeService as ⚙️ ShieldNetCallScreeningService (Kotlin)
-    participant NativeDB as 🗄️ ShieldNetDatabaseHelper (SQLite)
-    actor Recipient as 👤 Utilisateur
+    actor Caller as Appelant
+    participant AndroidOS as Android Telecom Framework
+    participant NativeService as ShieldNetCallScreeningService (Kotlin)
+    participant NativeDB as ShieldNetDatabaseHelper (SQLite)
+    actor Recipient as Utilisateur
 
     Caller->>AndroidOS: Appel entrant émis (ex: +1 514-999-0000)
     Note over AndroidOS,NativeService: Déclenchement de onScreenCall(details)
@@ -27,7 +27,7 @@ sequenceDiagram
     alt Est un numéro d'urgence (911, 811, 988, Contact Whitelist)
         NativeDB-->>NativeService: return TRUE
         NativeService->>AndroidOS: respondToCall(ALLOW, silence=false, skipCallLog=false)
-        AndroidOS->>Recipient: Sonnerie prioritaire immédiate 🚨
+        AndroidOS->>Recipient: Sonnerie prioritaire immédiate
     else Pas un numéro d'urgence
         NativeDB-->>NativeService: return FALSE
         
@@ -38,17 +38,17 @@ sequenceDiagram
         alt Numéro présent dans la Liste Noire
             NativeDB-->>NativeService: return TRUE (Spam confirmé)
             NativeService->>AndroidOS: respondToCall(DISALLOW, reject=true, skipNotification=true)
-            Note over AndroidOS: Appel rejeté sans sonnerie (< 2 ms) 🚫
+            Note over AndroidOS: Appel rejeté sans sonnerie (< 2 ms)
             NativeService->>NativeDB: logBlockedCallEvent(phoneHash, timestamp)
         else Numéro absent de la Liste Noire
             NativeDB-->>NativeService: return FALSE
             
             alt Mode "Bouclier Strict" Actif & Numéro Inconnu du Carnet
                 NativeService->>AndroidOS: respondToCall(DISALLOW / SILENCE)
-                Note over AndroidOS: Appel silencé / boîte vocale 🌙
+                Note over AndroidOS: Appel silencé / boîte vocale
             else Mode Standard
                 NativeService->>AndroidOS: respondToCall(ALLOW)
-                AndroidOS->>Recipient: Sonnerie normale 🔔
+                AndroidOS->>Recipient: Sonnerie normale
             end
         end
     end
@@ -63,12 +63,12 @@ Ce flux illustre la synchronisation d'arrière-plan périodique pilotée par `Wo
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Workmanager as ⏰ Android WorkManager
-    participant SyncService as 🔄 BackgroundSyncService (Dart)
-    participant ApiService as 🌐 ApiService (Dio)
-    participant DjangoAPI as ☁️ Backend Django (/api/v1/blacklist/)
-    participant CentralDB as 🏢 PostgreSQL Central
-    participant LocalDB as 🗄️ DatabaseHelper (SQLite Locale)
+    participant Workmanager as Android WorkManager
+    participant SyncService as BackgroundSyncService (Dart)
+    participant ApiService as ApiService (Dio)
+    participant DjangoAPI as Backend Django (/api/v1/blacklist/)
+    participant CentralDB as PostgreSQL Central
+    participant LocalDB as DatabaseHelper (SQLite Locale)
 
     Workmanager->>SyncService: Exécution tâche périodique programmée
     SyncService->>LocalDB: getLastSyncTimestamp()
@@ -102,12 +102,12 @@ Ce flux décrit le traitement sécurisé et asynchrone d'un SMS copié par l'uti
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as 👤 Utilisateur
-    participant UI as 📱 SmsInspectorPage / ClipboardBanner
-    participant UseCase as 🧠 AnalyzeSmsUseCase
-    participant Detector as 🛡️ SmsPhishingDetector (Core)
-    participant ApiService as 🌐 ApiService (Reputation Check)
-    participant Backend as ☁️ Backend Django (/api/v1/check-url/)
+    actor User as Utilisateur
+    participant UI as SmsInspectorPage / ClipboardBanner
+    participant UseCase as AnalyzeSmsUseCase
+    participant Detector as SmsPhishingDetector (Core)
+    participant ApiService as ApiService (Reputation Check)
+    participant Backend as Backend Django (/api/v1/check-url/)
 
     User->>UI: Ouvre l'inspecteur ou clique sur "Vérifier le SMS copié"
     UI->>UseCase: call(smsContent)
@@ -140,12 +140,12 @@ Ce flux détaille la modération communautaire décentralisée : comment un num�
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Victim as 👤 Utilisateur (Victime de démarchage)
-    participant App as 📱 Application ShieldNet
-    participant Crypto as 🔐 CryptoUtils
-    participant Backend as ☁️ Backend Django (/api/v1/reports/)
-    participant Consensus as ⚖️ Moteur de Consensus (Automatique)
-    participant Admin as 🛡️ Console d'Administration
+    actor Victim as Utilisateur (Victime de démarchage)
+    participant App as Application ShieldNet
+    participant Crypto as CryptoUtils
+    participant Backend as Backend Django (/api/v1/reports/)
+    participant Consensus as Moteur de Consensus (Automatique)
+    participant Admin as Console d'Administration
 
     Victim->>App: Signale un appel frauduleux (sélectionne motif: "Arnaque Fausse Banque")
     App->>Crypto: computeHmacSha256(phoneNumber, clientSalt)

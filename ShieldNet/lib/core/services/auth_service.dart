@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../network/api_client.dart';
+import '../utils/logger.dart';
 
 class UserModel {
   final int id;
@@ -184,6 +185,30 @@ class AuthService {
   /// Récupère le jeton JWT
   Future<String?> getAccessToken() async {
     return _storage.read(key: _kAccessToken);
+  }
+
+  /// Rafraîchit le jeton d'accès JWT expiré à l'aide du jeton de rafraîchissement
+  Future<String?> refreshToken() async {
+    final refresh = await _storage.read(key: _kRefreshToken);
+    if (refresh == null || refresh.isEmpty) {
+      return null;
+    }
+    try {
+      final response = await _dio.post(
+        'auth/token/refresh/',
+        data: {'refresh': refresh},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        final newAccess = response.data['access'] as String?;
+        if (newAccess != null && newAccess.isNotEmpty) {
+          await _storage.write(key: _kAccessToken, value: newAccess);
+          return newAccess;
+        }
+      }
+    } catch (e) {
+      AppLogger.log('[AuthService] Échec du rafraîchissement JWT: $e');
+    }
+    return null;
   }
 
   /// Récupère les métriques globales du système (Réservé aux administrateurs)

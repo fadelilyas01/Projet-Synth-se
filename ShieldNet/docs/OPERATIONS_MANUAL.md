@@ -1,4 +1,4 @@
-# 🛠️ Manuel d'Exploitation & Guide d'Administration (Runbook) — ShieldNet Backend
+# Manuel d'Exploitation & Guide d'Administration (Runbook) — ShieldNet Backend
 
 Ce document constitue le **manuel technique d'exploitation opérationnelle** (Runbook / Operations Guide) du serveur backend **ShieldNet**. Il est destiné aux administrateurs systèmes, ingénieurs DevOps et évaluateurs académiques pour le déploiement, la maintenance, la surveillance et la sécurisation de l'infrastructure centrale.
 

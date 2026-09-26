@@ -10,9 +10,13 @@ from .models import BlacklistedNumber, SpamReport, SafeReport, SafeReasonChoices
 def hash_phone_number(phone_number: str) -> str:
     cleaned = phone_number.strip()
     digits = re.sub(r'\D', '', cleaned)
+    if not digits:
+        return ""
     has_plus = cleaned.startswith('+')
     normalized = f"+{digits}" if has_plus else (f"+1{digits}" if len(digits) == 10 else f"+{digits}")
-    salt = getattr(settings, 'HASH_SALT', 'ShieldNet_Secure_Salt_2026_UQO')
+    salt = getattr(settings, 'HASH_SALT', '')
+    if not salt:
+        raise ValueError("Paramètre de sécurité HASH_SALT manquant dans la configuration.")
     return hmac.new(salt.encode('utf-8'), normalized.encode('utf-8'), hashlib.sha256).hexdigest()
 
 def mask_phone_number(phone_number: str) -> str:
@@ -23,15 +27,13 @@ def mask_phone_number(phone_number: str) -> str:
 
 class DatabaseSanitizerService:
     """
-    Service Anti-Pollution et de Nettoyage de Base de Données.
-    Empêche le remplissage de la BDD par du contenu poubelle (Cache Poisoning / DB Spamming).
+    Nettoyage et maintenance de la base de données.
     """
 
     @classmethod
     def purge_obsolete_and_unverified_junk(cls) -> int:
         """
-        Purge automatiquement les signalements isolés non confirmés âgés de plus de 30 jours.
-        Bénéfice: Conserve la BDD 100% propre, légère et exempte de pollution.
+        Supprime les signalements isolés non confirmés de plus de 30 jours.
         """
         thirty_days_ago = timezone.now() - timedelta(days=30)
         
@@ -48,13 +50,13 @@ class DatabaseSanitizerService:
 
 class AutomatedSpamVerifier:
     """
-    Moteur Algorithmique d'Évaluation et de Vérification Automatique de Spam.
+    Évaluation heuristique automatique des numéros.
     """
     
     NANP_PATTERN = re.compile(r'^\+1[2-9]\d{2}[2-9]\d{6}$')
 
     @classmethod
-    def evaluate_number(cls, phone_hash: str, raw_number: str = None) -> dict:
+    def evaluate_number(cls, phone_hash: str, raw_number: str = None, attestation: str = None) -> dict:
         score = 0
         anomalies = []
 
@@ -78,17 +80,28 @@ class AutomatedSpamVerifier:
                 score += 70
                 anomalies.append("Séquence de chiffres générée artificiellement")
 
+        # Évaluation du standard télécom STIR/SHAKEN (FCC / CRTC)
+        attestation_clean = (attestation or '').strip().upper()
+        if attestation_clean == 'A':
+            # Attestation A : Identité de l'appelant et droit d'usage certifiés par l'opérateur
+            score = max(0, score - 30)
+        elif attestation_clean == 'C':
+            # Attestation C : Passerelle VoIP non sécurisée sans validation d'identité
+            score += 25
+            anomalies.append("Attestation STIR/SHAKEN niveau C : Passerelle non authentifiée")
+
         return {
-            'calculated_score': min(100, score),
+            'calculated_score': min(100, max(0, score)),
             'is_verified_spam': score >= 40 or len(anomalies) > 0,
-            'anomalies': anomalies
+            'anomalies': anomalies,
+            'attestation': attestation_clean if attestation_clean in ('A', 'B', 'C') else None,
         }
 
 class FalsePositiveConsensusService:
     """
-    Moteur Algorithmique de Consensualité Décentralisée & Détection Automatique des Faux Positifs.
-    Confronte les signalements négatifs aux avis favorables et contestations légitimes de la communauté.
-    Lorsque le quorum et le ratio de consensualité légitime sont atteints, réhabilite automatiquement le numéro.
+    Gestion du consensus communautaire et réhabilitation des faux positifs.
+    Compare les signalements de spam aux avis légitimes déposés par les utilisateurs
+    et réhabilite automatiquement un numéro si le quorum et le ratio pondéré sont atteints.
     """
     QUORUM_MINIMUM_DEFAULT = 2         # Au moins 2 avis favorables distincts pour initier le consensus
     CONSENSUS_THRESHOLD_DEFAULT = 0.55    # Au moins 55% de masse favorable pondérée
@@ -130,26 +143,49 @@ class FalsePositiveConsensusService:
         spam_reports = list(SpamReport.objects.filter(phone_hash=phone_hash).select_related('reporter'))
         safe_reports = list(SafeReport.objects.filter(phone_hash=phone_hash).select_related('reporter'))
 
-        # 1. Masse de signalements spam (M_spam)
+        from .ai_engine import TemporalDecayService, NLPSemanticAnalyzer
+
+        # Calcul de la masse pondérée des signalements négatifs avec amortissement temporel
         m_spam = 0.0
+        spam_comments = []
         for s in spam_reports:
             w_cat = cls.SPAM_CATEGORY_WEIGHTS.get(s.category, 1.0)
             w_user = cls.calculate_reporter_weight(s.reporter)
-            m_spam += (w_cat * w_user)
+            w_decay = TemporalDecayService.calculate_decay_weight(s.created_at)
+            m_spam += (w_cat * w_user * w_decay)
+            if s.comment:
+                spam_comments.append(s.comment)
 
-        # 2. Masse d'avis favorables de légitimité (M_safe)
+        # Calcul de la masse pondérée des avis favorables légitimes avec amortissement temporel
         m_safe = 0.0
+        safe_comments = []
         for r in safe_reports:
             w_reason = cls.REASON_WEIGHTS.get(r.reason, 1.0)
             w_user = cls.calculate_reporter_weight(r.reporter, r.ip_address)
-            m_safe += (w_reason * w_user)
+            w_decay = TemporalDecayService.calculate_decay_weight(r.created_at)
+            m_safe += (w_reason * w_user * w_decay)
+            if r.comment:
+                safe_comments.append(r.comment)
 
-        # 3. Facteur d'adéquation structurelle NANP (alpha)
+        # Analyse sémantique NLP et détection d'usurpation contradictoire
+        nlp_res = NLPSemanticAnalyzer.analyze(spam_comments=spam_comments, safe_comments=safe_comments)
+
+        # Coefficient correcteur selon la conformité du format télécom
         raw_num = number_obj.masked_number if number_obj else None
         eval_algo = AutomatedSpamVerifier.evaluate_number(phone_hash, raw_num)
         alpha = 0.7 if eval_algo.get('is_verified_spam', False) else 1.25
 
-        weighted_safe = m_safe * alpha
+        # Modulation bayésienne sémantique :
+        # - En cas d'usurpation paradoxale détectée, la force de réhabilitation est fortement réduite (0.5)
+        # - En cas de confirmation sémantique de légitimité (santé, rdv...), bonus modéré
+        if nlp_res.get('is_impersonation', False):
+            beta_nlp = 0.5
+        elif nlp_res.get('legitimacy_score', 0) > 15:
+            beta_nlp = min(1.35, 1.0 + (nlp_res['legitimacy_score'] / 300.0))
+        else:
+            beta_nlp = 1.0
+
+        weighted_safe = m_safe * alpha * beta_nlp
         total_mass = weighted_safe + m_spam
 
         consensus_ratio = (weighted_safe / total_mass) if total_mass > 0 else 0.0
@@ -172,6 +208,7 @@ class FalsePositiveConsensusService:
             'm_spam': round(m_spam, 2),
             'm_safe': round(m_safe, 2),
             'alpha': alpha,
+            'beta_nlp': round(beta_nlp, 2),
             'consensus_ratio': round(consensus_ratio, 3),
             'quorum_met': quorum_met,
             'is_false_positive': is_false_positive,
@@ -325,17 +362,17 @@ class ReputationService:
 
     @classmethod
     @transaction.atomic
-    def process_new_report(cls, phone_hash: str, category: str, masked_number: str = None, user = None) -> SpamReport:
+    def process_new_report(cls, phone_hash: str, category: str, masked_number: str = None, user = None, comment: str = None) -> SpamReport:
         """
         Traite un nouveau signalement et exécute les vérifications anti-pollution
         avec garantie d'intégrité transactionnelle ACID.
         """
-        # Anti-Pollution Check 1: Ignorer les signalements en double rapprochés (< 1h) par le même utilisateur
+        # Déduplication : ignorer les signalements identiques rapprochés (< 1h) par le même utilisateur
         one_hour_ago = timezone.now() - timedelta(hours=1)
         if user and SpamReport.objects.filter(reporter=user, phone_hash=phone_hash, created_at__gte=one_hour_ago).exists():
             return SpamReport.objects.filter(reporter=user, phone_hash=phone_hash).first()
 
-        # Anti-Pollution Check 2: Limite globale par hash (max 50 signalements archivés)
+        # Plafond anti-saturation par hash (max 50 signalements archivés)
         if SpamReport.objects.filter(phone_hash=phone_hash).count() > 50:
             return SpamReport.objects.filter(phone_hash=phone_hash).first()
 
@@ -343,6 +380,7 @@ class ReputationService:
             reporter=user,
             phone_hash=phone_hash,
             category=category,
+            comment=comment,
         )
 
         number_obj = BlacklistedNumber.objects.select_for_update().filter(phone_hash=phone_hash).first()

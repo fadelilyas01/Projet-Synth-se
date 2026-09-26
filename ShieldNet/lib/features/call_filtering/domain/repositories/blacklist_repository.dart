@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/blacklisted_entry.dart';
 
-/// Contrat de Repository selon les préceptes de la Clean Architecture
+// Interface d'accès aux données de la liste noire (cache SQLite local + API Django)
 abstract class BlacklistRepository {
   /// Récupère l'ensemble des numéros bloqués en cache local SQLite
   Future<Either<Failure, List<BlacklistedEntry>>> getLocalBlacklist();

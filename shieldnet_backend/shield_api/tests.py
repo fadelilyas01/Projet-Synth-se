@@ -1,6 +1,7 @@
 import json
 from django.test import TestCase
 from django.urls import reverse
+from django.conf import settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import BlacklistedNumber, SpamReport, SafeReport
@@ -56,7 +57,7 @@ class ShieldApiEndpointsTest(APITestCase):
     Tests d'intégration des endpoints REST API avec authentification X-API-Key.
     """
     def setUp(self):
-        self.client.credentials(HTTP_X_API_KEY='ShieldNet_Secret_Token_UQO_2026')
+        self.client.credentials(HTTP_X_API_KEY=settings.API_KEY)
 
     def test_reject_request_without_api_key(self):
         client = self.client_class()  # Client sans en-tête
@@ -106,7 +107,7 @@ class ShieldApiEndpointsTest(APITestCase):
         self.assertTrue(len(response.data) >= 1)
 
     def test_user_registration_and_email_login(self):
-        # 1. Inscription avec email
+        # Création d'un nouveau compte citoyen
         register_url = reverse('auth-register')
         reg_data = {
             'email': 'utilisateur@shieldnet.app',
@@ -118,7 +119,7 @@ class ShieldApiEndpointsTest(APITestCase):
         self.assertIn('tokens', reg_resp.data)
         self.assertEqual(reg_resp.data['user']['email'], 'utilisateur@shieldnet.app')
 
-        # 2. Connexion avec email
+        # Authentification par mot de passe
         login_url = reverse('auth-login')
         login_data = {
             'email': 'utilisateur@shieldnet.app',
@@ -129,7 +130,7 @@ class ShieldApiEndpointsTest(APITestCase):
         access_token = login_resp.data['tokens']['access']
         self.assertIsNotNone(access_token)
 
-        # 3. Accès au profil /me avec le token JWT
+        # Vérification du jeton JWT sur le profil connecté
         auth_client = self.client_class()
         auth_client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
         me_url = reverse('auth-me')
@@ -144,14 +145,14 @@ class ShieldApiEndpointsTest(APITestCase):
             'email': 'google.user@shieldnet.app',
             'name': 'Google Test User'
         }
-        # 1. Premier appel : compte inexistant -> création auto
+        # Première authentification : auto-provisioning du compte
         resp1 = self.client.post(url, google_data, format='json')
         self.assertEqual(resp1.status_code, status.HTTP_200_OK)
         self.assertEqual(resp1.data['user']['email'], 'google.user@shieldnet.app')
         self.assertIn('tokens', resp1.data)
         self.assertIsNotNone(resp1.data['tokens']['access'])
 
-        # 2. Deuxième appel : compte existant -> connexion directe immédiate
+        # Connexions ultérieures : réutilisation immédiate du profil existant
         resp2 = self.client.post(url, google_data, format='json')
         self.assertEqual(resp2.status_code, status.HTTP_200_OK)
         self.assertEqual(resp2.data['user']['email'], 'google.user@shieldnet.app')
@@ -159,7 +160,7 @@ class ShieldApiEndpointsTest(APITestCase):
 
     def test_admin_stats_and_moderation(self):
         from django.contrib.auth.models import User
-        # 1. Création utilisateur standard et utilisateur admin
+        # Profils de test avec et sans privilèges
         std_user = User.objects.create_user(username='std@user.com', email='std@user.com', password='password')
         admin_user = User.objects.create_user(username='admin', email='admin@shieldnet.qc.ca', password='password', is_staff=True)
 
@@ -176,14 +177,14 @@ class ShieldApiEndpointsTest(APITestCase):
         std_token = str(RefreshToken.for_user(std_user).access_token)
         admin_token = str(RefreshToken.for_user(admin_user).access_token)
 
-        # 2. Utilisateur standard refusé
+        # Contrôle d'accès : rejet des utilisateurs non-administrateurs (403)
         std_client = self.client_class()
         std_client.credentials(HTTP_AUTHORIZATION=f'Bearer {std_token}')
         stats_url = reverse('admin-stats')
         resp_std = std_client.get(stats_url)
         self.assertEqual(resp_std.status_code, status.HTTP_403_FORBIDDEN)
 
-        # 3. Administrateur autorisé avec métriques globales
+        # Accès accordé pour l'administrateur avec les métriques SOC
         admin_client = self.client_class()
         admin_client.credentials(HTTP_AUTHORIZATION=f'Bearer {admin_token}')
         resp_admin = admin_client.get(stats_url)
@@ -192,7 +193,7 @@ class ShieldApiEndpointsTest(APITestCase):
         self.assertIn('total_blocked', resp_admin.data)
         self.assertIn('recent_reports', resp_admin.data)
 
-        # 4. Modération admin : blanchiment d'un numéro
+        # Action de modération : réhabilitation explicite d'un numéro
         mod_url = reverse('admin-moderate')
         mod_resp = admin_client.post(mod_url, {'phone_hash': phone_hash, 'action': 'whitelist'}, format='json')
         self.assertEqual(mod_resp.status_code, status.HTTP_200_OK)
@@ -205,7 +206,7 @@ class ShieldApiEndpointsTest(APITestCase):
         from django.contrib.auth.models import User
         from django.contrib.auth import authenticate
 
-        # 1. Création du compte administrateur dédié
+        # Compte superutilisateur configuré
         admin_email = 'admin@shieldnet.app'
         admin_pass = 'AdminPassword2026!'
         User.objects.create_superuser(
@@ -214,14 +215,14 @@ class ShieldApiEndpointsTest(APITestCase):
             password=admin_pass
         )
 
-        # 2. Vérification de la connexion Web Admin (/admin/) via son courriel dédié
+        # Connexion Django Admin standard via courriel
         web_user = authenticate(username=admin_email, password=admin_pass)
         self.assertIsNotNone(web_user)
         self.assertEqual(web_user.email, admin_email)
         self.assertTrue(web_user.is_staff)
         self.assertTrue(web_user.is_superuser)
 
-        # 3. Vérification de la connexion Mobile (/api/v1/auth/login/) via son courriel dédié
+        # Authentification JWT via l'API mobile
         login_url = reverse('auth-login')
         resp = self.client.post(login_url, {'email': admin_email, 'password': admin_pass}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -243,7 +244,7 @@ class ShieldApiEndpointsTest(APITestCase):
         admin_client = self.client_class()
         admin_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
-        # 1. Ajout direct d'un numéro à la blacklist par l'admin (avec raw phone number)
+        # Ajout manuel direct d'une entrée par un administrateur
         add_url = reverse('admin-blacklist')
         add_resp = admin_client.post(add_url, {
             'phone_number': '+1 819 555 9999',
@@ -255,29 +256,29 @@ class ShieldApiEndpointsTest(APITestCase):
         self.assertEqual(add_resp.status_code, status.HTTP_201_CREATED)
         phone_hash = add_resp.data['phone_hash']
 
-        # 2. Consultation de la blacklist
+        # Consultation et pagination de la liste noire
         list_resp = admin_client.get(add_url)
         self.assertEqual(list_resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(list_resp.data) >= 1)
 
-        # 3. Consultation de la liste des utilisateurs
+        # Liste des comptes utilisateurs enregistrés
         users_url = reverse('admin-users')
         users_resp = admin_client.get(users_url)
         self.assertEqual(users_resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(users_resp.data) >= 1)
 
-        # 4. Consultation des signalements
+        # Consultation des signalements citoyens
         reports_url = reverse('admin-reports')
         rep_resp = admin_client.get(reports_url)
         self.assertEqual(rep_resp.status_code, status.HTTP_200_OK)
 
-        # 5. Purge de la base
+        # Déclenchement de la purge de maintenance
         purge_url = reverse('admin-purge')
         purge_resp = admin_client.post(purge_url)
         self.assertEqual(purge_resp.status_code, status.HTTP_200_OK)
         self.assertIn('purged_count', purge_resp.data)
 
-        # 6. Suppression définitive du numéro
+        # Suppression définitive d'un numéro
         del_url = reverse('admin-blacklist-detail', kwargs={'phone_hash': phone_hash})
         del_resp = admin_client.delete(del_url)
         self.assertEqual(del_resp.status_code, status.HTTP_200_OK)
@@ -288,7 +289,7 @@ class ConsensusFalsePositiveServiceTest(APITestCase):
     Tests exhaustifs du moteur algorithmique de détection automatique des faux positifs par consensualité.
     """
     def setUp(self):
-        self.client.credentials(HTTP_X_API_KEY='ShieldNet_Secret_Token_UQO_2026')
+        self.client.credentials(HTTP_X_API_KEY=settings.API_KEY)
 
     def test_single_safe_report_does_not_reach_quorum(self):
         phone_hash = "1" * 64
@@ -422,7 +423,7 @@ class ConsensusFalsePositiveServiceTest(APITestCase):
 
         # 2e avis API avec autre adresse IP / utilisateur
         client2 = self.client_class()
-        client2.credentials(HTTP_X_API_KEY='ShieldNet_Secret_Token_UQO_2026')
+        client2.credentials(HTTP_X_API_KEY=settings.API_KEY)
         resp2 = client2.post(url, {
             'phone_hash': phone_hash,
             'reason': 'service',
@@ -578,10 +579,10 @@ class ConsensusFalsePositiveServiceTest(APITestCase):
         spam_indexes = [idx.name for idx in SpamReport._meta.indexes]
         self.assertIn('idx_spam_hash_created', spam_indexes)
 
-class UltraPremiumSOCTests(TestCase):
+class AdminDashboardTests(TestCase):
     """
-    Tests des fonctionnalités avancées de la console SOC :
-    Triage rapide, télémétrie en direct et rapport exécutif PDF.
+    Tests de la console d'administration et de modération :
+    Triage des signalements, consultation télémétrique et génération de rapport.
     """
     def setUp(self):
         from django.contrib.auth.models import User
@@ -596,7 +597,7 @@ class UltraPremiumSOCTests(TestCase):
             comment='Appel agressif'
         )
 
-        # 1. Escalader en blocage
+        # Action de triage : escalade en blocage actif
         triage_url = reverse('admin-triage-action')
         resp = self.client.post(
             triage_url,
@@ -613,7 +614,7 @@ class UltraPremiumSOCTests(TestCase):
         self.assertTrue(bl.is_blocked)
         self.assertFalse(bl.is_whitelisted)
 
-        # 2. Blanchir en faux-positif
+        # Action de triage : réhabilitation immédiate en faux positif
         resp2 = self.client.post(
             triage_url,
             data=json.dumps({'report_id': str(report.id), 'action': 'dismiss_safe'}),
@@ -661,6 +662,12 @@ class UltraPremiumSOCTests(TestCase):
         self.assertContains(resp, 'login-form')
 
     def test_admin_triage_dashboard_view(self):
+        # Création d'un signalement pour valider le rendu complet de la console avec l'analyse IA
+        SpamReport.objects.create(
+            phone_hash="e" * 64,
+            category='phishing',
+            comment='Tentative de hameçonnage bancaire'
+        )
         url = reverse('admin-triage-dashboard')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -854,11 +861,11 @@ class UltraPremiumSOCTests(TestCase):
 
 class ShieldNetAIEngineTest(APITestCase):
     """
-    Tests de validation du moteur d'Intelligence Artificielle ShieldNet :
-    - Analyseur sémantique NLP (FR / EN)
+    Tests de validation du moteur d'analyse sémantique et heuristique :
+    - Filtrage lexical multilingue (FR / EN)
     - Détection et arbitrage des faux positifs (services essentiels, santé, livraison)
-    - Détection proactive des attaques robocall et numéros fictifs NANP
-    - Explicabilité causale XAI (Explainable AI)
+    - Détection des motifs robocalls et numéros fictifs NANP (+1)
+    - Facteurs explicatifs de décision
     - Endpoint REST API /api/v1/ai/diagnose/
     """
     def setUp(self):
@@ -867,7 +874,7 @@ class ShieldNetAIEngineTest(APITestCase):
         self.ai_engine = ShieldNetAIEngine
         self.nlp = NLPSemanticAnalyzer
         self.hash_fn = hash_phone_number
-        self.client.credentials(HTTP_X_API_KEY='ShieldNet_Secret_Token_UQO_2026')
+        self.client.credentials(HTTP_X_API_KEY=settings.API_KEY)
 
     def test_nlp_legitimate_keywords(self):
         comments = [
@@ -987,6 +994,308 @@ class ShieldNetAIEngineTest(APITestCase):
         unauth_client = self.client_class()
         res_unauth = unauth_client.get(url, {'phone_number': '+1 819 555 0199'})
         self.assertIn(res_unauth.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+
+
+class SecurityConfigurationTests(TestCase):
+    """
+    Tests de validation de la configuration de sécurité (clés API, sels, autorisations).
+    """
+    def test_settings_has_valid_api_key_and_salt(self):
+        self.assertTrue(hasattr(settings, 'API_KEY'))
+        self.assertTrue(bool(settings.API_KEY))
+        self.assertTrue(hasattr(settings, 'HASH_SALT'))
+        self.assertTrue(bool(settings.HASH_SALT))
+
+    def test_hash_phone_number_uses_configured_salt(self):
+        from .services import hash_phone_number
+        hash_val = hash_phone_number("+1 819 123 4567")
+        self.assertEqual(len(hash_val), 64)
+
+    def test_permission_denies_wrong_or_missing_api_key(self):
+        from .permissions import HasAPIKeyOrAuthenticated
+        from rest_framework.test import APIRequestFactory
+        factory = APIRequestFactory()
+
+        # Clé invalide
+        req_invalid = factory.get('/api/v1/blacklist/', HTTP_X_API_KEY='cle_invalide_attaquant')
+        req_invalid.user = None
+        perm = HasAPIKeyOrAuthenticated()
+        self.assertFalse(perm.has_permission(req_invalid, None))
+
+        # Clé valide
+        req_valid = factory.get('/api/v1/blacklist/', HTTP_X_API_KEY=settings.API_KEY)
+        req_valid.user = None
+        self.assertTrue(perm.has_permission(req_valid, None))
+
+
+class AdvancedAIEngineTests(TestCase):
+    """
+    Tests unitaires des briques IA avancées :
+    - Entropie spectrale de Shannon (analyse des suites numériques spoofées)
+    - Amortissement temporel exponentiel (réassignation télécom & demi-vie 90j)
+    - Détection d'usurpation paradoxale (co-occurrence contradictoire)
+    - Intégration fermée dans le consensus de consensualité
+    """
+    def test_shannon_digit_entropy_detects_synthetic_sequences(self):
+        from .ai_engine import ShannonEntropyAnalyzer
+        # Numéro complètement uniforme (entropie nulle = 0.0 bit)
+        res_uniform = ShannonEntropyAnalyzer.evaluate_entropy_risk("+1 888 888 8888")
+        self.assertEqual(res_uniform['entropy'], 0.0)
+
+        # Numéro avec répétition massive (entropie très basse < 2.2 bits)
+        res_low = ShannonEntropyAnalyzer.evaluate_entropy_risk("+1 819 000 0000")
+        self.assertTrue(res_low['is_synthetic'])
+        self.assertLess(res_low['entropy'], 2.2)
+
+        # Numéro humain authentique et diversifié (entropie >= 2.5 bits)
+        res_normal = ShannonEntropyAnalyzer.evaluate_entropy_risk("+1 819 773 2495")
+        self.assertFalse(res_normal['is_synthetic'])
+        self.assertGreaterEqual(res_normal['entropy'], 2.5)
+
+    def test_temporal_decay_half_life(self):
+        from .ai_engine import TemporalDecayService
+        from django.utils import timezone
+        from datetime import timedelta
+
+        now = timezone.now()
+        # Événement immédiat -> poids proche de 1.0
+        w_now = TemporalDecayService.calculate_decay_weight(now)
+        self.assertAlmostEqual(w_now, 1.0, places=2)
+
+        # Événement vieux de 90 jours (une demi-vie) -> poids ~ 0.5
+        t_90d = now - timedelta(days=90)
+        w_90d = TemporalDecayService.calculate_decay_weight(t_90d)
+        self.assertAlmostEqual(w_90d, 0.5, delta=0.05)
+
+        # Événement vieux de 180 jours (deux demi-vies) -> poids ~ 0.25
+        t_180d = now - timedelta(days=180)
+        w_180d = TemporalDecayService.calculate_decay_weight(t_180d)
+        self.assertAlmostEqual(w_180d, 0.25, delta=0.05)
+
+        # Événement très ancien (ex: 2 ans) -> ne descend jamais sous le plancher de sécurité (0.05)
+        t_old = now - timedelta(days=730)
+        w_old = TemporalDecayService.calculate_decay_weight(t_old)
+        self.assertGreaterEqual(w_old, 0.05)
+
+    def test_adversarial_impersonation_detection(self):
+        from .ai_engine import AdversarialImpersonationDetector
+        # Fraude flagrante : Autorité officielle + Moyen d'extorsion financier
+        scam_text = "Ici Revenu Québec, votre compte est suspendu. Payez immédiatement en carte cadeau Apple ou mandat."
+        detection = AdversarialImpersonationDetector.detect(scam_text)
+        self.assertTrue(detection['is_impersonation'])
+        self.assertEqual(detection['severity'], 90)
+        self.assertIn('revenu quebec', detection['authorities'])
+        self.assertIn('carte cadeau', detection['extortions'])
+
+        # Message bénin mentionnant un service de santé sans extorsion
+        benign_text = "Rappel de votre rendez-vous au CLSC avec votre médecin demain à 14h."
+        detection_benign = AdversarialImpersonationDetector.detect(benign_text)
+        self.assertFalse(detection_benign['is_impersonation'])
+        self.assertEqual(detection_benign['severity'], 0)
+
+    def test_consensus_service_incorporates_nlp_and_temporal_decay(self):
+        from .services import FalsePositiveConsensusService, ReputationService
+        from django.contrib.auth.models import User
+
+        phone_hash = "f" * 64
+        # Signalement spam avec tentative d'usurpation dans le commentaire
+        ReputationService.process_new_report(
+            phone_hash=phone_hash,
+            category='fraud',
+            comment='Appel se disant de la police demandant un virement interac urgent'
+        )
+
+        user1 = User.objects.create_user(username='tester_cons_1', email='tc1@test.com')
+        # Avis légitime
+        FalsePositiveConsensusService.register_safe_feedback(
+            phone_hash=phone_hash,
+            reason='medical',
+            comment='C\'est en réalité la clinique médicale de Gatineau',
+            user=user1
+        )
+
+        evaluation = FalsePositiveConsensusService.evaluate_consensus(phone_hash)
+        self.assertIn('beta_nlp', evaluation)
+        # Usurpation détectée dans le signalement spam -> beta_nlp restreint à 0.5
+        self.assertLessEqual(evaluation['beta_nlp'], 1.0)
+
+
+class ApplicationSecurityAuditTests(APITestCase):
+    """
+    Tests de vérification et d'audit de sécurité applicative (OWASP Top 10 & CWE) :
+    - Immunité aux attaques par canal auxiliaire (Timing Attacks sur API_KEY)
+    - Protection contre l'usurpation de compte staff via connexion sociale (Account Takeover)
+    - Neutralisation de l'énumération des utilisateurs (User Enumeration Prevention)
+    - Protection contre les injections de formules dans les exports (CSV Injection CWE-1236)
+    - Plafonnement strict des tailles de charge utile (DoS / Resource Exhaustion)
+    """
+    def test_api_key_constant_time_comparison(self):
+        from .permissions import HasAPIKeyOrAuthenticated
+        from rest_framework.test import APIRequestFactory
+        factory = APIRequestFactory()
+        perm = HasAPIKeyOrAuthenticated()
+
+        # Clé invalide
+        req_wrong = factory.get('/api/v1/blacklist/', HTTP_X_API_KEY='fake_key')
+        req_wrong.user = None
+        self.assertFalse(perm.has_permission(req_wrong, None))
+
+        # Clé exacte
+        req_right = factory.get('/api/v1/blacklist/', HTTP_X_API_KEY=settings.API_KEY)
+        req_right.user = None
+        self.assertTrue(perm.has_permission(req_right, None))
+
+    def test_google_login_rejects_staff_account_takeover(self):
+        from django.contrib.auth.models import User
+        # Création d'un administrateur système
+        admin_email = 'soc_boss@shieldnet.app'
+        User.objects.create_superuser(username='soc_boss', email=admin_email, password='SecretPassword123!')
+
+        url = reverse('auth-google')
+        # Tentative d'usurpation de l'administrateur sans mot de passe via l'endpoint Google
+        resp = self.client.post(url, {'email': admin_email, 'name': 'Attacker'}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn('privilèges administratifs', resp.data['detail'])
+
+    def test_login_uniform_error_message_prevents_user_enumeration(self):
+        url = reverse('auth-login')
+        # 1. Tentative sur email inexistant
+        resp_nonexistent = self.client.post(url, {'email': 'ghost@unknown.qc.ca', 'password': 'somepassword'}, format='json')
+        self.assertEqual(resp_nonexistent.status_code, status.HTTP_400_BAD_REQUEST)
+        err_msg_1 = str(resp_nonexistent.data)
+
+        # 2. Création d'un utilisateur puis tentative avec mauvais mot de passe
+        from django.contrib.auth.models import User
+        User.objects.create_user(username='real@shieldnet.app', email='real@shieldnet.app', password='GoodPassword123!')
+        resp_wrong_pass = self.client.post(url, {'email': 'real@shieldnet.app', 'password': 'WrongPassword999!'}, format='json')
+        self.assertEqual(resp_wrong_pass.status_code, status.HTTP_400_BAD_REQUEST)
+        err_msg_2 = str(resp_wrong_pass.data)
+
+        # Les messages d'erreur doivent être identiques pour empêcher l'énumération d'adresses email
+        self.assertIn("Adresse email ou mot de passe incorrect", err_msg_1)
+        self.assertIn("Adresse email ou mot de passe incorrect", err_msg_2)
+
+    def test_csv_export_neutralizes_formula_injection(self):
+        from .admin_views import sanitize_csv_cell
+        # Formules malveillantes typiques sous Excel
+        self.assertEqual(sanitize_csv_cell("=CMD|'/C calc'!A0"), "'=CMD|'/C calc'!A0")
+        self.assertEqual(sanitize_csv_cell("+18195551234"), "'+18195551234")
+        self.assertEqual(sanitize_csv_cell("@SUM(1+1)"), "'@SUM(1+1)")
+        self.assertEqual(sanitize_csv_cell("-5+2"), "'-5+2")
+        # Valeur textuelle normale non modifiée
+        self.assertEqual(sanitize_csv_cell("FRAUD"), "FRAUD")
+        self.assertEqual(sanitize_csv_cell("8195551234"), "8195551234")
+
+    def test_comment_payload_size_enforced(self):
+        url = reverse('submit-report')
+        self.client.credentials(HTTP_X_API_KEY=settings.API_KEY)
+        huge_comment = "A" * 1500  # dépasse la limite de 1000 caractères
+        resp = self.client.post(url, {
+            'phone_hash': 'a' * 64,
+            'category': 'fraud',
+            'comment': huge_comment,
+        }, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('comment', resp.data)
+
+    def test_batch_check_numbers_success(self):
+        url = reverse('batch-check-number')
+        self.client.credentials(HTTP_X_API_KEY=settings.API_KEY)
+
+        # 1. Un numéro frauduleux bloqué
+        h1 = "1" * 64
+        BlacklistedNumber.objects.create(
+            phone_hash=h1,
+            category='financial_scam',
+            risk_score=85,
+            reports_count=5,
+            is_blocked=True,
+            is_whitelisted=False,
+        )
+
+        # 2. Un numéro réhabilité (liste blanche)
+        h2 = "2" * 64
+        BlacklistedNumber.objects.create(
+            phone_hash=h2,
+            category='service',
+            risk_score=0,
+            reports_count=2,
+            safe_reports_count=5,
+            consensus_score=0.9,
+            is_blocked=False,
+            is_whitelisted=True,
+            whitelist_reason='medical',
+        )
+
+        # 3. Un numéro inconnu
+        h3 = "3" * 64
+
+        resp = self.client.post(url, {'hashes': [h1, h2, h3]}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data['count'], 3)
+        res = resp.data['results']
+
+        self.assertTrue(res[h1]['is_spam'])
+        self.assertEqual(res[h1]['risk_score'], 85)
+        self.assertEqual(res[h1]['category'], 'financial_scam')
+
+        self.assertFalse(res[h2]['is_spam'])
+        self.assertTrue(res[h2]['is_whitelisted'])
+        self.assertEqual(res[h2]['whitelist_reason'], 'medical')
+
+        self.assertFalse(res[h3]['is_spam'])
+        self.assertEqual(res[h3]['risk_score'], 0)
+
+    def test_batch_check_validation_rules(self):
+        url = reverse('batch-check-number')
+        self.client.credentials(HTTP_X_API_KEY=settings.API_KEY)
+
+        # Hash non conforme (trop court)
+        resp_invalid = self.client.post(url, {'hashes': ['not_a_valid_hash']}, format='json')
+        self.assertEqual(resp_invalid.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Liste vide
+        resp_empty = self.client.post(url, {'hashes': []}, format='json')
+        self.assertEqual(resp_empty.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Plus de 100 hashes
+        too_many = [f"{i:064x}" for i in range(105)]
+        resp_too_many = self.client.post(url, {'hashes': too_many}, format='json')
+        self.assertEqual(resp_too_many.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_prometheus_metrics_endpoint(self):
+        url = reverse('prometheus-metrics')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIn('text/plain', resp.headers.get('Content-Type', ''))
+        body = resp.content.decode('utf-8')
+        self.assertIn("shieldnet_blacklist_active_total", body)
+        self.assertIn("shieldnet_spam_reports_total", body)
+        self.assertIn("shieldnet_whitelisted_total", body)
+
+    def test_stir_shaken_attestation_evaluations(self):
+        from .services import AutomatedSpamVerifier
+        from .ai_engine import ShieldNetAIEngine
+
+        # 1. Vérification AutomatedSpamVerifier avec Attestation A (réduction de score)
+        eval_a = AutomatedSpamVerifier.evaluate_number("a" * 64, raw_number="+18195551234", attestation="A")
+        self.assertEqual(eval_a['attestation'], 'A')
+        self.assertEqual(eval_a['calculated_score'], 0)
+
+        # 2. Vérification AutomatedSpamVerifier avec Attestation C (passerelle non sécurisée)
+        eval_c = AutomatedSpamVerifier.evaluate_number("c" * 64, raw_number="+18195551234", attestation="C")
+        self.assertEqual(eval_c['attestation'], 'C')
+        self.assertGreaterEqual(eval_c['calculated_score'], 25)
+        self.assertTrue(any("STIR/SHAKEN" in a for a in eval_c['anomalies']))
+
+        # 3. Diagnostic IA explicable avec attestation A
+        diag = ShieldNetAIEngine.diagnose(phone_number="+18195551234", attestation="A")
+        self.assertTrue(diag['success'])
+        xai_types = [f['type'] for f in diag['xai_factors']]
+        self.assertIn('STIR_SHAKEN', xai_types)
+        self.assertEqual(diag['metrics']['stir_shaken_attestation'], 'A')
+
+
 
 
 

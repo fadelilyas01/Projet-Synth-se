@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/sms_phishing_detector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../controllers/sms_inspector_controller.dart';
 
-class SmsInspectorPage extends StatefulWidget {
+class SmsInspectorPage extends ConsumerStatefulWidget {
   final String? initialText;
 
   const SmsInspectorPage({super.key, this.initialText});
 
   @override
-  State<SmsInspectorPage> createState() => _SmsInspectorPageState();
+  ConsumerState<SmsInspectorPage> createState() => _SmsInspectorPageState();
 }
 
-class _SmsInspectorPageState extends State<SmsInspectorPage> {
+class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
   late TextEditingController _textController;
-  PhishingAnalysisResult? _analysis;
-  bool _isAnalyzing = false;
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.initialText ?? '');
     if (widget.initialText != null && widget.initialText!.trim().isNotEmpty) {
-      _runAnalysis();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(smsInspectorProvider.notifier).analyze(widget.initialText!);
+      });
     }
   }
 
@@ -35,11 +37,10 @@ class _SmsInspectorPageState extends State<SmsInspectorPage> {
   Future<void> _pasteFromClipboard() async {
     HapticFeedback.selectionClick();
     final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text != null && data!.text!.trim().isNotEmpty) {
-      setState(() {
-        _textController.text = data.text!;
-      });
-      _runAnalysis();
+    final text = data?.text?.trim();
+    if (text != null && text.isNotEmpty) {
+      _textController.text = text;
+      ref.read(smsInspectorProvider.notifier).analyze(text);
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -54,29 +55,18 @@ class _SmsInspectorPageState extends State<SmsInspectorPage> {
     if (text.isEmpty) return;
 
     HapticFeedback.mediumImpact();
-    setState(() => _isAnalyzing = true);
-
-    Future.delayed(const Duration(milliseconds: 350), () {
-      final result = SmsPhishingDetector.analyze(text);
-      if (mounted) {
-        setState(() {
-          _analysis = result;
-          _isAnalyzing = false;
-        });
-      }
-    });
+    ref.read(smsInspectorProvider.notifier).analyze(text);
   }
 
   void _clearAll() {
     HapticFeedback.selectionClick();
-    setState(() {
-      _textController.clear();
-      _analysis = null;
-    });
+    _textController.clear();
+    ref.read(smsInspectorProvider.notifier).clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    final inspectorState = ref.watch(smsInspectorProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
@@ -91,7 +81,7 @@ class _SmsInspectorPageState extends State<SmsInspectorPage> {
           ],
         ),
         actions: [
-          if (_textController.text.isNotEmpty)
+          if (_textController.text.isNotEmpty || inspectorState.result != null)
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
               tooltip: 'Réinitialiser',
@@ -175,7 +165,7 @@ class _SmsInspectorPageState extends State<SmsInspectorPage> {
                         onPressed: _pasteFromClipboard,
                       ),
                       ElevatedButton.icon(
-                        icon: _isAnalyzing
+                        icon: inspectorState.isAnalyzing
                             ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                             : const Icon(Icons.shield_outlined, size: 16),
                         label: const Text('Inspecter', style: TextStyle(fontSize: 12)),
@@ -183,7 +173,7 @@ class _SmsInspectorPageState extends State<SmsInspectorPage> {
                           backgroundColor: AppTheme.accentCyan,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: _isAnalyzing ? null : _runAnalysis,
+                        onPressed: inspectorState.isAnalyzing ? null : _runAnalysis,
                       ),
                     ],
                   ),
@@ -194,8 +184,8 @@ class _SmsInspectorPageState extends State<SmsInspectorPage> {
           const SizedBox(height: 20),
 
           // Résultats de l'analyse
-          if (_analysis != null) ...[
-            _buildResultCard(_analysis!, cardBg, borderColor),
+          if (inspectorState.result != null) ...[
+            _buildResultCard(inspectorState.result!, cardBg, borderColor),
           ],
         ],
       ),

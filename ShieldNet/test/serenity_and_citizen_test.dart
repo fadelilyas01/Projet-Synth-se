@@ -10,7 +10,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('SerenityScoreCalculator Tests', () {
-    test('Toutes les options activées donnent 100% et Sérénité Maximale', () {
+    test('Toutes les options activées donnent 100% et Protection Optimale', () {
       final res = SerenityScoreCalculator.compute(
         isCallScreeningActive: true,
         isAutoBlockEnabled: true,
@@ -20,7 +20,7 @@ void main() {
       );
 
       expect(res.score, equals(100));
-      expect(res.statusTitle, equals('Sérénité Maximale'));
+      expect(res.statusTitle, equals('Protection Optimale'));
       expect(res.recommendations, isEmpty);
     });
 

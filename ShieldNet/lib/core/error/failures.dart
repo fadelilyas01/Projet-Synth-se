@@ -1,4 +1,4 @@
-/// Modèle unifié d'erreurs fonctionnelles (Clean Architecture)
+// Classes d'erreurs pour encapsuler les échecs réseau, base locale ou validation
 abstract class Failure {
   final String message;
   const Failure(this.message);

@@ -1,6 +1,6 @@
 /* =====================================================================
-   ShieldNet Enterprise — Cyber SOC Architecture & Design System (2026)
-   Senior UI/UX Overhaul : Adaptive Dual-Theme (Dark/Light), High Contrast
+   ShieldNet — Interface d'administration & modération (Projet UQO 2026)
+   Thème adaptatif Clair / Sombre
    ===================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
@@ -1552,7 +1552,7 @@ ul.errorlist li {
 }
 
 /* =====================================================================
-   8. COMPOSANTS SOC ULTRA-PREMIUM (JAUGE, HEATMAP, TRIAGE, TOASTS)
+   8. COMPOSANTS DU TABLEAU DE BORD (JAUGE, CARTE, TRIAGE, TOASTS)
    ===================================================================== */
 .pulse-dot {
   display: inline-block;

@@ -39,7 +39,7 @@ class ApiService {
               .map((e) => e.toString())
               .toList();
 
-          // 1. Insertion / mise à jour par lot des numéros actifs
+          // Insertion ou rafraîchissement des entrées signalées actives
           final activeNumbers = rawActive.map((item) {
             return BlacklistedNumber.fromMap({
               'phone_hash': item['phone_hash'],
@@ -55,13 +55,13 @@ class ApiService {
             await _databaseHelper.batchInsertOrUpdateBlacklistedNumbers(activeNumbers);
           }
 
-          // 2. Purge locale des faux positifs blanchis par l'admin
+          // Nettoyage immédiat du cache pour les numéros réhabilités ou blanchis côté serveur
           if (removedHashes.isNotEmpty) {
             final purgedCount = await _databaseHelper.deleteBatchBlacklistedNumbers(removedHashes);
             AppLogger.log("[Sync] Purge de $purgedCount faux-positifs réussie.");
           }
 
-          // 3. Mémoriser le timestamp de synchronisation
+          // Horodatage fourni par le backend pour le prochain delta
           final serverSyncTime = map['sync_timestamp'] as String? ?? DateTime.now().toIso8601String();
           await prefs.setString('last_sync_timestamp', serverSyncTime);
 
@@ -167,26 +167,79 @@ class ApiService {
     }
   }
 
-  /// Soumet un avis favorable ou une contestation de faux-positif au serveur Django
+  /// Vérifie en une seule requête HTTP un ensemble de numéros (jusqu'à 100).
+  /// Reçoit une liste de numéros bruts, calcule leurs empreintes SHA-256 localement,
+  /// et interroge l'endpoint `/api/v1/check/batch/`.
+  /// Retourne un dictionnaire : { rawPhoneNumber: { 'is_spam': bool, 'risk_score': int, ... } }
+  Future<Map<String, Map<String, dynamic>>?> checkNumbersBatch(List<String> rawPhoneNumbers) async {
+    if (rawPhoneNumbers.isEmpty) return {};
+
+    try {
+      // Dédoublonnage et limitation à 100 numéros max
+      final uniqueNumbers = rawPhoneNumbers.toSet().take(100).toList();
+      final Map<String, String> hashToRawMap = {};
+
+      for (final raw in uniqueNumbers) {
+        final hash = await CryptoUtils.hashPhoneNumberAsync(raw);
+        hashToRawMap[hash] = raw;
+      }
+
+      final response = await _dio.post(
+        'check/batch/',
+        data: {
+          'hashes': hashToRawMap.keys.toList(),
+        },
+      );
+
+      if (response.statusCode == 200 && response.data is Map) {
+        final data = response.data as Map;
+        final rawResults = (data['results'] as Map?) ?? {};
+        final Map<String, Map<String, dynamic>> finalResult = {};
+
+        rawResults.forEach((key, val) {
+          final hashStr = key.toString();
+          final rawNum = hashToRawMap[hashStr] ?? hashStr;
+          if (val is Map) {
+            finalResult[rawNum] = Map<String, dynamic>.from(val);
+          }
+        });
+
+        return finalResult;
+      }
+      return null;
+    } catch (e) {
+      AppLogger.log("Erreur vérification groupée de numéros: $e");
+      return null;
+    }
+  }
+
+  /// Soumet un avis favorable ou une contestation de faux-positif au serveur Django.
+  /// Accepte soit un numéro brut (qui sera haché/masqué), soit directement son empreinte et numéro masqué.
   Future<Map<String, dynamic>?> submitSafeReport({
-    required String rawPhoneNumber,
+    String? rawPhoneNumber,
+    String? phoneHash,
+    String? maskedNumber,
     required String reason,
     String? comment,
   }) async {
-    final phoneHash = await CryptoUtils.hashPhoneNumberAsync(rawPhoneNumber);
-    final maskedNumber = CryptoUtils.maskPhoneNumber(rawPhoneNumber);
+    final computedHash = phoneHash ?? (rawPhoneNumber != null ? await CryptoUtils.hashPhoneNumberAsync(rawPhoneNumber) : null);
+    if (computedHash == null) {
+      AppLogger.log("submitSafeReport: phoneHash ou rawPhoneNumber requis.");
+      return null;
+    }
+    final computedMasked = maskedNumber ?? (rawPhoneNumber != null ? CryptoUtils.maskPhoneNumber(rawPhoneNumber) : '***');
 
     try {
       final response = await _dio.post(
         'reports/safe/',
         data: {
-          'phone_hash': phoneHash,
-          'masked_number': maskedNumber,
+          'phone_hash': computedHash,
+          'masked_number': computedMasked,
           'reason': reason,
           'comment': comment ?? '',
         },
       );
-      if (response.statusCode == 200 && response.data is Map) {
+      if ((response.statusCode == 200 || response.statusCode == 201) && response.data is Map) {
         return response.data as Map<String, dynamic>;
       }
       return null;

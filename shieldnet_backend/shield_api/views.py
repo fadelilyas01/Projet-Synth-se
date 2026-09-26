@@ -10,6 +10,7 @@ from .serializers import AuditLogSerializer
 import secrets
 from django.db import models
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,6 +26,7 @@ from .serializers import (
     SafeReportCreateSerializer,
     SafeReportSerializer,
     CheckNumberResponseSerializer,
+    BatchCheckRequestSerializer,
     UserSerializer,
     UserRegisterSerializer,
     EmailLoginSerializer,
@@ -122,6 +124,7 @@ class SubmitReportView(APIView):
                 category=data['category'],
                 masked_number=data.get('masked_number'),
                 user=user,
+                comment=data.get('comment'),
             )
 
             number_obj = BlacklistedNumber.objects.get(phone_hash=data['phone_hash'])
@@ -208,18 +211,28 @@ class CheckNumberView(APIView):
     """
     GET /api/v1/check/<phone_hash>/
     Vérifie le score de risque, la consensualité et le statut d'un numéro d'après son empreinte SHA-256.
+    Supporte le paramètre optionnel ?attestation=A|B|C (norme STIR/SHAKEN).
     """
     permission_classes = [HasAPIKeyOrAuthenticated]
 
     @extend_schema(responses={200: CheckNumberResponseSerializer})
     def get(self, request, phone_hash):
+        attestation = request.query_params.get('attestation', '').strip()[:1].upper()
         try:
             number = BlacklistedNumber.objects.get(phone_hash=phone_hash)
             # Un numéro est considéré comme spam s'il est bloqué ET non blanchi
             is_spam = number.is_blocked and not number.is_whitelisted
+            risk_score = number.risk_score
+
+            # Ajustement dynamique basé sur l'attestation cryptographique STIR/SHAKEN
+            if attestation == 'A' and risk_score < 70 and not number.is_blocked:
+                risk_score = max(0, risk_score - 20)
+            elif attestation == 'C' and is_spam:
+                risk_score = min(100, risk_score + 10)
+
             return Response({
                 'is_spam': is_spam,
-                'risk_score': number.risk_score,
+                'risk_score': risk_score,
                 'category': number.category,
                 'reports_count': number.reports_count,
                 'safe_reports_count': number.safe_reports_count,
@@ -238,6 +251,56 @@ class CheckNumberView(APIView):
                 'is_whitelisted': False,
                 'whitelist_reason': None,
             })
+
+
+class BatchCheckNumberView(APIView):
+    """
+    POST /api/v1/check/batch/
+    Vérification groupée d'empreintes SHA-256 (jusqu'à 100 numéros par requête).
+    Permet à l'application mobile de vérifier localement l'historique d'appels en une seule passe réseau.
+    """
+    permission_classes = [HasAPIKeyOrAuthenticated]
+
+    def post(self, request):
+        serializer = BatchCheckRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        hashes = serializer.validated_data['hashes']
+        numbers = BlacklistedNumber.objects.filter(phone_hash__in=hashes)
+        number_map = {num.phone_hash: num for num in numbers}
+
+        results = {}
+        for h in hashes:
+            num = number_map.get(h)
+            if num:
+                is_spam = num.is_blocked and not num.is_whitelisted
+                results[h] = {
+                    'is_spam': is_spam,
+                    'risk_score': num.risk_score,
+                    'category': num.category,
+                    'reports_count': num.reports_count,
+                    'safe_reports_count': num.safe_reports_count,
+                    'consensus_score': num.consensus_score,
+                    'is_whitelisted': num.is_whitelisted,
+                    'whitelist_reason': num.whitelist_reason,
+                }
+            else:
+                results[h] = {
+                    'is_spam': False,
+                    'risk_score': 0,
+                    'category': None,
+                    'reports_count': 0,
+                    'safe_reports_count': 0,
+                    'consensus_score': 0.0,
+                    'is_whitelisted': False,
+                    'whitelist_reason': None,
+                }
+
+        return Response({
+            'results': results,
+            'count': len(results),
+        })
 
 
 class RegisterView(APIView):
@@ -302,6 +365,12 @@ class GoogleLoginView(APIView):
         name = serializer.validated_data.get('name', '').strip()
 
         user = User.objects.filter(email__iexact=email).first()
+        if user and (user.is_staff or user.is_superuser):
+            return Response(
+                {'detail': 'Les comptes avec privilèges administratifs ne peuvent pas utiliser la connexion Google sans validation SSO.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         if not user:
             # Auto-provisioning immédiat pour le compte Google
             first_name = name.split()[0] if name else email.split('@')[0]
@@ -629,7 +698,7 @@ class HealthCheckView(APIView):
         }
         http_code = status.HTTP_200_OK
 
-        # 1. Vérification connectivité BDD
+        # Sonde de connectivité de la base de données
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1;")
@@ -646,7 +715,7 @@ class HealthCheckView(APIView):
             }
             http_code = status.HTTP_503_SERVICE_UNAVAILABLE
 
-        # 2. Métriques d'exploitation
+        # Métriques sommaires d'activité pour le monitoring
         if http_code == status.HTTP_200_OK:
             health_data['components']['metrics'] = {
                 'active_blacklist_count': BlacklistedNumber.objects.filter(is_blocked=True, is_whitelisted=False, risk_score__gte=30).count(),
@@ -745,37 +814,112 @@ class AdminAuditLogsListView(APIView):
 
 
 # ==============================================================================
-# MOTEUR D'INTELLIGENCE ARTIFICIELLE & ARBITRAGE (SHIELDNET AI ENGINE)
+# MODULE D'ANALYSE SÉMANTIQUE & ARBITRAGE DES SIGNALEMENTS
 # ==============================================================================
 from .ai_engine import ShieldNetAIEngine
 
 class AIDiagnoseView(APIView):
     """
     POST /api/v1/ai/diagnose/ ou GET /api/v1/ai/diagnose/?phone_number=...
-    Diagnostic intelligent de réputation télécom, arbitrage prédictif de faux-positifs
-    et explicabilité causale (XAI - Explainable AI).
+    Diagnostic de réputation télécom, arbitrage des faux-positifs
+    et détail des facteurs explicatifs du score.
     """
     permission_classes = [HasAPIKeyOrAuthenticated]
 
     def get(self, request):
-        phone_number = request.query_params.get('phone_number', '').strip()
-        phone_hash = request.query_params.get('phone_hash', '').strip()
+        phone_number = request.query_params.get('phone_number', '').strip()[:32]
+        phone_hash = request.query_params.get('phone_hash', '').strip()[:64]
+        attestation = request.query_params.get('attestation', '').strip()[:1]
         if not phone_number and not phone_hash:
             return Response(
                 {'error': 'Veuillez fournir un phone_number ou un phone_hash.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        result = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash)
+        result = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash, attestation=attestation)
         return Response(result)
 
     def post(self, request):
-        phone_number = request.data.get('phone_number', '').strip()
-        phone_hash = request.data.get('phone_hash', '').strip()
+        phone_number = request.data.get('phone_number', '').strip()[:32]
+        phone_hash = request.data.get('phone_hash', '').strip()[:64]
+        attestation = request.data.get('attestation', '').strip()[:1]
         if not phone_number and not phone_hash:
             return Response(
                 {'error': 'Veuillez fournir un phone_number ou un phone_hash.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        result = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash)
+        result = ShieldNetAIEngine.diagnose(phone_number=phone_number, phone_hash=phone_hash, attestation=attestation)
         return Response(result)
+
+
+# ==============================================================================
+# OBSERVABILITÉ & TÉLÉMÉTRIE OPENMETRICS / PROMETHEUS
+# ==============================================================================
+class PrometheusMetricsView(APIView):
+    """
+    GET /api/v1/metrics/
+    Expose les compteurs et jauges opérationnels du SOC ShieldNet
+    au format standard OpenMetrics / Prometheus (text/plain; version=0.0.4).
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        active_blacklist = BlacklistedNumber.objects.filter(is_blocked=True, is_whitelisted=False, risk_score__gte=30).count()
+        total_blacklist = BlacklistedNumber.objects.count()
+        whitelisted = BlacklistedNumber.objects.filter(is_whitelisted=True).count()
+        auto_consensus = BlacklistedNumber.objects.filter(whitelist_reason='auto_consensus').count()
+        total_spam = SpamReport.objects.count()
+        total_safe = SafeReport.objects.count()
+        total_users = User.objects.count()
+        total_audit_logs = AuditLog.objects.count()
+
+        category_counts = (
+            SpamReport.objects.values('category')
+            .annotate(count=models.Count('id'))
+            .order_by('category')
+        )
+
+        lines = [
+            "# HELP shieldnet_blacklist_active_total Nombre de numéros activement bloqués",
+            "# TYPE shieldnet_blacklist_active_total gauge",
+            f"shieldnet_blacklist_active_total {active_blacklist}",
+            "",
+            "# HELP shieldnet_blacklist_records_total Nombre total d'enregistrements dans la liste",
+            "# TYPE shieldnet_blacklist_records_total gauge",
+            f"shieldnet_blacklist_records_total {total_blacklist}",
+            "",
+            "# HELP shieldnet_whitelisted_total Nombre de numéros réhabilités (liste blanche)",
+            "# TYPE shieldnet_whitelisted_total gauge",
+            f"shieldnet_whitelisted_total {whitelisted}",
+            "",
+            "# HELP shieldnet_auto_consensus_total Numéros réhabilités automatiquement par consensus citoyen",
+            "# TYPE shieldnet_auto_consensus_total gauge",
+            f"shieldnet_auto_consensus_total {auto_consensus}",
+            "",
+            "# HELP shieldnet_spam_reports_total Total des signalements de spam enregistrés",
+            "# TYPE shieldnet_spam_reports_total counter",
+            f"shieldnet_spam_reports_total {total_spam}",
+            "",
+            "# HELP shieldnet_safe_reports_total Total des avis légitimes / contestations reçus",
+            "# TYPE shieldnet_safe_reports_total counter",
+            f"shieldnet_safe_reports_total {total_safe}",
+            "",
+            "# HELP shieldnet_users_total Nombre de comptes utilisateurs enregistrés",
+            "# TYPE shieldnet_users_total gauge",
+            f"shieldnet_users_total {total_users}",
+            "",
+            "# HELP shieldnet_audit_logs_total Total des entrées dans le journal d'audit",
+            "# TYPE shieldnet_audit_logs_total counter",
+            f"shieldnet_audit_logs_total {total_audit_logs}",
+            "",
+            "# HELP shieldnet_spam_reports_by_category Nombre de signalements par catégorie d'infraction",
+            "# TYPE shieldnet_spam_reports_by_category gauge",
+        ]
+
+        for item in category_counts:
+            cat = item['category'] or 'unknown'
+            lines.append(f'shieldnet_spam_reports_by_category{{category="{cat}"}} {item["count"]}')
+
+        lines.append("")  # newline final requis par OpenMetrics
+        metrics_body = "\n".join(lines)
+        return HttpResponse(metrics_body, content_type="text/plain; version=0.0.4; charset=utf-8")
 

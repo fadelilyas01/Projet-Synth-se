@@ -1,9 +1,7 @@
 import '../entities/admin_stats.dart';
 import '../entities/audit_log_entry.dart';
 
-/// Contrat abstrait définissant les opérations d'administration ShieldNet
-/// Respecte la règle de dépendance de la Clean Architecture :
-/// la couche domain ne dépend d'aucune implémentation concrète.
+// Interface définissant les opérations de la console d'administration
 abstract class AdminRepository {
   /// Récupère les statistiques globales du serveur
   Future<AdminStats> getStats();

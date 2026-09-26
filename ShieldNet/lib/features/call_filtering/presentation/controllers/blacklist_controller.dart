@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/blacklisted_entry.dart';
 import '../../domain/repositories/blacklist_repository.dart';
 import '../../domain/usecases/get_blacklist_usecase.dart';
@@ -7,7 +9,7 @@ import '../../domain/usecases/check_number_usecase.dart';
 import '../../domain/usecases/report_spam_usecase.dart';
 import '../../data/repositories/blacklist_repository_impl.dart';
 
-// Providers d'injection de dépendances (Clean Architecture)
+// Providers pour l'accès au repository et aux cas d'usage de filtrage
 final blacklistRepositoryProvider = Provider<BlacklistRepository>((ref) {
   return BlacklistRepositoryImpl();
 });
@@ -77,6 +79,23 @@ class BlacklistNotifier extends StateNotifier<AsyncValue<List<BlacklistedEntry>>
       },
     );
   }
+
+  Future<Either<Failure, bool>> reportSpam({
+    required String rawPhoneNumber,
+    required String category,
+    String? comment,
+  }) async {
+    final result = await _repository.submitSpamReport(
+      rawPhoneNumber: rawPhoneNumber,
+      category: category,
+      comment: comment,
+    );
+    result.fold(
+      (_) {},
+      (_) => loadBlacklist(),
+    );
+    return result;
+  }
 }
 
 final blacklistControllerProvider =
@@ -87,3 +106,6 @@ final blacklistControllerProvider =
     repository: ref.watch(blacklistRepositoryProvider),
   );
 });
+
+/// Alias idiomatique Riverpod
+final blacklistProvider = blacklistControllerProvider;

@@ -37,14 +37,14 @@ class CheckNumberUseCase {
     }
 
     try {
-      // 1. Analyse algorithmique heuristique locale
+      // Vérification heuristique instantanée (format NANP, séquences frauduleuses)
       final algoResult = AutomatedSpamVerifier.verifyNumber(rawPhoneNumber);
 
-      // 2. Recherche dans le cache local SQLite (< 5 ms)
+      // Consultation du cache local SQLite (réponse instantanée sous les 5 ms)
       final localResultEither = await repository.checkNumberLocally(rawPhoneNumber);
       final localMatch = localResultEither.getOrElse((_) => null);
 
-      // 3. Interrogation du serveur backend Django (avec fallback si hors-ligne)
+      // Interrogation de l'API backend pour obtenir la réputation à jour et le consensus
       final serverResultEither = await repository.checkNumberOnServer(rawPhoneNumber);
       final serverDetails = serverResultEither.getOrElse((_) => <String, dynamic>{});
 

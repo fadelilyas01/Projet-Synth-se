@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shieldnet/core/utils/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -32,7 +33,29 @@ class ApiClient {
     return _workingBaseUrl ?? candidateBaseUrls.first;
   }
 
+  /// Résout la clé API d'authentification client selon la hiérarchie :
+  /// 1. Paramètre de compilation --dart-define=API_KEY=...
+  /// 2. Fichier d'environnement .env (variable API_KEY)
+  /// 3. Mode développement uniquement (kDebugMode)
+  static String get resolvedApiKey {
+    const defineKey = String.fromEnvironment('API_KEY');
+    if (defineKey.isNotEmpty) {
+      return defineKey;
+    }
+    if (dotenv.isInitialized) {
+      final envKey = dotenv.env['API_KEY'];
+      if (envKey != null && envKey.isNotEmpty) {
+        return envKey;
+      }
+    }
+    if (kDebugMode) {
+      return 'ShieldNet_Secret_Token_UQO_2026';
+    }
+    return '';
+  }
+
   static Dio createDio() {
+    final apiKey = resolvedApiKey;
     final dio = Dio(
       BaseOptions(
         baseUrl: initialBaseUrl,
@@ -40,7 +63,7 @@ class ApiClient {
         receiveTimeout: const Duration(seconds: 8),
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': dotenv.env['API_KEY'] ?? 'ShieldNet_Secret_Token_UQO_2026',
+          if (apiKey.isNotEmpty) 'X-API-Key': apiKey,
         },
       ),
     );
@@ -72,9 +95,14 @@ class ApiClient {
                   },
                 );
 
-                final String fullPath = err.requestOptions.path.startsWith('http')
-                    ? err.requestOptions.path
-                    : '$candidate${err.requestOptions.path}';
+                final String rawPath = err.requestOptions.path;
+                final String fullPath = rawPath.startsWith('http')
+                    ? rawPath
+                    : (candidate.endsWith('/') && rawPath.startsWith('/')
+                        ? '$candidate${rawPath.substring(1)}'
+                        : (!candidate.endsWith('/') && !rawPath.startsWith('/')
+                            ? '$candidate/$rawPath'
+                            : '$candidate$rawPath'));
 
                 final retryResponse = await dio.request(
                   fullPath,

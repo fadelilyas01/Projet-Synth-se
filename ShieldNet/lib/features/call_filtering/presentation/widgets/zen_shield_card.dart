@@ -4,7 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'pulse_radar_shield.dart';
 
-/// Carte principale de protection « Zen » avec radar concentrique animé
+/// Carte principale d'état et d'activation du filtrage d'appels.
 class ZenShieldCard extends StatelessWidget {
   final bool isActive;
   final bool isContactsOnly;

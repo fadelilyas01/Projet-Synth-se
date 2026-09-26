@@ -2,21 +2,38 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Chargement du fichier d'environnement .env
 load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-shieldnet-uqo-secret-key-2026-synthese')
-
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'django-insecure-shieldnet-uqo-secret-key-2026-synthese'
+    else:
+        raise ImproperlyConfigured("Variable d'environnement SECRET_KEY obligatoire en production.")
 
 ALLOWED_HOSTS = ['*'] if DEBUG else ['api.shieldnet.app', 'localhost', '127.0.0.1', '10.0.2.2']
 
 # Sécurité Clé API pour l'application mobile et sel de hachage
-API_KEY = os.environ.get('API_KEY', 'ShieldNet_Secret_Token_UQO_2026')
-HASH_SALT = os.environ.get('HASH_SALT', 'ShieldNet_Secure_Salt_2026_UQO')
+API_KEY = os.environ.get('API_KEY')
+if not API_KEY:
+    if DEBUG:
+        API_KEY = 'ShieldNet_Secret_Token_UQO_2026'
+    else:
+        raise ImproperlyConfigured("Variable d'environnement API_KEY obligatoire en production.")
+
+HASH_SALT = os.environ.get('HASH_SALT')
+if not HASH_SALT:
+    if DEBUG:
+        HASH_SALT = 'ShieldNet_Secure_Salt_2026_UQO'
+    else:
+        raise ImproperlyConfigured("Variable d'environnement HASH_SALT obligatoire en production.")
 
 INSTALLED_APPS = [
     'django.contrib.admin',

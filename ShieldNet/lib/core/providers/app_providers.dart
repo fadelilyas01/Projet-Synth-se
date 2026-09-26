@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../network/api_service.dart';
 import '../services/call_screening_service.dart';
+import '../services/background_sync_service.dart';
+import '../services/citizen_impact_service.dart';
 export 'auth_provider.dart';
 
 /// Provider pour le mode de thème (Clair / Sombre / Système)
@@ -71,13 +73,13 @@ class ProtectionNotifier extends StateNotifier<AsyncValue<bool>> {
   Future<bool> requestPermission() async {
     state = const AsyncValue.loading();
     try {
-      // 1. Demande d'autorisation téléphonique Android (READ_PHONE_STATE / CALLS)
+      // Permission système standard pour l'état d'appel (READ_PHONE_STATE)
       final phoneStatus = await Permission.phone.request();
 
-      // 2. Demande de rôle CallScreeningService natif
+      // Dialogue système Android Telecom pour accorder le rôle ROLE_CALL_SCREENING
       final roleGranted = await _screeningService.requestCallScreeningRole();
 
-      // 3. Réactivation des préférences
+      // Active les protections associées dans les préférences de l'application
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('settings_auto_block', true);
       await prefs.setBool('settings_sms_analysis', true);
@@ -156,5 +158,109 @@ class ContactsOnlyNotifier extends StateNotifier<bool> {
 /// Provider d'état pour le mode Contacts Uniquement
 final contactsOnlyProvider = StateNotifierProvider<ContactsOnlyNotifier, bool>((ref) {
   return ContactsOnlyNotifier(ref.watch(callScreeningServiceProvider));
+});
+
+/// État réactif des réglages de sécurité et de filtrage
+class AppSettingsState {
+  final bool autoBlock;
+  final bool smsAnalysis;
+  final bool autoSync;
+
+  const AppSettingsState({
+    this.autoBlock = true,
+    this.smsAnalysis = true,
+    this.autoSync = true,
+  });
+
+  AppSettingsState copyWith({
+    bool? autoBlock,
+    bool? smsAnalysis,
+    bool? autoSync,
+  }) {
+    return AppSettingsState(
+      autoBlock: autoBlock ?? this.autoBlock,
+      smsAnalysis: smsAnalysis ?? this.smsAnalysis,
+      autoSync: autoSync ?? this.autoSync,
+    );
+  }
+}
+
+/// Notifier pour centraliser et persister les préférences de filtrage
+class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
+  final Ref _ref;
+
+  AppSettingsNotifier(this._ref) : super(const AppSettingsState()) {
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final autoBlock = prefs.getBool('settings_auto_block') ?? true;
+      final sms = prefs.getBool('settings_sms_analysis') ?? true;
+      final autoSync = await BackgroundSyncService.instance.isAutoSyncEnabled();
+      state = AppSettingsState(
+        autoBlock: autoBlock,
+        smsAnalysis: sms,
+        autoSync: autoSync,
+      );
+    } catch (_) {}
+  }
+
+  Future<void> setAutoBlock(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings_auto_block', enabled);
+    state = state.copyWith(autoBlock: enabled);
+    await _ref.read(protectionStatusProvider.notifier).checkStatus();
+  }
+
+  Future<void> setSmsAnalysis(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings_sms_analysis', enabled);
+    state = state.copyWith(smsAnalysis: enabled);
+    await _ref.read(protectionStatusProvider.notifier).checkStatus();
+  }
+
+  Future<void> setAutoSync(bool enabled) async {
+    await BackgroundSyncService.instance.setAutoSyncEnabled(enabled);
+    state = state.copyWith(autoSync: enabled);
+  }
+}
+
+/// Provider pour les réglages globaux de sécurité
+final appSettingsProvider =
+    StateNotifierProvider<AppSettingsNotifier, AppSettingsState>((ref) {
+  return AppSettingsNotifier(ref);
+});
+
+/// Notifier pour l'activation de la synchronisation automatique en arrière-plan
+class AutoSyncNotifier extends StateNotifier<bool> {
+  AutoSyncNotifier() : super(true) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final enabled = await BackgroundSyncService.instance.isAutoSyncEnabled();
+      state = enabled;
+    } catch (_) {}
+  }
+
+  Future<void> toggle(bool enabled) async {
+    try {
+      await BackgroundSyncService.instance.setAutoSyncEnabled(enabled);
+      state = enabled;
+    } catch (_) {}
+  }
+}
+
+/// Provider pour le statut de synchronisation automatique
+final autoSyncProvider = StateNotifierProvider<AutoSyncNotifier, bool>((ref) {
+  return AutoSyncNotifier();
+});
+
+/// Provider pour les statistiques d'impact citoyen
+final citizenImpactProvider = FutureProvider.autoDispose.family<CitizenImpactData, int>((ref, localBlockedCount) async {
+  return CitizenImpactService.getImpactData(localBlockedSpams: localBlockedCount);
 });
 

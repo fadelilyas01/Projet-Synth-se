@@ -55,13 +55,13 @@ class CitizenImpactCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Impact Citoyen',
+                            'Signalements communautaires',
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Protection collaborative',
+                            'Partage de signalements',
                             style: TextStyle(fontSize: 11, color: Colors.grey),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

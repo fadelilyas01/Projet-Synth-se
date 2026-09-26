@@ -1,5 +1,6 @@
 import 'package:shieldnet/core/utils/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/database/database_helper.dart';
 import 'core/providers/app_providers.dart';
+import 'core/security/crypto_utils.dart';
 
 import 'features/call_filtering/presentation/pages/dashboard_page.dart';
 import 'features/call_filtering/presentation/pages/activity_page.dart';
@@ -28,29 +30,40 @@ void main() async {
     AppLogger.log("[Main] Fichier .env non présent ou illisible, configuration par défaut: $e");
   }
 
-  // 1. Initialisation de la base de données SQLite locale
+  // Synchronisation sécurisée du sel cryptographique avec le Keystore Android
+  try {
+    final salt = CryptoUtils.resolveSalt();
+    if (salt.isNotEmpty) {
+      const MethodChannel('com.shieldnet.security')
+          .invokeMethod('setCryptoSalt', {'salt': salt});
+    }
+  } catch (e) {
+    AppLogger.log("[Main] Sel Keystore non synchronisé: $e");
+  }
+
+  // Initialisation précoce du cache SQLite local
   await DatabaseHelper.instance.database;
 
-  // 2. Initialisation du planificateur de synchronisation en arrière-plan
+  // Enregistrement du worker de synchronisation en tâche de fond (WorkManager)
   try {
     await BackgroundSyncService.instance.initialize();
   } catch (e) {
     AppLogger.log("BackgroundSync init exception: $e");
   }
 
-  // 3. Déclenchement automatique d'une synchronisation discrète au lancement
+  // Tente une actualisation discrète de la liste noire au démarrage si l'option est active
   try {
     BackgroundSyncService.instance.isAutoSyncEnabled().then((enabled) {
       if (enabled) {
         BackgroundSyncService.instance.syncNow().then((count) {
-          AppLogger.log("Synchronisation automatique au démarrage réussie: $count numéros.");
+          AppLogger.log("Synchronisation automatique au démarrage: $count numéros synchronisés.");
         }).catchError((err) {
-          AppLogger.log("Sync automatique au démarrage ignorée (backend hors-ligne ou erreur): $err");
+          AppLogger.log("Sync au démarrage ignorée (backend hors-ligne ou pas de réseau): $err");
         });
       }
     });
   } catch (e) {
-    AppLogger.log("[Main] Échec de la vérification de synchronisation initiale: $e");
+    AppLogger.log("[Main] Échec du déclenchement de la sync initiale: $e");
   }
 
   final sentryDsn = dotenv.isInitialized ? (dotenv.env['SENTRY_DSN'] ?? '').trim() : '';
