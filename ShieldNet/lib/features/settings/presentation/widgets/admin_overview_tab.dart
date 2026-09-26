@@ -108,7 +108,12 @@ class AdminOverviewTab extends ConsumerWidget {
                 children: [
                   Icon(Icons.cleaning_services_rounded, color: AppTheme.accentGreen, size: 22),
                   SizedBox(width: 8),
-                  Text('Maintenance Automatisée & Consensualité', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  Expanded(
+                    child: Text(
+                      'Maintenance Automatisée & Consensualité',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 6),

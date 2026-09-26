@@ -13,6 +13,7 @@ import '../../../../core/services/citizen_impact_service.dart';
 import '../../../../core/network/api_service.dart';
 import '../controllers/blacklist_controller.dart';
 import '../../domain/entities/blacklisted_entry.dart';
+import '../../../../core/services/call_log_helper.dart';
 
 class ActivityPage extends ConsumerStatefulWidget {
   const ActivityPage({super.key});
@@ -73,10 +74,10 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
           return;
         }
       }
-      final entries = await call_log.CallLog.get();
+      final entries = await CallLogHelper.getSafeEntries(limit: 50);
       if (mounted) {
         setState(() {
-          _recentCalls = entries.take(50).toList();
+          _recentCalls = entries;
           _isLoadingCalls = false;
         });
       }

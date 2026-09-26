@@ -125,5 +125,19 @@ class MainActivity : FlutterActivity() {
             pendingRoleResult = null
         }
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        try {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        } catch (e: IllegalStateException) {
+            android.util.Log.w("MainActivity", "Caught duplicate reply from plugin: ${e.message}")
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error in onRequestPermissionsResult: ${e.message}")
+        }
+    }
 }
 

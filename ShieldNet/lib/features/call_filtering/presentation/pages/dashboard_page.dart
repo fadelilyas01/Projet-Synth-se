@@ -2,7 +2,6 @@ import 'package:shieldnet/core/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:call_log/call_log.dart' as call_log;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/database/database_helper.dart';
@@ -12,6 +11,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../controllers/blacklist_controller.dart';
 import '../../../../core/services/night_shield_service.dart';
+import '../../../../core/services/call_log_helper.dart';
 import '../../domain/services/serenity_score_calculator.dart';
 import '../widgets/clipboard_banner.dart';
 import '../widgets/action_hub_row.dart';
@@ -85,10 +85,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
       if (!status.isGranted) return;
 
       final list = await DatabaseHelper.instance.getAllBlacklistedNumbers();
-      final entries = await call_log.CallLog.get();
+      final entries = await CallLogHelper.getSafeEntries(limit: 100);
       final hashes = list.map((e) => e.phoneHash).toSet();
       int intercepted = 0;
-      for (var entry in entries.take(100)) {
+      for (var entry in entries) {
         if (entry.number != null && hashes.contains(CryptoUtils.hashPhoneNumber(entry.number!))) {
           intercepted++;
         }

@@ -284,7 +284,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0),
               child: Text(
-                'ShieldNet v1.0.0 • UQO',
+                'ShieldNet v1.0.0 • Sécurité Télécom',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ),
