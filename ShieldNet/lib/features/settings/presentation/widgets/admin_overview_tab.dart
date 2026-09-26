@@ -90,7 +90,7 @@ class AdminOverviewTab extends ConsumerWidget {
             _buildStatBox('Signalements', '${stats?['total_reports'] ?? 0}', AppTheme.primaryColor, Icons.report_problem_rounded, cardBg, borderColor),
             _buildStatBox('Utilisateurs', '${stats?['total_users'] ?? 0}', AppTheme.accentOrange, Icons.people_alt_rounded, cardBg, borderColor),
             _buildStatBox('Avis Légitimes', '${stats?['total_safe_reports'] ?? 0}', Colors.teal, Icons.thumb_up_alt_rounded, cardBg, borderColor),
-            _buildStatBox('Auto-Consensus', '${stats?['total_auto_consensus'] ?? 0}', Colors.deepPurpleAccent, Icons.auto_awesome_rounded, cardBg, borderColor),
+            _buildStatBox('Auto-Consensus', '${stats?['total_auto_consensus'] ?? 0}', Colors.deepPurpleAccent, Icons.how_to_reg_rounded, cardBg, borderColor),
           ],
         ),
         const SizedBox(height: 24),
@@ -125,7 +125,7 @@ class AdminOverviewTab extends ConsumerWidget {
                     onPressed: onPurge,
                   ),
                   ElevatedButton.icon(
-                    icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+                    icon: const Icon(Icons.fact_check_rounded, size: 18),
                     label: const Text('Audit Consensualité'),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
                     onPressed: onConsensusAudit,

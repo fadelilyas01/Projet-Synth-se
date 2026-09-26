@@ -122,7 +122,7 @@ class AdminBlacklistTab extends StatelessWidget {
               : AppTheme.accentRed.withValues(alpha: 0.1),
           child: Icon(
             isWhitelisted
-                ? (isAutoConsensus ? Icons.auto_awesome_rounded : Icons.verified_user_rounded)
+                ? (isAutoConsensus ? Icons.how_to_reg_rounded : Icons.verified_user_rounded)
                 : Icons.block_rounded,
             color: isWhitelisted
                 ? (isAutoConsensus ? Colors.deepPurpleAccent : AppTheme.accentGreen)
