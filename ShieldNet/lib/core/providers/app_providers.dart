@@ -8,8 +8,39 @@ import '../services/background_sync_service.dart';
 import '../services/citizen_impact_service.dart';
 export 'auth_provider.dart';
 
+/// Notifier pour le mode de thème (Clair / Sombre / Système) avec persistance SharedPreferences
+class ThemeModeNotifier extends StateNotifier<ThemeMode> {
+  ThemeModeNotifier() : super(ThemeMode.system) {
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final modeStr = prefs.getString('settings_theme_mode');
+      if (modeStr != null) {
+        state = ThemeMode.values.firstWhere(
+          (m) => m.name == modeStr,
+          orElse: () => ThemeMode.system,
+        );
+      }
+    } catch (_) {}
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    if (state == mode) return;
+    state = mode;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('settings_theme_mode', mode.name);
+    } catch (_) {}
+  }
+}
+
 /// Provider pour le mode de thème (Clair / Sombre / Système)
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+  return ThemeModeNotifier();
+});
 
 /// Notifier pour la langue de l'application (Français par défaut ou Anglais)
 class LocaleNotifier extends StateNotifier<Locale> {
@@ -49,7 +80,7 @@ final callScreeningServiceProvider = Provider<CallScreeningService>((ref) => Cal
 class ProtectionNotifier extends StateNotifier<AsyncValue<bool>> {
   final CallScreeningService _screeningService;
 
-  ProtectionNotifier(this._screeningService) : super(const AsyncValue.loading()) {
+  ProtectionNotifier(this._screeningService) : super(const AsyncValue.data(true)) {
     checkStatus();
   }
 

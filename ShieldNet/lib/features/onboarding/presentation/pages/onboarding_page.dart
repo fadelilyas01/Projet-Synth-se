@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shieldnet/core/theme/app_theme.dart';
 import 'package:shieldnet/main.dart';
 
@@ -66,6 +67,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
     const storage = FlutterSecureStorage();
     await storage.write(key: 'has_seen_onboarding', value: 'true');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_seen_onboarding', true);
+    } catch (_) {}
 
     if (mounted) {
       Navigator.of(context).pushReplacement(

@@ -50,12 +50,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
     super.dispose();
   }
 
+  DateTime? _lastResumeCheck;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(protectionStatusProvider.notifier).checkStatus();
-      _loadInterceptedMetrics();
-      ref.invalidate(citizenImpactProvider);
+      final now = DateTime.now();
+      if (_lastResumeCheck == null || now.difference(_lastResumeCheck!).inSeconds > 15) {
+        _lastResumeCheck = now;
+        ref.read(protectionStatusProvider.notifier).checkStatus();
+        _loadInterceptedMetrics();
+      }
       _checkClipboard();
     }
   }

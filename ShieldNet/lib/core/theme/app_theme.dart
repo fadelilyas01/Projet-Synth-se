@@ -53,7 +53,10 @@ class AppTheme {
   static Color cardBg(bool isDark) => isDark ? surfaceDark : surfaceLight;
   static Color borderColor(bool isDark) => isDark ? borderDark : borderLight;
 
-  static ThemeData get lightTheme {
+  static final ThemeData lightTheme = _buildLightTheme();
+  static final ThemeData darkTheme = _buildDarkTheme();
+
+  static ThemeData _buildLightTheme() {
     final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme(
       ThemeData.light().textTheme,
     ).apply(
@@ -140,7 +143,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme {
+  static ThemeData _buildDarkTheme() {
     final baseDarkTextTheme = GoogleFonts.plusJakartaSansTextTheme(
       ThemeData.dark().textTheme,
     ).apply(

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'core/database/database_helper.dart';
 import 'core/providers/app_providers.dart';
@@ -66,6 +67,23 @@ void main() async {
     AppLogger.log("[Main] Échec du déclenchement de la sync initiale: $e");
   }
 
+  // Détection instantanée de l'onboarding via SharedPreferences (en mémoire sans latence Keystore)
+  bool hasSeenOnboarding = false;
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+    if (!hasSeenOnboarding) {
+      const storage = FlutterSecureStorage();
+      final secureVal = await storage.read(key: 'has_seen_onboarding');
+      if (secureVal == 'true') {
+        hasSeenOnboarding = true;
+        await prefs.setBool('has_seen_onboarding', true);
+      }
+    }
+  } catch (e) {
+    AppLogger.log("[Main] Erreur lecture statut onboarding: $e");
+  }
+
   final sentryDsn = dotenv.isInitialized ? (dotenv.env['SENTRY_DSN'] ?? '').trim() : '';
   if (sentryDsn.isNotEmpty && !sentryDsn.contains('placeholder')) {
     await SentryFlutter.init(
@@ -74,22 +92,23 @@ void main() async {
         options.tracesSampleRate = 1.0;
       },
       appRunner: () => runApp(
-        const ProviderScope(
-          child: ShieldNetApp(),
+        ProviderScope(
+          child: ShieldNetApp(hasSeenOnboarding: hasSeenOnboarding),
         ),
       ),
     );
   } else {
     runApp(
-      const ProviderScope(
-        child: ShieldNetApp(),
+      ProviderScope(
+        child: ShieldNetApp(hasSeenOnboarding: hasSeenOnboarding),
       ),
     );
   }
 }
 
 class ShieldNetApp extends ConsumerWidget {
-  const ShieldNetApp({super.key});
+  final bool hasSeenOnboarding;
+  const ShieldNetApp({super.key, this.hasSeenOnboarding = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -113,7 +132,9 @@ class ShieldNetApp extends ConsumerWidget {
       ],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: const InitialSplashScreen(),
+      home: hasSeenOnboarding
+          ? const MainTabNavigationScreen()
+          : const OnboardingPage(),
       onUnknownRoute: (settings) {
         AppLogger.log('[Navigation] Route inconnue interceptée: ${settings.name}');
         return MaterialPageRoute(
@@ -139,19 +160,26 @@ class _InitialSplashScreenState extends State<InitialSplashScreen> {
   }
 
   Future<void> _checkOnboarding() async {
-    const storage = FlutterSecureStorage();
-    final hasSeen = await storage.read(key: 'has_seen_onboarding');
-    
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      var hasSeen = prefs.getBool('has_seen_onboarding') ?? false;
+      if (!hasSeen) {
+        const storage = FlutterSecureStorage();
+        final secureVal = await storage.read(key: 'has_seen_onboarding');
+        hasSeen = (secureVal == 'true');
+      }
 
-    if (mounted) {
-      if (hasSeen == 'true') {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => hasSeen ? const MainTabNavigationScreen() : const OnboardingPage(),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const MainTabNavigationScreen()),
-        );
-      } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const OnboardingPage()),
         );
       }
     }

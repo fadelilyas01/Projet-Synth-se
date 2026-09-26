@@ -48,7 +48,9 @@ class BlacklistNotifier extends StateNotifier<AsyncValue<List<BlacklistedEntry>>
   }
 
   Future<void> loadBlacklist() async {
-    state = const AsyncValue.loading();
+    if (!state.hasValue) {
+      state = const AsyncValue.loading();
+    }
     final result = await _getBlacklistUseCase();
     result.fold(
       (failure) => state = AsyncValue.error(failure.message, StackTrace.current),

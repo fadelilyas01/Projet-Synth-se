@@ -227,7 +227,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       DropdownMenuItem(value: ThemeMode.dark, child: Text(l10n?.themeDark ?? 'Sombre')),
                     ],
                     onChanged: (mode) {
-                      if (mode != null) ref.read(themeModeProvider.notifier).state = mode;
+                      if (mode != null) ref.read(themeModeProvider.notifier).setThemeMode(mode);
                     },
                   ),
                 ),
