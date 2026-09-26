@@ -6,6 +6,7 @@ import '../network/api_service.dart';
 import '../services/call_screening_service.dart';
 import '../services/background_sync_service.dart';
 import '../services/citizen_impact_service.dart';
+import '../services/offline_sync_service.dart';
 export 'auth_provider.dart';
 
 /// Notifier pour le mode de thème (Clair / Sombre / Système) avec persistance SharedPreferences
@@ -196,22 +197,26 @@ class AppSettingsState {
   final bool autoBlock;
   final bool smsAnalysis;
   final bool autoSync;
+  final bool seniorMode;
 
   const AppSettingsState({
     this.autoBlock = true,
     this.smsAnalysis = true,
     this.autoSync = true,
+    this.seniorMode = false,
   });
 
   AppSettingsState copyWith({
     bool? autoBlock,
     bool? smsAnalysis,
     bool? autoSync,
+    bool? seniorMode,
   }) {
     return AppSettingsState(
       autoBlock: autoBlock ?? this.autoBlock,
       smsAnalysis: smsAnalysis ?? this.smsAnalysis,
       autoSync: autoSync ?? this.autoSync,
+      seniorMode: seniorMode ?? this.seniorMode,
     );
   }
 }
@@ -230,10 +235,12 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       final autoBlock = prefs.getBool('settings_auto_block') ?? true;
       final sms = prefs.getBool('settings_sms_analysis') ?? true;
       final autoSync = await BackgroundSyncService.instance.isAutoSyncEnabled();
+      final senior = prefs.getBool('settings_senior_mode') ?? false;
       state = AppSettingsState(
         autoBlock: autoBlock,
         smsAnalysis: sms,
         autoSync: autoSync,
+        seniorMode: senior,
       );
     } catch (_) {}
   }
@@ -256,12 +263,43 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     await BackgroundSyncService.instance.setAutoSyncEnabled(enabled);
     state = state.copyWith(autoSync: enabled);
   }
+
+  Future<void> setSeniorMode(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings_senior_mode', enabled);
+    state = state.copyWith(seniorMode: enabled);
+    _ref.read(seniorModeProvider.notifier).state = enabled;
+  }
 }
 
 /// Provider pour les réglages globaux de sécurité
 final appSettingsProvider =
     StateNotifierProvider<AppSettingsNotifier, AppSettingsState>((ref) {
   return AppSettingsNotifier(ref);
+});
+
+/// Notifier et provider pour le mode simplifié seniors / aînés
+class SeniorModeNotifier extends StateNotifier<bool> {
+  SeniorModeNotifier() : super(false) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getBool('settings_senior_mode') ?? false;
+    } catch (_) {}
+  }
+
+  Future<void> toggle(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('settings_senior_mode', enabled);
+    state = enabled;
+  }
+}
+
+final seniorModeProvider = StateNotifierProvider<SeniorModeNotifier, bool>((ref) {
+  return SeniorModeNotifier();
 });
 
 /// Notifier pour l'activation de la synchronisation automatique en arrière-plan
@@ -288,6 +326,16 @@ class AutoSyncNotifier extends StateNotifier<bool> {
 /// Provider pour le statut de synchronisation automatique
 final autoSyncProvider = StateNotifierProvider<AutoSyncNotifier, bool>((ref) {
   return AutoSyncNotifier();
+});
+
+/// Provider pour le service de synchronisation hors-ligne
+final offlineSyncServiceProvider = Provider<OfflineSyncService>((ref) {
+  return OfflineSyncService.instance;
+});
+
+/// Provider pour observer le nombre d'éléments en attente dans la file d'attente hors-ligne
+final offlineQueueCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  return await OfflineSyncService.instance.getPendingCount();
 });
 
 /// Provider pour les statistiques d'impact citoyen

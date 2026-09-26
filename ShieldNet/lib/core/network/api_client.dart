@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:shieldnet/core/utils/logger.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Client Dio intelligent avec basculement automatique d'URL
@@ -67,6 +70,41 @@ class ApiClient {
         },
       ),
     );
+
+    // Durcissement SSL / Certificate Pinning pour les environnements de production
+    if (!kIsWeb) {
+      final adapter = dio.httpClientAdapter;
+      if (adapter is IOHttpClientAdapter) {
+        adapter.createHttpClient = () {
+          final client = HttpClient();
+          // Exiger TLS 1.2+ minimum
+          client.badCertificateCallback = (X509Certificate cert, String host, int port) {
+            // Environnements de développement locaux autorisés
+            if (host == 'localhost' ||
+                host == '127.0.0.1' ||
+                host == '10.0.2.2' ||
+                host.startsWith('192.168.') ||
+                host.startsWith('10.') ||
+                host.startsWith('172.')) {
+              return true;
+            }
+            // Vérification de l'empreinte SHA-256 configurée dans les variables d'environnement
+            final pinnedSha256 = dotenv.env['SSL_PINNED_SHA256'];
+            if (pinnedSha256 != null && pinnedSha256.isNotEmpty) {
+              final certSha256 = crypto.sha256.convert(cert.der).toString();
+              final cleanPinned = pinnedSha256.replaceAll(':', '').toLowerCase();
+              final isMatch = certSha256.toLowerCase() == cleanPinned;
+              if (!isMatch) {
+                AppLogger.log('[Security] ÉCHEC DU CERTIFICATE PINNING pour $host ! Hash reçu: $certSha256');
+              }
+              return isMatch;
+            }
+            return false;
+          };
+          return client;
+        };
+      }
+    }
 
     dio.interceptors.add(
       InterceptorsWrapper(

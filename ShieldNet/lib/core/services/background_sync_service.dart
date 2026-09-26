@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import '../network/api_service.dart';
 import '../database/database_helper.dart';
+import 'offline_sync_service.dart';
 
 const String kPeriodicSyncTask = 'shieldnet_periodic_sync';
 const String kOneOffSyncTask = 'shieldnet_oneoff_sync';
@@ -23,6 +24,17 @@ void callbackDispatcher() {
         AppLogger.log("[BackgroundSync] Fichier .env non chargé, valeurs par défaut: $e");
       }
 
+      // 1. Vidage de la file d'attente hors-ligne (signalements & contestations stockés)
+      try {
+        final flushResult = await OfflineSyncService.instance.flushQueue();
+        if (flushResult.hasWorkDone) {
+          AppLogger.log("[BackgroundSync] File hors-ligne vidée: ${flushResult.totalSynced} éléments transmis.");
+        }
+      } catch (flushErr) {
+        AppLogger.log("[BackgroundSync] Avertissement vidage file: $flushErr");
+      }
+
+      // 2. Synchronisation de la liste noire (delta)
       final api = ApiService();
       final count = await api.syncBlacklistWithBackend();
       await DatabaseHelper.instance.checkpointWAL();
@@ -82,6 +94,13 @@ class BackgroundSyncService {
   /// Déclenche une synchronisation immédiate (en avant-plan ou déclenchée par l'UI)
   Future<int> syncNow() async {
     try {
+      // 1. Vidage de la file d'attente hors-ligne si présente
+      try {
+        await OfflineSyncService.instance.flushQueue();
+      } catch (flushErr) {
+        AppLogger.log("[BackgroundSync] Avertissement flush queue dans syncNow: $flushErr");
+      }
+
       final api = ApiService();
       final count = await api.syncBlacklistWithBackend();
       await DatabaseHelper.instance.checkpointWAL();

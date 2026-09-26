@@ -19,7 +19,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
 
 from .models import BlacklistedNumber, SpamReport, SafeReport
-from .permissions import HasAPIKeyOrAuthenticated, IsAdminStaffUser
+from .permissions import (
+    HasAPIKeyOrAuthenticated,
+    IsAdminStaffUser,
+    IsManagerOrAdminUser,
+    IsAdminOnlyUser,
+)
 from .serializers import (
     BlacklistedNumberSerializer,
     SpamReportCreateSerializer,
@@ -410,14 +415,11 @@ class UserProfileView(APIView):
 class AdminStatsView(APIView):
     """
     GET /api/v1/admin/stats/
-    Fournit une vue d'ensemble complète de l'état du système pour les administrateurs.
+    Fournit une vue d'ensemble complète de l'état du système pour les administrateurs et gestionnaires.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsManagerOrAdminUser]
 
     def get(self, request):
-        if not request.user.is_staff:
-            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=status.HTTP_403_FORBIDDEN)
-
         total_blacklisted = BlacklistedNumber.objects.count()
         total_blocked = BlacklistedNumber.objects.filter(is_blocked=True).count()
         total_whitelisted = BlacklistedNumber.objects.filter(is_whitelisted=True).count()
@@ -455,19 +457,19 @@ class AdminStatsView(APIView):
 class AdminModerateView(APIView):
     """
     POST /api/v1/admin/moderate/
-    Permet à l'administrateur de blanchir (whitelist) ou bloquer un numéro à distance.
+    Permet à l'administrateur ou au gestionnaire de blanchir (whitelist) ou bloquer un numéro à distance.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsManagerOrAdminUser]
 
     def post(self, request):
-        if not request.user.is_staff:
-            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=status.HTTP_403_FORBIDDEN)
-
         phone_hash = request.data.get('phone_hash')
         action = request.data.get('action')  # 'whitelist' ou 'block'
 
         if not phone_hash or action not in ['whitelist', 'block']:
             return Response({'detail': 'Paramètres invalides (phone_hash et action: whitelist|block requis).'}, status=status.HTTP_400_BAD_REQUEST)
+
+        source = 'MOBILE_ADMIN' if request.user.is_superuser else 'MOBILE_MANAGER'
+        role_label = 'admin' if request.user.is_superuser else 'gestionnaire'
 
         try:
             entry = BlacklistedNumber.objects.get(phone_hash=phone_hash)
@@ -477,8 +479,14 @@ class AdminModerateView(APIView):
                 entry.risk_score = 0
                 entry.whitelist_reason = 'manual_admin'
                 entry.save()
-                AuditLog.objects.create(user=request.user, action=AuditLogAction.WHITELIST_UNBLOCK, details=f'Numéro blanchi: {entry.masked_number or phone_hash[:10]}', target_hash=phone_hash, source='MOBILE_ADMIN')
-                return Response({'detail': f'Numéro {entry.masked_number or phone_hash[:8]} blanchi avec succès (décision admin).'})
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=AuditLogAction.WHITELIST_UNBLOCK,
+                    details=f'Numéro blanchi: {entry.masked_number or phone_hash[:10]} (décision {role_label})',
+                    target_hash=phone_hash,
+                    source=source
+                )
+                return Response({'detail': f'Numéro {entry.masked_number or phone_hash[:8]} blanchi avec succès (décision {role_label}).'})
             elif action == 'block':
                 entry.is_blocked = True
                 entry.is_whitelisted = False
@@ -486,7 +494,13 @@ class AdminModerateView(APIView):
                 if entry.risk_score < 50:
                     entry.risk_score = 75
                 entry.save()
-                AuditLog.objects.create(user=request.user, action=AuditLogAction.APPROVE_BLOCK, details=f'Numéro bloqué: {entry.masked_number or phone_hash[:10]}', target_hash=phone_hash, source='MOBILE_ADMIN')
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=AuditLogAction.APPROVE_BLOCK,
+                    details=f'Numéro bloqué: {entry.masked_number or phone_hash[:10]} (décision {role_label})',
+                    target_hash=phone_hash,
+                    source=source
+                )
                 return Response({'detail': f'Numéro {entry.masked_number or phone_hash[:8]} bloqué avec succès.'})
         except BlacklistedNumber.DoesNotExist:
             return Response({'detail': 'Numéro introuvable.'}, status=status.HTTP_404_NOT_FOUND)
@@ -543,12 +557,13 @@ class AdminBlacklistManagerView(APIView):
                 'is_whitelisted': is_whitelisted,
             }
         )
+        source = 'MOBILE_ADMIN' if request.user.is_superuser else 'MOBILE_MANAGER'
         AuditLog.objects.create(
             user=request.user,
             action=AuditLogAction.MANUAL_ADD,
             details=f"Numéro {masked_number} ajouté/modifié manuellement (catégorie: {category}, score: {risk_score})",
             target_hash=phone_hash,
-            source='MOBILE_ADMIN'
+            source=source
         )
         return Response(BlacklistedNumberSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
@@ -556,19 +571,20 @@ class AdminBlacklistDetailView(APIView):
     """
     DELETE /api/v1/admin/blacklist/<phone_hash>/ : Suppression définitive d'un numéro.
     """
-    permission_classes = [IsAdminStaffUser]
+    permission_classes = [IsManagerOrAdminUser]
 
     def delete(self, request, phone_hash):
         try:
             entry = BlacklistedNumber.objects.get(phone_hash=phone_hash)
             masked = entry.masked_number or phone_hash[:10]
             entry.delete()
+            source = 'MOBILE_ADMIN' if request.user.is_superuser else 'MOBILE_MANAGER'
             AuditLog.objects.create(
                 user=request.user,
                 action=AuditLogAction.DELETE_NUMBER,
                 details=f"Suppression définitive du numéro: {masked}",
                 target_hash=phone_hash,
-                source='MOBILE_ADMIN'
+                source=source
             )
             return Response({'detail': f'Numéro supprimé de la liste noire.'})
         except BlacklistedNumber.DoesNotExist:
@@ -577,8 +593,9 @@ class AdminBlacklistDetailView(APIView):
 class AdminUsersListView(APIView):
     """
     GET /api/v1/admin/users/ : Liste tous les utilisateurs inscrits.
+    Réservé exclusivement aux administrateurs système (Superuser).
     """
-    permission_classes = [IsAdminStaffUser]
+    permission_classes = [IsAdminOnlyUser]
 
     def get(self, request):
         users = User.objects.all().order_by('-date_joined')
@@ -591,6 +608,8 @@ class AdminUsersListView(APIView):
                 'username': u.username,
                 'name': f"{u.first_name} {u.last_name}".strip() or u.username,
                 'is_staff': u.is_staff,
+                'is_superuser': u.is_superuser,
+                'role': 'ADMIN' if u.is_superuser else ('MANAGER' if u.is_staff else 'CITIZEN'),
                 'is_active': u.is_active,
                 'date_joined': u.date_joined.isoformat(),
                 'reports_count': reports_count,
@@ -602,7 +621,7 @@ class AdminReportsListView(APIView):
     GET /api/v1/admin/reports/ : Liste tous les signalements utilisateurs.
     DELETE /api/v1/admin/reports/<report_id>/ : Suppression d'un signalement.
     """
-    permission_classes = [IsAdminStaffUser]
+    permission_classes = [IsManagerOrAdminUser]
 
     def get(self, request):
         reports = SpamReport.objects.all().select_related('reporter').order_by('-created_at')[:50]
@@ -628,12 +647,13 @@ class AdminReportsListView(APIView):
             report = SpamReport.objects.get(id=report_id)
             target_hash = report.phone_hash
             report.delete()
+            source = 'MOBILE_ADMIN' if request.user.is_superuser else 'MOBILE_MANAGER'
             AuditLog.objects.create(
                 user=request.user,
                 action=AuditLogAction.DELETE_REPORT,
                 details=f"Suppression du signalement ID {report_id} pour {target_hash[:10]}",
                 target_hash=target_hash,
-                source='MOBILE_ADMIN'
+                source=source
             )
             return Response({'detail': 'Signalement supprimé avec succès.'})
         except SpamReport.DoesNotExist:
@@ -642,8 +662,9 @@ class AdminReportsListView(APIView):
 class AdminPurgeJunkView(APIView):
     """
     POST /api/v1/admin/purge/ : Nettoie et purge les faux spams et orphelins (>30j).
+    Réservé exclusivement aux administrateurs système (Superuser).
     """
-    permission_classes = [IsAdminStaffUser]
+    permission_classes = [IsAdminOnlyUser]
 
     def post(self, request):
         purged = DatabaseSanitizerService.purge_obsolete_and_unverified_junk()

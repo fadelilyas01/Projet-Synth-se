@@ -271,6 +271,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
     final totalBlocked = blacklistAsync.value?.length ?? 0;
     final l10n = AppLocalizations.of(context);
     final isProtectionActive = protectionState.value ?? false;
+    final isSeniorMode = ref.watch(seniorModeProvider);
 
     final serenityResult = SerenityScoreCalculator.compute(
       isCallScreeningActive: isProtectionActive,
@@ -299,6 +300,41 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           children: [
+            // BANDEAU MODE SÉNIORS / ACCESSIBILITÉ
+            if (isSeniorMode) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.primaryColor, width: 2),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.elderly_rounded, color: AppTheme.primaryColor, size: 30),
+                    SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Mode Simplifié Actif',
+                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppTheme.primaryColor),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Textes et boutons agrandis. Votre téléphone est protégé contre toute fraude.',
+                            style: TextStyle(fontSize: 13, height: 1.3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             // BANDEAU DU PRESSE-PAPIER
             if (_detectedClipboardNumber != null) ...[
               ClipboardBanner(

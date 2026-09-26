@@ -42,7 +42,7 @@ class AdminOverviewTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Carte d'accès Admin Unifié
+        // Carte d'accès Admin / Gestionnaire
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -54,19 +54,28 @@ class AdminOverviewTab extends ConsumerWidget {
               const Icon(Icons.shield_rounded, color: Colors.white, size: 36),
               const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Contrôle Administrateur Total', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 2),
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final currentAdminEmail = ref.watch(authNotifierProvider)?.email;
-                        final displayEmail = (currentAdminEmail != null && currentAdminEmail.isNotEmpty) ? currentAdminEmail : 'admin@shieldnet.app';
-                        return Text('Connecté en tant que $displayEmail avec privilèges complets (Web & Mobile).', style: const TextStyle(color: Colors.white70, fontSize: 12));
-                      },
-                    ),
-                  ],
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final currentUser = ref.watch(authNotifierProvider);
+                    final isAdmin = currentUser?.isAdmin ?? false;
+                    final displayEmail = currentUser?.email ?? 'admin@shieldnet.app';
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isAdmin ? 'Contrôle Administrateur Total' : 'Espace Gestionnaire & Modération',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isAdmin
+                              ? 'Connecté en tant que $displayEmail avec privilèges complets (Web & Mobile).'
+                              : 'Connecté en tant que $displayEmail avec rôle de gestion opérationnelle.',
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -119,23 +128,29 @@ class AdminOverviewTab extends ConsumerWidget {
               const SizedBox(height: 6),
               const Text('Purge les signalements obsolètes (>30j) ou lance l\'audit de consensualité pour réhabiliter automatiquement les faux positifs légitimes.', style: TextStyle(fontSize: 12, color: Colors.grey)),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 8,
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.auto_delete_outlined, size: 18),
-                    label: const Text('Nettoyage BDD'),
-                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGreen, foregroundColor: Colors.white),
-                    onPressed: onPurge,
-                  ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.fact_check_rounded, size: 18),
-                    label: const Text('Audit Consensualité'),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
-                    onPressed: onConsensusAudit,
-                  ),
-                ],
+              Consumer(
+                builder: (context, ref, _) {
+                  final isAdmin = ref.watch(authNotifierProvider)?.isAdmin ?? false;
+                  return Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      if (isAdmin)
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.auto_delete_outlined, size: 18),
+                          label: const Text('Nettoyage BDD'),
+                          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGreen, foregroundColor: Colors.white),
+                          onPressed: onPurge,
+                        ),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.fact_check_rounded, size: 18),
+                        label: const Text('Audit Consensualité'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
+                        onPressed: onConsensusAudit,
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),

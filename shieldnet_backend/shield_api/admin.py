@@ -94,12 +94,33 @@ class BlacklistedNumberAdmin(admin.ModelAdmin):
     @admin.action(description="Activer et Bloquer les numéros sélectionnés")
     def approve_and_block(self, request, queryset):
         count = queryset.update(is_blocked=True, is_whitelisted=False, whitelist_reason='')
-        self.message_user(request, f"{count} numéros mis à jour avec le statut bloqué.")
+        source = 'WEB_ADMIN' if request.user.is_superuser else 'WEB_MANAGER'
+        role_label = 'admin' if request.user.is_superuser else 'gestionnaire'
+        for obj in queryset:
+            AuditLog.objects.create(
+                user=request.user,
+                action=AuditLogAction.APPROVE_BLOCK,
+                details=f"Numéro bloqué: {obj.masked_number or obj.phone_hash[:10]} (décision {role_label})",
+                target_hash=obj.phone_hash,
+                source=source
+            )
+        self.message_user(request, f"{count} numéros mis à jour avec le statut bloqué ({role_label}).")
 
     @admin.action(description="Débloquer et blanchir les numéros sélectionnés (Faux positifs)")
     def unblock_number(self, request, queryset):
-        count = queryset.update(is_blocked=False, risk_score=0, is_whitelisted=True, whitelist_reason='manual_admin')
-        self.message_user(request, f"{count} numéros réinitialisés, blanchis et autorisés (décision admin).")
+        source = 'WEB_ADMIN' if request.user.is_superuser else 'WEB_MANAGER'
+        role_label = 'admin' if request.user.is_superuser else 'gestionnaire'
+        reason = 'manual_admin' if request.user.is_superuser else 'manual_manager'
+        count = queryset.update(is_blocked=False, risk_score=0, is_whitelisted=True, whitelist_reason=reason)
+        for obj in queryset:
+            AuditLog.objects.create(
+                user=request.user,
+                action=AuditLogAction.WHITELIST_UNBLOCK,
+                details=f"Numéro blanchi: {obj.masked_number or obj.phone_hash[:10]} (décision {role_label})",
+                target_hash=obj.phone_hash,
+                source=source
+            )
+        self.message_user(request, f"{count} numéros réinitialisés, blanchis et autorisés (décision {role_label}).")
 
     @admin.action(description="Réévaluer la consensualité (Détection automatique faux positifs)")
     def reevaluate_consensus_action(self, request, queryset):
@@ -193,9 +214,14 @@ class AuditLogAdmin(admin.ModelAdmin):
         }
 
     def source_badge(self, obj):
-        is_web = obj.source == 'WEB_ADMIN'
-        bg = '#3B82F6' if is_web else '#8B5CF6'
-        label = 'Web' if is_web else 'Mobile'
+        source_styles = {
+            'WEB_ADMIN': ('#3B82F6', 'Web Admin'),
+            'WEB_MANAGER': ('#0284C7', 'Web Gestionnaire'),
+            'MOBILE_ADMIN': ('#8B5CF6', 'Mobile Admin'),
+            'MOBILE_MANAGER': ('#10B981', 'Mobile Gestionnaire'),
+            'AUTO_CONSENSUS': ('#F59E0B', 'Auto Consensus'),
+        }
+        bg, label = source_styles.get(obj.source, ('#64748B', obj.source))
         return format_html(
             '<span style="background-color: {}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">{}</span>',
             bg,

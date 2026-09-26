@@ -9,6 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../widgets/auth_bottom_sheet.dart';
 import 'admin_console_page.dart';
 import '../../../../core/services/night_shield_service.dart';
+import '../../../../core/services/offline_sync_service.dart';
 import '../../../sms_inspector/presentation/pages/sms_inspector_page.dart';
 import 'emergency_whitelist_page.dart';
 
@@ -67,6 +68,41 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _toggleAutoSync(bool val) async {
     await ref.read(appSettingsProvider.notifier).setAutoSync(val);
+  }
+
+  Future<void> _toggleSeniorMode(bool val) async {
+    await ref.read(appSettingsProvider.notifier).setSeniorMode(val);
+  }
+
+  Future<void> _flushOfflineQueue() async {
+    setState(() => _isSyncing = true);
+    try {
+      final res = await OfflineSyncService.instance.flushQueue();
+      ref.invalidate(offlineQueueCountProvider);
+      if (mounted) {
+        setState(() => _isSyncing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              res.hasWorkDone
+                  ? 'File hors-ligne synchronisée : ${res.totalSynced} élément(s) transmis.'
+                  : 'Aucun élément en attente de synchronisation.',
+            ),
+            backgroundColor: AppTheme.accentGreen,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSyncing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur vidage file hors-ligne: $e'),
+            backgroundColor: AppTheme.accentRed,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _syncNow([AppLocalizations? l10n]) async {
@@ -208,12 +244,70 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
+          // Résilience & File d'attente hors-ligne
+          _buildSectionHeader('RÉSILIENCE & HORS-LIGNE'),
+          _buildCard(
+            cardBg: cardBg,
+            borderColor: borderColor,
+            children: [
+              Consumer(
+                builder: (context, ref, _) {
+                  final pendingCountAsync = ref.watch(offlineQueueCountProvider);
+                  final count = pendingCountAsync.value ?? 0;
+                  return ListTile(
+                    leading: Icon(
+                      count > 0 ? Icons.cloud_queue_rounded : Icons.cloud_done_rounded,
+                      color: count > 0 ? AppTheme.accentOrange : AppTheme.accentGreen,
+                      size: 24,
+                    ),
+                    title: const Text(
+                      'File d\'attente hors-ligne',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      count > 0
+                          ? '$count signalement(s) en attente de synchronisation'
+                          : 'Tous les signalements et contestations sont synchronisés',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    trailing: count > 0
+                        ? ElevatedButton.icon(
+                            onPressed: _isSyncing ? null : _flushOfflineQueue,
+                            icon: const Icon(Icons.upload_rounded, size: 14),
+                            label: const Text('Envoyer', style: TextStyle(fontSize: 12)),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              backgroundColor: AppTheme.accentOrange,
+                            ),
+                          )
+                        : const Icon(Icons.check_circle_outline, color: AppTheme.accentGreen, size: 20),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
           // Préférences d'affichage et de langue
           _buildSectionHeader(l10n?.sectionPreferences ?? 'PRÉFÉRENCES'),
           _buildCard(
             cardBg: cardBg,
             borderColor: borderColor,
             children: [
+              SwitchListTile(
+                value: settings.seniorMode,
+                onChanged: _toggleSeniorMode,
+                title: const Text(
+                  'Mode Interface Simplifiée (Aînés)',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'Agrandit les textes, renforce les contrastes et simplifie l\'accueil',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                secondary: const Icon(Icons.elderly_rounded, color: AppTheme.primaryColor, size: 24),
+              ),
+              const Divider(height: 1, indent: 56),
               ListTile(
                 leading: const Icon(Icons.palette, color: AppTheme.accentOrange, size: 24),
                 title: Text(l10n?.settingTheme ?? 'Thème', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
@@ -256,16 +350,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
-          // Espace modération pour les comptes administrateurs
-          if (user != null && user.isAdmin) ...[
-            _buildSectionHeader(l10n?.sectionAdmin ?? 'ADMINISTRATION'),
+          // Espace modération pour les comptes administrateurs et gestionnaires
+          if (user != null && user.canModerate) ...[
+            _buildSectionHeader(user.isSuperAdmin ? (l10n?.sectionAdmin ?? 'ADMINISTRATION') : 'GESTION & MODÉRATION'),
             _buildCard(
               cardBg: cardBg,
               borderColor: borderColor,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.admin_panel_settings, color: AppTheme.accentOrange, size: 24),
-                  title: Text(l10n?.adminConsoleTitle ?? 'Console d\'Administration', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  leading: Icon(
+                    user.isSuperAdmin ? Icons.admin_panel_settings : Icons.verified_user_rounded,
+                    color: user.isSuperAdmin ? AppTheme.accentOrange : AppTheme.primaryColor,
+                    size: 24,
+                  ),
+                  title: Text(
+                    user.isSuperAdmin ? (l10n?.adminConsoleTitle ?? 'Console d\'Administration') : 'Console de Gestion & Modération',
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                   onTap: () {
                     Navigator.push(
@@ -318,7 +419,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (user.isAdmin) ...[
+                if (user.isSuperAdmin) ...[
                   const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -327,6 +428,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text('ADMIN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentOrange)),
+                  ),
+                ] else if (user.isManager) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text('GESTIONNAIRE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
                   ),
                 ],
               ],

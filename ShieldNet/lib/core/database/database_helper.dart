@@ -83,6 +83,104 @@ class EmergencyContact {
   }
 }
 
+/// Modèle d'un signalement en attente de synchronisation réseau (Offline Queue)
+class PendingSpamReport {
+  final int? id;
+  final String phoneHash;
+  final String rawNumber;
+  final String maskedNumber;
+  final String category;
+  final String? comment;
+  final String createdAt;
+  final int retryCount;
+
+  PendingSpamReport({
+    this.id,
+    required this.phoneHash,
+    required this.rawNumber,
+    required this.maskedNumber,
+    required this.category,
+    this.comment,
+    required this.createdAt,
+    this.retryCount = 0,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (id != null) 'id': id,
+      'phone_hash': phoneHash,
+      'raw_number': rawNumber,
+      'masked_number': maskedNumber,
+      'category': category,
+      'comment': comment,
+      'created_at': createdAt,
+      'retry_count': retryCount,
+    };
+  }
+
+  factory PendingSpamReport.fromMap(Map<String, dynamic> map) {
+    return PendingSpamReport(
+      id: map['id'] as int?,
+      phoneHash: map['phone_hash'] as String,
+      rawNumber: (map['raw_number'] as String?) ?? '',
+      maskedNumber: (map['masked_number'] as String?) ?? '',
+      category: (map['category'] as String?) ?? 'other',
+      comment: map['comment'] as String?,
+      createdAt: (map['created_at'] as String?) ?? DateTime.now().toIso8601String(),
+      retryCount: (map['retry_count'] as int?) ?? 0,
+    );
+  }
+}
+
+/// Modèle d'une contestation légitime en attente de synchronisation réseau (Offline Queue)
+class PendingSafeDispute {
+  final int? id;
+  final String phoneHash;
+  final String? rawNumber;
+  final String maskedNumber;
+  final String reason;
+  final String? comment;
+  final String createdAt;
+  final int retryCount;
+
+  PendingSafeDispute({
+    this.id,
+    required this.phoneHash,
+    this.rawNumber,
+    required this.maskedNumber,
+    required this.reason,
+    this.comment,
+    required this.createdAt,
+    this.retryCount = 0,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (id != null) 'id': id,
+      'phone_hash': phoneHash,
+      'raw_number': rawNumber,
+      'masked_number': maskedNumber,
+      'reason': reason,
+      'comment': comment,
+      'created_at': createdAt,
+      'retry_count': retryCount,
+    };
+  }
+
+  factory PendingSafeDispute.fromMap(Map<String, dynamic> map) {
+    return PendingSafeDispute(
+      id: map['id'] as int?,
+      phoneHash: map['phone_hash'] as String,
+      rawNumber: map['raw_number'] as String?,
+      maskedNumber: (map['masked_number'] as String?) ?? '***',
+      reason: (map['reason'] as String?) ?? 'other',
+      comment: map['comment'] as String?,
+      createdAt: (map['created_at'] as String?) ?? DateTime.now().toIso8601String(),
+      retryCount: (map['retry_count'] as int?) ?? 0,
+    );
+  }
+}
+
 /// Helper SQLite local sécurisé
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -112,7 +210,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -151,6 +249,32 @@ class DatabaseHelper {
         label TEXT NOT NULL,
         is_system_critical INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE pending_reports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        phone_hash TEXT NOT NULL,
+        raw_number TEXT NOT NULL,
+        masked_number TEXT NOT NULL,
+        category TEXT NOT NULL,
+        comment TEXT,
+        created_at TEXT NOT NULL,
+        retry_count INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE pending_safe_disputes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        phone_hash TEXT NOT NULL,
+        raw_number TEXT,
+        masked_number TEXT NOT NULL,
+        reason TEXT NOT NULL,
+        comment TEXT,
+        created_at TEXT NOT NULL,
+        retry_count INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -199,6 +323,36 @@ class DatabaseHelper {
         await _seedDefaultEmergencyNumbers(db);
       } catch (e) {
         AppLogger.log('[DatabaseHelper] Table emergency_whitelist déjà présente ou erreur migration: $e');
+      }
+    }
+    if (oldVersion < 4) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS pending_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            phone_hash TEXT NOT NULL,
+            raw_number TEXT NOT NULL,
+            masked_number TEXT NOT NULL,
+            category TEXT NOT NULL,
+            comment TEXT,
+            created_at TEXT NOT NULL,
+            retry_count INTEGER NOT NULL DEFAULT 0
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS pending_safe_disputes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            phone_hash TEXT NOT NULL,
+            raw_number TEXT,
+            masked_number TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            comment TEXT,
+            created_at TEXT NOT NULL,
+            retry_count INTEGER NOT NULL DEFAULT 0
+          )
+        ''');
+      } catch (e) {
+        AppLogger.log('[DatabaseHelper] Erreur migration V4 offline queue: $e');
       }
     }
   }
@@ -357,6 +511,86 @@ class DatabaseHelper {
       limit: 1,
     );
     return maps.isNotEmpty;
+  }
+
+  // ==================== FILE D'ATTENTE HORS-LIGNE (OFFLINE QUEUE) ====================
+
+  /// Enregistre un signalement indésirable en attente d'envoi réseau
+  Future<int> insertPendingReport(PendingSpamReport report) async {
+    final db = await instance.database;
+    final id = await db.insert(
+      'pending_reports',
+      report.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await checkpointWAL();
+    return id;
+  }
+
+  /// Récupère tous les signalements en attente de synchronisation
+  Future<List<PendingSpamReport>> getPendingReports() async {
+    final db = await instance.database;
+    final maps = await db.query('pending_reports', orderBy: 'id ASC');
+    return maps.map((m) => PendingSpamReport.fromMap(m)).toList();
+  }
+
+  /// Supprime un signalement en attente après transmission réussie
+  Future<int> deletePendingReport(int id) async {
+    final db = await instance.database;
+    final deleted = await db.delete('pending_reports', where: 'id = ?', whereArgs: [id]);
+    await checkpointWAL();
+    return deleted;
+  }
+
+  /// Incrémente le compteur de tentatives pour un signalement
+  Future<void> incrementPendingReportRetry(int id) async {
+    final db = await instance.database;
+    await db.rawUpdate('UPDATE pending_reports SET retry_count = retry_count + 1 WHERE id = ?', [id]);
+  }
+
+  /// Enregistre une contestation légitime en attente d'envoi réseau
+  Future<int> insertPendingSafeDispute(PendingSafeDispute dispute) async {
+    final db = await instance.database;
+    final id = await db.insert(
+      'pending_safe_disputes',
+      dispute.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await checkpointWAL();
+    return id;
+  }
+
+  /// Récupère toutes les contestations légitimes en attente
+  Future<List<PendingSafeDispute>> getPendingSafeDisputes() async {
+    final db = await instance.database;
+    final maps = await db.query('pending_safe_disputes', orderBy: 'id ASC');
+    return maps.map((m) => PendingSafeDispute.fromMap(m)).toList();
+  }
+
+  /// Supprime une contestation légitime en attente après transmission réussie
+  Future<int> deletePendingSafeDispute(int id) async {
+    final db = await instance.database;
+    final deleted = await db.delete('pending_safe_disputes', where: 'id = ?', whereArgs: [id]);
+    await checkpointWAL();
+    return deleted;
+  }
+
+  /// Incrémente le compteur de tentatives pour une contestation
+  Future<void> incrementPendingSafeDisputeRetry(int id) async {
+    final db = await instance.database;
+    await db.rawUpdate('UPDATE pending_safe_disputes SET retry_count = retry_count + 1 WHERE id = ?', [id]);
+  }
+
+  /// Compte le nombre total d'actions en attente dans la file hors-ligne
+  Future<int> getPendingTotalCount() async {
+    final db = await instance.database;
+    final reportsCount = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM pending_reports'),
+    ) ?? 0;
+    final disputesCount = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM pending_safe_disputes'),
+    ) ?? 0;
+    return reportsCount + disputesCount;
   }
 }
 

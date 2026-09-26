@@ -94,14 +94,22 @@ from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'is_staff', 'is_superuser', 'date_joined']
+        fields = ['id', 'email', 'name', 'is_staff', 'is_superuser', 'role', 'date_joined']
 
     def get_name(self, obj):
         full_name = f"{obj.first_name} {obj.last_name}".strip()
         return full_name if full_name else (obj.email.split('@')[0] if obj.email else obj.username)
+
+    def get_role(self, obj):
+        if obj.is_superuser:
+            return 'ADMIN'
+        if obj.is_staff or obj.groups.filter(name='Gestionnaires').exists():
+            return 'MANAGER'
+        return 'CITIZEN'
 
 class UserRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()

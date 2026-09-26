@@ -10,6 +10,7 @@ class UserModel {
   final String name;
   final bool isStaff;
   final bool isSuperuser;
+  final String role;
 
   UserModel({
     required this.id,
@@ -17,17 +18,27 @@ class UserModel {
     required this.name,
     this.isStaff = false,
     this.isSuperuser = false,
+    this.role = 'CITIZEN',
   });
 
-  bool get isAdmin => isStaff || isSuperuser;
+  bool get isAdmin => isStaff || isSuperuser || role == 'ADMIN';
+  bool get isSuperAdmin => isSuperuser || role == 'ADMIN';
+  bool get isManager => (role == 'MANAGER' || isStaff) && !isSuperuser && role != 'ADMIN';
+  bool get canModerate => isAdmin || isManager;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final staff = json['is_staff'] as bool? ?? false;
+    final superuser = json['is_superuser'] as bool? ?? false;
+    final rawRole = json['role'] as String?;
+    final resolvedRole = rawRole ?? (superuser ? 'ADMIN' : (staff ? 'MANAGER' : 'CITIZEN'));
+
     return UserModel(
       id: json['id'] as int,
       email: json['email'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      isStaff: json['is_staff'] as bool? ?? false,
-      isSuperuser: json['is_superuser'] as bool? ?? false,
+      isStaff: staff,
+      isSuperuser: superuser,
+      role: resolvedRole,
     );
   }
 
@@ -37,6 +48,7 @@ class UserModel {
     'name': name,
     'is_staff': isStaff,
     'is_superuser': isSuperuser,
+    'role': role,
   };
 }
 

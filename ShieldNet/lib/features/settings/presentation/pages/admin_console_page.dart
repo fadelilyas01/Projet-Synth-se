@@ -50,7 +50,9 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    final user = ref.read(authNotifierProvider);
+    final isSuperAdmin = user?.isSuperAdmin ?? false;
+    _tabController = TabController(length: isSuperAdmin ? 5 : 4, vsync: this);
     _blacklistScrollController.addListener(_onBlacklistScroll);
     _loadAllAdminData();
   }
@@ -72,11 +74,14 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
   // ==================== CHARGEMENT DES DONNÉES ====================
 
   Future<void> _loadAllAdminData() async {
+    final user = ref.read(authNotifierProvider);
     _loadStats();
     _loadSyncStatus();
     _loadBlacklist();
     _loadReports();
-    _loadUsers();
+    if (user?.isSuperAdmin ?? false) {
+      _loadUsers();
+    }
     _loadAuditLogs();
   }
 
@@ -450,16 +455,22 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(authNotifierProvider);
+    final isSuperAdmin = user?.isSuperAdmin ?? false;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.admin_panel_settings_rounded, color: AppTheme.accentOrange),
-            SizedBox(width: 8),
+            Icon(
+              isSuperAdmin ? Icons.admin_panel_settings_rounded : Icons.verified_user_rounded,
+              color: isSuperAdmin ? AppTheme.accentOrange : AppTheme.primaryColor,
+            ),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Administration Totale',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                isSuperAdmin ? 'Administration Totale' : 'Espace Gestionnaire & Modération',
+                style: const TextStyle(fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -475,15 +486,16 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-          labelColor: AppTheme.accentOrange,
+          labelColor: isSuperAdmin ? AppTheme.accentOrange : AppTheme.primaryColor,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: AppTheme.accentOrange,
-          tabs: const [
-            Tab(icon: Icon(Icons.dashboard_rounded), text: 'Vue d\'ensemble'),
-            Tab(icon: Icon(Icons.format_list_bulleted_rounded), text: 'Liste Noire'),
-            Tab(icon: Icon(Icons.report_problem_rounded), text: 'Signalements'),
-            Tab(icon: Icon(Icons.people_alt_rounded), text: 'Utilisateurs'),
-            Tab(icon: Icon(Icons.history_rounded), text: 'Audit & Traces'),
+          indicatorColor: isSuperAdmin ? AppTheme.accentOrange : AppTheme.primaryColor,
+          tabs: [
+            const Tab(icon: Icon(Icons.dashboard_rounded), text: 'Vue d\'ensemble'),
+            const Tab(icon: Icon(Icons.format_list_bulleted_rounded), text: 'Liste Noire'),
+            const Tab(icon: Icon(Icons.report_problem_rounded), text: 'Signalements'),
+            if (isSuperAdmin)
+              const Tab(icon: Icon(Icons.people_alt_rounded), text: 'Utilisateurs'),
+            const Tab(icon: Icon(Icons.history_rounded), text: 'Audit & Traces'),
           ],
         ),
       ),
@@ -520,10 +532,11 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
             onModerate: _moderate,
             onDeleteReport: _deleteReport,
           ),
-          AdminUsersTab(
-            users: _users,
-            isLoading: _isLoadingUsers,
-          ),
+          if (isSuperAdmin)
+            AdminUsersTab(
+              users: _users,
+              isLoading: _isLoadingUsers,
+            ),
           AdminAuditTab(
             auditLogs: _auditLogs,
             isLoading: _isLoadingAuditLogs,

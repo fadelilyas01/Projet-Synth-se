@@ -1303,6 +1303,91 @@ class ApplicationSecurityAuditTests(APITestCase):
         self.assertIn('STIR_SHAKEN', xai_types)
         self.assertEqual(diag['metrics']['stir_shaken_attestation'], 'A')
 
+    def test_manager_vs_admin_role_permissions(self):
+        from django.contrib.auth.models import User, Group
+        from rest_framework_simplejwt.tokens import RefreshToken
+        from .models import AuditLog
+
+        # 1. Création d'un Gestionnaire et d'un Administrateur
+        group, _ = Group.objects.get_or_create(name='Gestionnaires')
+        manager_user = User.objects.create_user(
+            username='soc_manager',
+            email='manager@shieldnet.app',
+            password='Password123!',
+            is_staff=True,
+            is_superuser=False
+        )
+        manager_user.groups.add(group)
+
+        admin_user = User.objects.create_superuser(
+            username='soc_admin',
+            email='admin@shieldnet.app',
+            password='AdminPassword123!'
+        )
+
+        std_user = User.objects.create_user(
+            username='citizen_user',
+            email='citizen@shieldnet.app',
+            password='Password123!'
+        )
+
+        manager_token = str(RefreshToken.for_user(manager_user).access_token)
+        admin_token = str(RefreshToken.for_user(admin_user).access_token)
+        std_token = str(RefreshToken.for_user(std_user).access_token)
+
+        manager_client = self.client_class()
+        manager_client.credentials(HTTP_AUTHORIZATION=f'Bearer {manager_token}')
+
+        admin_client = self.client_class()
+        admin_client.credentials(HTTP_AUTHORIZATION=f'Bearer {admin_token}')
+
+        std_client = self.client_class()
+        std_client.credentials(HTTP_AUTHORIZATION=f'Bearer {std_token}')
+
+        # 2. Vérification des rôles renvoyés par /api/v1/auth/me/
+        me_manager = manager_client.get(reverse('auth-me'))
+        self.assertEqual(me_manager.status_code, status.HTTP_200_OK)
+        self.assertEqual(me_manager.data['role'], 'MANAGER')
+
+        me_admin = admin_client.get(reverse('auth-me'))
+        self.assertEqual(me_admin.status_code, status.HTTP_200_OK)
+        self.assertEqual(me_admin.data['role'], 'ADMIN')
+
+        me_std = std_client.get(reverse('auth-me'))
+        self.assertEqual(me_std.status_code, status.HTTP_200_OK)
+        self.assertEqual(me_std.data['role'], 'CITIZEN')
+
+        # 3. Le Gestionnaire PEUT modérer et consulter les statistiques
+        stats_resp = manager_client.get(reverse('admin-stats'))
+        self.assertEqual(stats_resp.status_code, status.HTTP_200_OK)
+
+        hash_test = "e" * 64
+        BlacklistedNumber.objects.create(phone_hash=hash_test, category='phishing', risk_score=80, is_blocked=True)
+
+        mod_resp = manager_client.post(reverse('admin-moderate'), {'phone_hash': hash_test, 'action': 'whitelist'}, format='json')
+        self.assertEqual(mod_resp.status_code, status.HTTP_200_OK)
+
+        # Vérification du traçage d'audit avec source MOBILE_MANAGER
+        audit = AuditLog.objects.filter(target_hash=hash_test).first()
+        self.assertIsNotNone(audit)
+        self.assertEqual(audit.source, 'MOBILE_MANAGER')
+        self.assertEqual(audit.user, manager_user)
+
+        # 4. Le Gestionnaire NE PEUT PAS purger la base ni gérer les utilisateurs (403 Forbidden)
+        purge_resp = manager_client.post(reverse('admin-purge'))
+        self.assertEqual(purge_resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        users_resp = manager_client.get(reverse('admin-users'))
+        self.assertEqual(users_resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        # 5. L'Administrateur PEUT purger et lister les utilisateurs
+        admin_users_resp = admin_client.get(reverse('admin-users'))
+        self.assertEqual(admin_users_resp.status_code, status.HTTP_200_OK)
+
+        admin_purge_resp = admin_client.post(reverse('admin-purge'))
+        self.assertEqual(admin_purge_resp.status_code, status.HTTP_200_OK)
+
+
 
 
 

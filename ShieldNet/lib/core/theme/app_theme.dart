@@ -53,6 +53,12 @@ class AppTheme {
   static Color cardBg(bool isDark) => isDark ? surfaceDark : surfaceLight;
   static Color borderColor(bool isDark) => isDark ? borderDark : borderLight;
 
+  // Accessibilité & Mode Interface Simplifiée (Seniors / Aînés)
+  static const double seniorFontMultiplier = 1.25;
+  static const double seniorMinButtonHeight = 58.0;
+  static const Color seniorHighContrastBorder = Color(0xFF000000);
+  static const Color seniorHighContrastBorderDark = Color(0xFFE2E8F0);
+
   static final ThemeData lightTheme = _buildLightTheme();
   static final ThemeData darkTheme = _buildDarkTheme();
 

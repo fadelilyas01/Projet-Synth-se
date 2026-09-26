@@ -350,34 +350,61 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
             if (_isLogin) ...[
               if (kDebugMode) ...[
                 const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _emailController.text = 'admin@shieldnet.app';
-                        _passwordController.text = 'admin123';
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.vpn_key_rounded, size: 14, color: AppTheme.accentOrange),
-                          SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              'Identifiants Démo Admin (admin@shieldnet.app)',
-                              style: TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
-                              overflow: TextOverflow.ellipsis,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _emailController.text = 'admin@shieldnet.app';
+                          _passwordController.text = 'admin123';
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+                        child: Row(
+                          children: [
+                            Icon(Icons.vpn_key_rounded, size: 14, color: AppTheme.accentOrange),
+                            SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Démo Admin (admin@shieldnet.app)',
+                                style: TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _emailController.text = 'manager@shieldnet.app';
+                          _passwordController.text = 'manager123';
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+                        child: Row(
+                          children: [
+                            Icon(Icons.verified_user_rounded, size: 14, color: AppTheme.primaryColor),
+                            SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Démo Gestionnaire (manager@shieldnet.app)',
+                                style: TextStyle(fontSize: 11, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ],

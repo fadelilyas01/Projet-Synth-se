@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/database/database_helper.dart';
 import '../../../../core/network/api_service.dart';
+import '../../../../core/security/crypto_utils.dart';
 import '../../domain/entities/blacklisted_entry.dart';
 import '../../domain/repositories/blacklist_repository.dart';
 
@@ -76,9 +77,48 @@ class BlacklistRepositoryImpl implements BlacklistRepository {
         await localDatabase.checkpointWAL();
         return const Right(true);
       }
-      return const Left(ServerFailure('Échec de validation du signalement par le serveur.'));
+      return await _saveReportToOfflineQueue(rawPhoneNumber, category, comment);
     } catch (e) {
-      return Left(ServerFailure('Erreur d\'envoi du signalement: $e'));
+      return await _saveReportToOfflineQueue(rawPhoneNumber, category, comment);
+    }
+  }
+
+  Future<Either<Failure, bool>> _saveReportToOfflineQueue(
+    String rawPhoneNumber,
+    String category,
+    String? comment,
+  ) async {
+    try {
+      final phoneHash = await CryptoUtils.hashPhoneNumberAsync(rawPhoneNumber);
+      final masked = CryptoUtils.maskPhoneNumber(rawPhoneNumber);
+      final now = DateTime.now().toIso8601String();
+
+      await localDatabase.insertPendingReport(
+        PendingSpamReport(
+          phoneHash: phoneHash,
+          rawNumber: rawPhoneNumber,
+          maskedNumber: masked,
+          category: category,
+          comment: comment,
+          createdAt: now,
+        ),
+      );
+
+      await localDatabase.insertOrUpdateBlacklistedNumber(
+        BlacklistedNumber(
+          phoneHash: phoneHash,
+          maskedNumber: masked,
+          category: category,
+          riskScore: 70,
+          reportsCount: 1,
+          updatedAt: now,
+        ),
+      );
+
+      await localDatabase.checkpointWAL();
+      return const Right(true);
+    } catch (err) {
+      return Left(CacheFailure('Impossible de sauvegarder le signalement hors-ligne: $err'));
     }
   }
 

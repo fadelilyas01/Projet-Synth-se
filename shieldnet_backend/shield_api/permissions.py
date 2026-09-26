@@ -25,12 +25,33 @@ class HasAPIKeyOrAuthenticated(permissions.BasePermission):
 
         return False
 
-class IsAdminStaffUser(permissions.BasePermission):
+class IsManagerOrAdminUser(permissions.BasePermission):
     """
-    Exige que l'utilisateur soit authentifié avec des privilèges d'administrateur (is_staff = True).
+    Autorise les administrateurs (is_superuser) ET les gestionnaires/modérateurs (is_staff ou groupe Gestionnaires).
+    Permet la gestion de la liste noire, la modération des signalements et la consultation des métriques.
     """
-    message = "Accès réservé exclusivement aux administrateurs du système."
+    message = "Accès réservé aux gestionnaires et administrateurs autorisés."
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.is_staff)
+        u = request.user
+        if not (u and u.is_authenticated):
+            return False
+        return bool(u.is_superuser or u.is_staff or u.groups.filter(name='Gestionnaires').exists())
+
+class IsAdminStaffUser(IsManagerOrAdminUser):
+    """
+    Alias pour la rétro-compatibilité : autorise le personnel d'administration et de gestion.
+    """
+    pass
+
+class IsAdminOnlyUser(permissions.BasePermission):
+    """
+    Exige des privilèges d'administration totale (is_superuser).
+    Réservé aux opérations hautement critiques : purge de la base, gestion des comptes utilisateurs, modification des accès.
+    """
+    message = "Accès strictement restreint aux administrateurs système (Superuser)."
+
+    def has_permission(self, request, view):
+        u = request.user
+        return bool(u and u.is_authenticated and u.is_superuser)
 
