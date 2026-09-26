@@ -108,5 +108,15 @@ flutter run
 
 ---
 
+## Documentation Technique & Ingénierie
+
+Pour approfondir les détails de conception, d'interception temps réel et de sécurité du client mobile, consultez la documentation centralisée dans `docs/` :
+
+* [**Architecture & Spécification UML**](file:///C:/Projet/Projet%20synthese/docs/ARCHITECTURE_ET_CONCEPTION.md) : Modélisation Clean Architecture, diagramme de classes UML et flux d'interception d'appel (< 2 ms).
+* [**Modèle de Menace & Sécurité Cryptographique**](file:///C:/Projet/Projet%20synthese/docs/SECURITY_AND_THREAT_MODEL.md) : Analyse de l'entropie NANP, budget temps réel du CallScreeningService Android et conformité Loi 25.
+* [**Guide de Déploiement & Pipeline CI/CD**](file:///C:/Projet/Projet%20synthese/docs/DEPLOIEMENT_ET_CI_CD.md) : Pipeline Jenkins d'automatisation des tests et compilation d'artefacts APK.
+
+---
+
 ## Mentions Légales
 © 2026 Université du Québec en Outaouais (UQO) — Tous droits réservés.

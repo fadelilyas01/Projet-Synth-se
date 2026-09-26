@@ -38,9 +38,10 @@ Projet synthese/
 ├── docker-compose.jenkins.yml        # Serveur d'intégration continue Jenkins LTS conteneurisé
 ├── test-all.ps1                      # Script unifié d'assurance qualité (Backend + Mobile)
 ├── start-dev.ps1                     # Script d'amorçage automatique de l'environnement de développement
-├── docs/                             # Documentation technique et académique (UQO) :
-│   ├── SECURITY_AND_THREAT_MODEL.md  # Modèle de menace, analyse d'entropie NANP (+1) et Loi 25
-│   └── JENKINS_CI_CD.md              # Guide d'exploitation et architecture du pipeline Jenkins
+├── docs/                             # Documentation d'ingénierie et académique (UQO) :
+│   ├── ARCHITECTURE_ET_CONCEPTION.md # Spécification Clean Architecture, diagrammes UML & flux critiques
+│   ├── DEPLOIEMENT_ET_CI_CD.md       # Manuel d'exploitation (Runbook), Docker & pipeline Jenkins CI/CD
+│   └── SECURITY_AND_THREAT_MODEL.md  # Modèle de menace STRIDE, analyse d'entropie NANP (+1) & Loi 25
 │
 ├── ShieldNet/                        # Client Mobile Multiplateforme (Flutter / Dart / Kotlin)
 │   ├── .env                          # Configuration d'environnement (URLs, clés API, sels)
@@ -77,8 +78,17 @@ Projet synthese/
         ├── services.py               # Services cryptographiques, consensus anti-Sybil, STIR/SHAKEN
         ├── views.py                  # Endpoints REST API v1 (dont AIDiagnose, BatchCheck, Metrics)
         ├── urls.py                   # Routage des endpoints REST
-        └── tests.py                  # Suite de 61 tests unitaires et de sécurité Django
 ```
+
+### Dossiers d'Ingénierie & Spécifications Approfondies
+
+Pour une analyse exhaustive des composantes d'ingénierie, trois documents de référence sont centralisés dans le répertoire `docs/` :
+
+| Document | Objet & Thématiques Couvertes |
+|---|---|
+| [**Architecture & Conception UML**](file:///C:/Projet/Projet%20synthese/docs/ARCHITECTURE_ET_CONCEPTION.md) | Découpage Clean Architecture, diagramme de composants, diagramme de classes UML, principes SOLID et 4 diagrammes de séquence des flux critiques. |
+| [**Déploiement & Pipeline CI/CD**](file:///C:/Projet/Projet%20synthese/docs/DEPLOIEMENT_ET_CI_CD.md) | Manuel d'exploitation (Runbook), Docker Compose, configuration Gunicorn/Nginx, pipeline Jenkins en 6 étapes et plans de continuité (PCA/PRA). |
+| [**Sécurité, Modèle de Menace & Loi 25**](file:///C:/Projet/Projet%20synthese/docs/SECURITY_AND_THREAT_MODEL.md) | Modèle de menace formel STRIDE, analyse d'entropie mathématique du plan NANP (+1), compromis temps réel HMAC vs Argon2 et conformité Loi 25 / RGPD. |
 
 ---
 

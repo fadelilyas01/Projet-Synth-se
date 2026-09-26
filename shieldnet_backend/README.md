@@ -140,5 +140,15 @@ python manage.py runserver 0.0.0.0:8000
 
 ---
 
+## Documentation Technique & Ingénierie
+
+Pour approfondir les détails d'architecture, de déploiement et de sécurité du backend, consultez la documentation centralisée dans `docs/` :
+
+* [**Guide de Déploiement, Runbook & CI/CD**](file:///C:/Projet/Projet%20synthese/docs/DEPLOIEMENT_ET_CI_CD.md) : Stack Docker, Gunicorn, PostgreSQL 16, Nginx et pipeline Jenkins déclaratif.
+* [**Architecture & Conception Logicielle**](file:///C:/Projet/Projet%20synthese/docs/ARCHITECTURE_ET_CONCEPTION.md) : Modélisation UML, Clean Architecture et diagrammes de flux REST API.
+* [**Modèle de Menace & Sécurité Cryptographique**](file:///C:/Projet/Projet%20synthese/docs/SECURITY_AND_THREAT_MODEL.md) : Analyse d'entropie NANP (+1), Loi 25 et durcissement OWASP.
+
+---
+
 ## Mentions Légales
 © 2026 Université du Québec en Outaouais (UQO) — Tous droits réservés.
