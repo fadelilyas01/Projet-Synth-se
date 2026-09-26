@@ -1,5 +1,5 @@
 /* =====================================================================
-   ShieldNet — Interface d'administration & modération (Projet UQO 2026)
+   ShieldNet — Interface d'administration & modération
    Thème adaptatif Clair / Sombre
    ===================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
@@ -2282,6 +2282,850 @@ ul.errorlist li {
 }
 
 /* =====================================================================
+   DARK MODE: HIGH-CONTRAST DUAL-ENGINE ARCHITECTURE & VISIBILITY GUARDS
+   Universal Compatibility: html:not(.light-mode), body:not(.light-mode), [data-theme="dark"]
+   ===================================================================== */
+
+/* 1. Global Backgrounds & Container Shells */
+html:not(.light-mode),
+body:not(.light-mode),
+html[data-theme="dark"],
+body[data-theme="dark"],
+[data-theme="dark"] {
+  background-color: #070b14 !important;
+  color: #f8fafc !important;
+}
+
+html:not(.light-mode) body,
+body:not(.light-mode),
+[data-theme="dark"] body {
+  background-color: #070b14 !important;
+  color: #f8fafc !important;
+}
+
+html:not(.light-mode) .soc-shell,
+body:not(.light-mode) .soc-shell,
+[data-theme="dark"] .soc-shell,
+html:not(.light-mode) .soc-main-area,
+body:not(.light-mode) .soc-main-area,
+[data-theme="dark"] .soc-main-area,
+html:not(.light-mode) .soc-canvas,
+body:not(.light-mode) .soc-canvas,
+[data-theme="dark"] .soc-canvas,
+html:not(.light-mode) #content,
+body:not(.light-mode) #content,
+[data-theme="dark"] #content,
+html:not(.light-mode) #content-main,
+body:not(.light-mode) #content-main,
+[data-theme="dark"] #content-main {
+  background-color: #070b14 !important;
+  color: #f8fafc !important;
+}
+
+/* 2. Topbar & Sidebar in Dark Mode */
+html:not(.light-mode) .soc-top-bar,
+body:not(.light-mode) .soc-top-bar,
+[data-theme="dark"] .soc-top-bar {
+  background: #0b0f19 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+html:not(.light-mode) .soc-sidebar,
+body:not(.light-mode) .soc-sidebar,
+[data-theme="dark"] .soc-sidebar {
+  background: #0b0f19 !important;
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) .sidebar-brand,
+body:not(.light-mode) .sidebar-brand,
+[data-theme="dark"] .sidebar-brand {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) .sidebar-footer,
+body:not(.light-mode) .sidebar-footer,
+[data-theme="dark"] .sidebar-footer {
+  background: #0b0f19 !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) .nav-item,
+[data-theme="dark"] .nav-item {
+  color: #cbd5e1 !important;
+}
+
+html:not(.light-mode) .nav-item:hover,
+[data-theme="dark"] .nav-item:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+html:not(.light-mode) .nav-item.active,
+[data-theme="dark"] .nav-item.active {
+  color: #60a5fa !important;
+  background: rgba(59, 130, 246, 0.12) !important;
+  border-left: 3px solid #3b82f6 !important;
+}
+
+/* 3. Cards, Panels, Modules & Containers */
+html:not(.light-mode) .soc-hero-banner,
+html:not(.light-mode) .sandbox-panel,
+html:not(.light-mode) .ops-bar,
+html:not(.light-mode) .triage-panel,
+html:not(.light-mode) .kpi-card,
+html:not(.light-mode) .chart-card,
+html:not(.light-mode) .posture-widget,
+html:not(.light-mode) .triage-header-card,
+html:not(.light-mode) .sandbox-header-card,
+html:not(.light-mode) .sandbox-input-card,
+html:not(.light-mode) .sandbox-results-panel,
+html:not(.light-mode) .sb-metric-box,
+html:not(.light-mode) fieldset.module,
+html:not(.light-mode) .form-row,
+html:not(.light-mode) .results,
+html:not(.light-mode) .actions,
+html:not(.light-mode) .submit-row,
+html:not(.light-mode) .selector-available,
+html:not(.light-mode) .selector-chosen,
+html:not(.light-mode) #change-history,
+html:not(.light-mode) .delete-confirmation form,
+html:not(.light-mode) .live-ticker-wrap,
+html:not(.light-mode) .inline-group,
+html:not(.light-mode) div.module,
+[data-theme="dark"] .soc-hero-banner,
+[data-theme="dark"] .sandbox-panel,
+[data-theme="dark"] .ops-bar,
+[data-theme="dark"] .triage-panel,
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .chart-card,
+[data-theme="dark"] .posture-widget,
+[data-theme="dark"] .triage-header-card,
+[data-theme="dark"] .sandbox-header-card,
+[data-theme="dark"] .sandbox-input-card,
+[data-theme="dark"] .sandbox-results-panel,
+[data-theme="dark"] .sb-metric-box,
+[data-theme="dark"] fieldset.module,
+[data-theme="dark"] .form-row,
+[data-theme="dark"] .results,
+[data-theme="dark"] .actions,
+[data-theme="dark"] .submit-row,
+[data-theme="dark"] .selector-available,
+[data-theme="dark"] .selector-chosen,
+[data-theme="dark"] #change-history,
+[data-theme="dark"] .delete-confirmation form,
+[data-theme="dark"] .live-ticker-wrap,
+[data-theme="dark"] .inline-group,
+[data-theme="dark"] div.module {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 4. Headings & High-Contrast Typography */
+html:not(.light-mode) h1,
+html:not(.light-mode) h2,
+html:not(.light-mode) h3,
+html:not(.light-mode) h4,
+html:not(.light-mode) h5,
+html:not(.light-mode) h6,
+html:not(.light-mode) .page-main-title,
+html:not(.light-mode) .hero-banner-title,
+html:not(.light-mode) .soc-page-title,
+html:not(.light-mode) .brand-name,
+html:not(.light-mode) strong,
+html:not(.light-mode) b,
+html:not(.light-mode) caption,
+html:not(.light-mode) .module caption,
+html:not(.light-mode) fieldset.module h2,
+html:not(.light-mode) .inline-group h2,
+html:not(.light-mode) .inline-related h3,
+html:not(.light-mode) #changelist-filter h2,
+html:not(.light-mode) #changelist-filter h3,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .page-main-title,
+[data-theme="dark"] .hero-banner-title,
+[data-theme="dark"] .soc-page-title,
+[data-theme="dark"] .brand-name,
+[data-theme="dark"] strong,
+[data-theme="dark"] b,
+[data-theme="dark"] caption,
+[data-theme="dark"] .module caption,
+[data-theme="dark"] fieldset.module h2,
+[data-theme="dark"] .inline-group h2,
+[data-theme="dark"] .inline-related h3,
+[data-theme="dark"] #changelist-filter h2,
+[data-theme="dark"] #changelist-filter h3 {
+  color: #f8fafc !important;
+}
+
+html:not(.light-mode) p,
+html:not(.light-mode) span,
+html:not(.light-mode) li,
+html:not(.light-mode) label,
+html:not(.light-mode) .ticker-content,
+html:not(.light-mode) #live-ticker-text,
+html:not(.light-mode) .form-row label,
+html:not(.light-mode) .actions label,
+html:not(.light-mode) .delete-confirmation form p,
+html:not(.light-mode) .delete-confirmation form li,
+html:not(.light-mode) .inline-group p,
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] li,
+[data-theme="dark"] label,
+[data-theme="dark"] .ticker-content,
+[data-theme="dark"] #live-ticker-text,
+[data-theme="dark"] .form-row label,
+[data-theme="dark"] .actions label,
+[data-theme="dark"] .delete-confirmation form p,
+[data-theme="dark"] .delete-confirmation form li,
+[data-theme="dark"] .inline-group p {
+  color: #cbd5e1 !important;
+}
+
+html:not(.light-mode) .hero-banner-sub,
+html:not(.light-mode) .page-subtitle,
+html:not(.light-mode) .soc-page-subtitle,
+html:not(.light-mode) .brand-sub,
+html:not(.light-mode) .kpi-sub-text,
+html:not(.light-mode) .help,
+html:not(.light-mode) p.help,
+html:not(.light-mode) div.help,
+html:not(.light-mode) span.help,
+html:not(.light-mode) .help-tooltip,
+html:not(.light-mode) .help-block,
+html:not(.light-mode) .nav-section-label,
+html:not(.light-mode) .kpi-label,
+html:not(.light-mode) .sb-metric-label,
+html:not(.light-mode) .area-code-stat,
+html:not(.light-mode) .actions .action-counter,
+html:not(.light-mode) .datetimeshortcuts,
+[data-theme="dark"] .hero-banner-sub,
+[data-theme="dark"] .page-subtitle,
+[data-theme="dark"] .soc-page-subtitle,
+[data-theme="dark"] .brand-sub,
+[data-theme="dark"] .kpi-sub-text,
+[data-theme="dark"] .help,
+[data-theme="dark"] p.help,
+[data-theme="dark"] div.help,
+[data-theme="dark"] span.help,
+[data-theme="dark"] .help-tooltip,
+[data-theme="dark"] .help-block,
+[data-theme="dark"] .nav-section-label,
+[data-theme="dark"] .kpi-label,
+[data-theme="dark"] .sb-metric-label,
+[data-theme="dark"] .area-code-stat,
+[data-theme="dark"] .actions .action-counter,
+[data-theme="dark"] .datetimeshortcuts {
+  color: #94a3b8 !important;
+}
+
+/* 5. Global Link Contrast in Dark Mode */
+html:not(.light-mode) a:link,
+html:not(.light-mode) a:visited,
+[data-theme="dark"] a:link,
+[data-theme="dark"] a:visited {
+  color: #60a5fa !important;
+  text-decoration: none !important;
+}
+
+html:not(.light-mode) a:hover,
+html:not(.light-mode) a:focus,
+[data-theme="dark"] a:hover,
+[data-theme="dark"] a:focus {
+  color: #93c5fd !important;
+}
+
+/* 6. High-Contrast Table Styling (Changelists, Triage & Modules) */
+html:not(.light-mode) table thead th,
+html:not(.light-mode) .triage-table th,
+html:not(.light-mode) #result_list thead th,
+html:not(.light-mode) #change-history th,
+[data-theme="dark"] table thead th,
+[data-theme="dark"] .triage-table th,
+[data-theme="dark"] #result_list thead th,
+[data-theme="dark"] #change-history th {
+  background: #111827 !important;
+  color: #cbd5e1 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) table thead th a,
+html:not(.light-mode) .triage-table th a,
+html:not(.light-mode) #result_list thead th a,
+[data-theme="dark"] table thead th a,
+[data-theme="dark"] .triage-table th a,
+[data-theme="dark"] #result_list thead th a {
+  color: #cbd5e1 !important;
+}
+
+html:not(.light-mode) table thead th a:hover,
+html:not(.light-mode) .triage-table th a:hover,
+html:not(.light-mode) #result_list thead th a:hover,
+[data-theme="dark"] table thead th a:hover,
+[data-theme="dark"] .triage-table th a:hover,
+[data-theme="dark"] #result_list thead th a:hover {
+  color: #f8fafc !important;
+}
+
+/* Sorted Column Highlight */
+html:not(.light-mode) table thead th.sorted,
+html:not(.light-mode) #changelist table thead th.sorted,
+[data-theme="dark"] table thead th.sorted,
+[data-theme="dark"] #changelist table thead th.sorted {
+  background: #1e293b !important;
+}
+
+html:not(.light-mode) table thead th.sorted .text a,
+html:not(.light-mode) #changelist table thead th.sorted .text a,
+[data-theme="dark"] table thead th.sorted .text a,
+[data-theme="dark"] #changelist table thead th.sorted .text a {
+  color: #60a5fa !important;
+  font-weight: 700 !important;
+}
+
+html:not(.light-mode) table tbody td,
+html:not(.light-mode) table tbody th,
+html:not(.light-mode) .triage-table td,
+html:not(.light-mode) #result_list tbody td,
+html:not(.light-mode) #result_list tbody th,
+html:not(.light-mode) #change-history td,
+[data-theme="dark"] table tbody td,
+[data-theme="dark"] table tbody th,
+[data-theme="dark"] .triage-table td,
+[data-theme="dark"] #result_list tbody td,
+[data-theme="dark"] #result_list tbody th,
+[data-theme="dark"] #change-history td {
+  color: #cbd5e1 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+html:not(.light-mode) table tbody td a,
+html:not(.light-mode) table tbody th a,
+html:not(.light-mode) .triage-table td a,
+html:not(.light-mode) #result_list tbody td a,
+html:not(.light-mode) #result_list tbody th a,
+[data-theme="dark"] table tbody td a,
+[data-theme="dark"] table tbody th a,
+[data-theme="dark"] .triage-table td a,
+[data-theme="dark"] #result_list tbody td a,
+[data-theme="dark"] #result_list tbody th a {
+  color: #60a5fa !important;
+  font-weight: 600 !important;
+}
+
+html:not(.light-mode) table tbody td a:hover,
+html:not(.light-mode) table tbody th a:hover,
+html:not(.light-mode) #result_list tbody td a:hover,
+html:not(.light-mode) #result_list tbody th a:hover,
+[data-theme="dark"] table tbody td a:hover,
+[data-theme="dark"] table tbody th a:hover,
+[data-theme="dark"] #result_list tbody td a:hover,
+[data-theme="dark"] #result_list tbody th a:hover {
+  color: #93c5fd !important;
+  text-decoration: underline !important;
+}
+
+html:not(.light-mode) table tbody tr:nth-child(even),
+html:not(.light-mode) .triage-table tbody tr:nth-child(even),
+html:not(.light-mode) #result_list tbody tr:nth-child(even),
+[data-theme="dark"] table tbody tr:nth-child(even),
+[data-theme="dark"] .triage-table tbody tr:nth-child(even),
+[data-theme="dark"] #result_list tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+html:not(.light-mode) table tbody tr:hover,
+html:not(.light-mode) .triage-table tbody tr:hover,
+html:not(.light-mode) #result_list tbody tr:hover,
+[data-theme="dark"] table tbody tr:hover,
+[data-theme="dark"] .triage-table tbody tr:hover,
+[data-theme="dark"] #result_list tbody tr:hover {
+  background: rgba(59, 130, 246, 0.12) !important;
+}
+
+html:not(.light-mode) table tbody tr:hover td,
+html:not(.light-mode) table tbody tr:hover th,
+html:not(.light-mode) #result_list tbody tr:hover td,
+html:not(.light-mode) #result_list tbody tr:hover th,
+[data-theme="dark"] table tbody tr:hover td,
+[data-theme="dark"] table tbody tr:hover th,
+[data-theme="dark"] #result_list tbody tr:hover td,
+[data-theme="dark"] #result_list tbody tr:hover th {
+  color: #f8fafc !important;
+}
+
+/* 7. Form Controls, Inputs, Selects & Textareas */
+html:not(.light-mode) input[type="text"],
+html:not(.light-mode) input[type="password"],
+html:not(.light-mode) input[type="email"],
+html:not(.light-mode) input[type="url"],
+html:not(.light-mode) input[type="number"],
+html:not(.light-mode) input[type="tel"],
+html:not(.light-mode) input[type="search"],
+html:not(.light-mode) input[type="date"],
+html:not(.light-mode) input[type="datetime-local"],
+html:not(.light-mode) input[type="time"],
+html:not(.light-mode) textarea,
+html:not(.light-mode) select,
+html:not(.light-mode) .vTextField,
+html:not(.light-mode) .vIntegerField,
+html:not(.light-mode) .vDateField,
+html:not(.light-mode) .vTimeField,
+html:not(.light-mode) .vURLField,
+html:not(.light-mode) .vLargeTextField,
+html:not(.light-mode) .search-field,
+html:not(.light-mode) .sandbox-phone-field,
+html:not(.light-mode) .sandbox-input,
+html:not(.light-mode) .selector-filter input,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="url"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="datetime-local"],
+[data-theme="dark"] input[type="time"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+[data-theme="dark"] .vTextField,
+[data-theme="dark"] .vIntegerField,
+[data-theme="dark"] .vDateField,
+[data-theme="dark"] .vTimeField,
+[data-theme="dark"] .vURLField,
+[data-theme="dark"] .vLargeTextField,
+[data-theme="dark"] .search-field,
+[data-theme="dark"] .sandbox-phone-field,
+[data-theme="dark"] .sandbox-input,
+[data-theme="dark"] .selector-filter input {
+  background-color: #162032 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+html:not(.light-mode) input:focus,
+html:not(.light-mode) textarea:focus,
+html:not(.light-mode) select:focus,
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+  background-color: #162032 !important;
+}
+
+/* Universal Select Option Engine (Fixes Chromium on Windows) */
+html:not(.light-mode) select option,
+html:not(.light-mode) optgroup,
+html:not(.light-mode) optgroup option,
+html:not(.light-mode) .actions select option,
+html:not(.light-mode) .selector select option,
+[data-theme="dark"] select option,
+[data-theme="dark"] optgroup,
+[data-theme="dark"] optgroup option,
+[data-theme="dark"] .actions select option,
+[data-theme="dark"] .selector select option {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+  padding: 8px 12px !important;
+}
+
+html:not(.light-mode) select option:checked,
+html:not(.light-mode) select option:hover,
+[data-theme="dark"] select option:checked,
+[data-theme="dark"] select option:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+html:not(.light-mode) ::placeholder,
+[data-theme="dark"] ::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+/* Readonly fields & Datetime Shortcuts */
+html:not(.light-mode) .readonly,
+html:not(.light-mode) div.readonly,
+html:not(.light-mode) p.readonly,
+[data-theme="dark"] .readonly,
+[data-theme="dark"] div.readonly,
+[data-theme="dark"] p.readonly {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+}
+
+html:not(.light-mode) .datetimeshortcuts a,
+[data-theme="dark"] .datetimeshortcuts a {
+  color: #60a5fa !important;
+  font-weight: 500 !important;
+}
+
+html:not(.light-mode) .datetimeshortcuts a:hover,
+[data-theme="dark"] .datetimeshortcuts a:hover {
+  color: #93c5fd !important;
+}
+
+/* 8. Action Bar, Filter Sidebar, Paginator & Search */
+html:not(.light-mode) .actions,
+[data-theme="dark"] .actions {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+html:not(.light-mode) .actions select,
+[data-theme="dark"] .actions select {
+  background: #162032 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html:not(.light-mode) .actions .all a,
+html:not(.light-mode) .actions .clear a,
+html:not(.light-mode) .actions .question a,
+[data-theme="dark"] .actions .all a,
+[data-theme="dark"] .actions .clear a,
+[data-theme="dark"] .actions .question a {
+  color: #60a5fa !important;
+  font-weight: 600 !important;
+}
+
+/* Filter Sidebar */
+html:not(.light-mode) #changelist-filter,
+[data-theme="dark"] #changelist-filter {
+  background: #0e1526 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) #changelist-filter h2,
+[data-theme="dark"] #changelist-filter h2 {
+  color: #f8fafc !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) #changelist-filter h3,
+[data-theme="dark"] #changelist-filter h3 {
+  color: #f8fafc !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin: 14px 0 8px 0 !important;
+  padding: 0 !important;
+}
+
+html:not(.light-mode) #changelist-filter summary,
+[data-theme="dark"] #changelist-filter summary {
+  color: #60a5fa !important;
+}
+
+html:not(.light-mode) #changelist-filter li a,
+[data-theme="dark"] #changelist-filter li a {
+  color: #cbd5e1 !important;
+}
+
+html:not(.light-mode) #changelist-filter li a:hover,
+[data-theme="dark"] #changelist-filter li a:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html:not(.light-mode) #changelist-filter li.selected a,
+[data-theme="dark"] #changelist-filter li.selected a {
+  color: #60a5fa !important;
+  font-weight: 700 !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+  border-left: 2px solid #3b82f6 !important;
+}
+
+html:not(.light-mode) #changelist-filter #changelist-filter-clear a,
+[data-theme="dark"] #changelist-filter #changelist-filter-clear a {
+  color: #f87171 !important;
+}
+
+/* Paginator */
+html:not(.light-mode) .paginator,
+[data-theme="dark"] .paginator {
+  color: #cbd5e1 !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) .paginator a:link,
+html:not(.light-mode) .paginator a:visited,
+[data-theme="dark"] .paginator a:link,
+[data-theme="dark"] .paginator a:visited {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+html:not(.light-mode) .paginator a:hover,
+[data-theme="dark"] .paginator a:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+}
+
+html:not(.light-mode) .paginator .this-page,
+[data-theme="dark"] .paginator .this-page {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Object Tools & Buttons */
+html:not(.light-mode) .object-tools a,
+[data-theme="dark"] .object-tools a {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+html:not(.light-mode) .object-tools a:hover,
+[data-theme="dark"] .object-tools a:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+}
+
+html:not(.light-mode) .submit-row,
+[data-theme="dark"] .submit-row {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) .submit-row input[name="_addanother"],
+html:not(.light-mode) .submit-row input[name="_continue"],
+[data-theme="dark"] .submit-row input[name="_addanother"],
+[data-theme="dark"] .submit-row input[name="_continue"] {
+  background: #162032 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+html:not(.light-mode) .submit-row input[name="_addanother"]:hover,
+html:not(.light-mode) .submit-row input[name="_continue"]:hover,
+[data-theme="dark"] .submit-row input[name="_addanother"]:hover,
+[data-theme="dark"] .submit-row input[name="_continue"]:hover {
+  background: #1e293b !important;
+  color: #ffffff !important;
+}
+
+/* Breadcrumbs in Dark Mode */
+html:not(.light-mode) .breadcrumbs,
+html:not(.light-mode) .soc-breadcrumbs,
+[data-theme="dark"] .breadcrumbs,
+[data-theme="dark"] .soc-breadcrumbs {
+  color: #94a3b8 !important;
+}
+
+html:not(.light-mode) .breadcrumbs a,
+html:not(.light-mode) .soc-breadcrumbs a,
+[data-theme="dark"] .breadcrumbs a,
+[data-theme="dark"] .soc-breadcrumbs a {
+  color: #cbd5e1 !important;
+}
+
+html:not(.light-mode) .breadcrumbs a:hover,
+html:not(.light-mode) .soc-breadcrumbs a:hover,
+[data-theme="dark"] .breadcrumbs a:hover,
+[data-theme="dark"] .soc-breadcrumbs a:hover {
+  color: #ffffff !important;
+}
+
+html:not(.light-mode) .breadcrumbs span,
+html:not(.light-mode) .soc-breadcrumbs span,
+[data-theme="dark"] .breadcrumbs span,
+[data-theme="dark"] .soc-breadcrumbs span {
+  color: #f8fafc !important;
+  font-weight: 600 !important;
+}
+
+/* 9. Status Badges, Chips & Code */
+html:not(.light-mode) .badge-safe,
+[data-theme="dark"] .badge-safe {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid #10b981 !important;
+}
+
+html:not(.light-mode) .badge-critical,
+[data-theme="dark"] .badge-critical {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid #ef4444 !important;
+}
+
+html:not(.light-mode) .badge-warning,
+[data-theme="dark"] .badge-warning {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid #f59e0b !important;
+}
+
+html:not(.light-mode) .category-chip,
+[data-theme="dark"] .category-chip {
+  background: #162032 !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html:not(.light-mode) .hash-code,
+html:not(.light-mode) code.hash-code,
+[data-theme="dark"] .hash-code,
+[data-theme="dark"] code.hash-code {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border: 1px solid rgba(59, 130, 246, 0.25) !important;
+  color: #93c5fd !important;
+}
+
+html:not(.light-mode) .sys-health-chip,
+[data-theme="dark"] .sys-health-chip {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+/* 10. Global SOC Footer in Dark Mode */
+html:not(.light-mode) .soc-footer,
+[data-theme="dark"] .soc-footer {
+  background: #0b0f19 !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) .soc-footer-inner,
+[data-theme="dark"] .soc-footer-inner {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.light-mode) .soc-footer-title,
+html:not(.light-mode) .soc-footer-col-title,
+[data-theme="dark"] .soc-footer-title,
+[data-theme="dark"] .soc-footer-col-title {
+  color: #f8fafc !important;
+}
+
+html:not(.light-mode) .soc-footer-sub,
+html:not(.light-mode) .soc-footer-desc,
+[data-theme="dark"] .soc-footer-sub,
+[data-theme="dark"] .soc-footer-desc {
+  color: #94a3b8 !important;
+}
+
+html:not(.light-mode) .soc-footer-links li a,
+[data-theme="dark"] .soc-footer-links li a {
+  color: #94a3b8 !important;
+}
+
+html:not(.light-mode) .soc-footer-links li a:hover,
+[data-theme="dark"] .soc-footer-links li a:hover {
+  color: #60a5fa !important;
+}
+
+html:not(.light-mode) .soc-footer-bottom,
+[data-theme="dark"] .soc-footer-bottom {
+  color: #64748b !important;
+}
+
+html:not(.light-mode) .soc-footer-copy strong,
+[data-theme="dark"] .soc-footer-copy strong {
+  color: #f8fafc !important;
+}
+
+html:not(.light-mode) .soc-footer-scroll-top,
+[data-theme="dark"] .soc-footer-scroll-top {
+  background: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+
+html:not(.light-mode) .soc-footer-scroll-top svg,
+[data-theme="dark"] .soc-footer-scroll-top svg {
+  stroke: #cbd5e1 !important;
+}
+
+html:not(.light-mode) .soc-footer-scroll-top:hover,
+[data-theme="dark"] .soc-footer-scroll-top:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+html:not(.light-mode) .soc-footer-scroll-top:hover svg,
+[data-theme="dark"] .soc-footer-scroll-top:hover svg {
+  stroke: #ffffff !important;
+}
+
+/* 11. Django Flash Messages & Alerts */
+html:not(.light-mode) .messages-wrap,
+[data-theme="dark"] .messages-wrap {
+  margin-bottom: 20px !important;
+}
+
+html:not(.light-mode) .soc-alert,
+html:not(.light-mode) ul.messagelist,
+html:not(.light-mode) ul.messagelist li,
+[data-theme="dark"] .soc-alert,
+[data-theme="dark"] ul.messagelist,
+[data-theme="dark"] ul.messagelist li {
+  padding: 12px 18px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  list-style: none !important;
+  margin: 0 0 10px 0 !important;
+}
+
+html:not(.light-mode) .soc-alert.success,
+html:not(.light-mode) ul.messagelist li.success,
+[data-theme="dark"] .soc-alert.success,
+[data-theme="dark"] ul.messagelist li.success {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid #10b981 !important;
+}
+
+html:not(.light-mode) .soc-alert.error,
+html:not(.light-mode) ul.messagelist li.error,
+[data-theme="dark"] .soc-alert.error,
+[data-theme="dark"] ul.messagelist li.error {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid #ef4444 !important;
+}
+
+html:not(.light-mode) .soc-alert.warning,
+html:not(.light-mode) ul.messagelist li.warning,
+[data-theme="dark"] .soc-alert.warning,
+[data-theme="dark"] ul.messagelist li.warning {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid #f59e0b !important;
+}
+
+html:not(.light-mode) .soc-alert.info,
+html:not(.light-mode) ul.messagelist li.info,
+[data-theme="dark"] .soc-alert.info,
+[data-theme="dark"] ul.messagelist li.info {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+  border: 1px solid #3b82f6 !important;
+}
+
+/* =====================================================================
    LIGHT MODE: HIGH-CONTRAST DUAL-ENGINE ARCHITECTURE & VISIBILITY GUARDS
    Universal Compatibility: html.light-mode, body.light-mode, [data-theme="light"]
    ===================================================================== */
@@ -3169,10 +4013,25 @@ html.light-mode .selector-chosen h2,
   color: #0f172a !important;
   border-bottom-color: #e2e8f0 !important;
 }
+html.light-mode select option,
+html.light-mode optgroup,
+html.light-mode optgroup option,
+html.light-mode .actions select option,
 html.light-mode .selector select option,
+[data-theme="light"] select option,
+[data-theme="light"] optgroup,
+[data-theme="light"] optgroup option,
+[data-theme="light"] .actions select option,
 [data-theme="light"] .selector select option {
-  background: #ffffff !important;
-  color: #1e293b !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+html.light-mode select option:checked,
+html.light-mode select option:hover,
+[data-theme="light"] select option:checked,
+[data-theme="light"] select option:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 html.light-mode .selector-chooser a,
 [data-theme="light"] .selector-chooser a {
@@ -3345,6 +4204,57 @@ html.light-mode .soc-footer-scroll-top:hover,
 html.light-mode .soc-footer-scroll-top:hover svg,
 [data-theme="light"] .soc-footer-scroll-top:hover svg {
   stroke: #1d4ed8 !important;
+}
+
+/* Light Mode Flash Messages & Alerts */
+html.light-mode .soc-alert,
+html.light-mode ul.messagelist,
+html.light-mode ul.messagelist li,
+[data-theme="light"] .soc-alert,
+[data-theme="light"] ul.messagelist,
+[data-theme="light"] ul.messagelist li {
+  padding: 12px 18px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  list-style: none !important;
+  margin: 0 0 10px 0 !important;
+}
+
+html.light-mode .soc-alert.success,
+html.light-mode ul.messagelist li.success,
+[data-theme="light"] .soc-alert.success,
+[data-theme="light"] ul.messagelist li.success {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+html.light-mode .soc-alert.error,
+html.light-mode ul.messagelist li.error,
+[data-theme="light"] .soc-alert.error,
+[data-theme="light"] ul.messagelist li.error {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
+}
+
+html.light-mode .soc-alert.warning,
+html.light-mode ul.messagelist li.warning,
+[data-theme="light"] .soc-alert.warning,
+[data-theme="light"] ul.messagelist li.warning {
+  background-color: #fffbeb !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a !important;
+}
+
+html.light-mode .soc-alert.info,
+html.light-mode ul.messagelist li.info,
+[data-theme="light"] .soc-alert.info,
+[data-theme="light"] ul.messagelist li.info {
+  background-color: #eff6ff !important;
+  color: #1e40af !important;
+  border: 1px solid #bfdbfe !important;
 }
 
 /* 8. UNIVERSAL FLUID THEME TRANSITION */

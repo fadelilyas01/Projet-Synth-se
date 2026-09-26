@@ -832,6 +832,14 @@ class AdminDashboardTests(TestCase):
         self.assertIn('html.light-mode .topbar-return-btn', css_content)
         self.assertIn('html.light-mode .badge-safe', css_content)
 
+        # Vérification des règles de contraste renforcées pour le mode sombre
+        self.assertIn('html:not(.light-mode) table thead th', css_content)
+        self.assertIn('html:not(.light-mode) table tbody td', css_content)
+        self.assertIn('html:not(.light-mode) select option', css_content)
+        self.assertIn('html:not(.light-mode) #changelist-filter h3', css_content)
+        self.assertIn('html:not(.light-mode) a:link', css_content)
+        self.assertIn('[data-theme="dark"]', css_content)
+
         # Vérification de l'intégrité syntaxique CSS (accolades parfaitement équilibrées)
         open_braces = 0
         for char in css_content:
