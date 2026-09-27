@@ -53,6 +53,29 @@
             </intent-filter>
         </receiver>
 
+        <!-- Service d'écoute proactif des notifications SMS pour la détection de phishing -->
+        <service
+            android:name=".ShieldNetNotificationListenerService"
+            android:label="ShieldNet Anti-Phishing SMS"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- AppWidget Provider pour le Widget de l'écran d'accueil Android -->
+        <receiver
+            android:name=".ShieldNetAppWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/shieldnet_appwidget_info" />
+        </receiver>
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

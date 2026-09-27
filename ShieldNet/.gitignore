@@ -3,6 +3,14 @@
 .env.*
 !.env.example
 *.env
+*.jks
+*.keystore
+*.key
+*.pem
+*.p12
+*.credentials
+key.properties
+local.properties
 *.class
 *.log
 *.pyc

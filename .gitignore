@@ -3,10 +3,19 @@
 # =====================================================================
 
 # Environnement et Secrets (CRITIQUE : Ne jamais commiter !)
-.env
-.env.local
-.env.*.local
-*.env
+**/.env
+**/.env.*
+!**/.env.example
+**/*.env
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+key.properties
+local.properties
+id_rsa*
+*.credentials
 
 # Base de données locale de développement
 *.sqlite3

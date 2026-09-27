@@ -12,7 +12,7 @@ import javax.crypto.spec.SecretKeySpec
 object ShieldNetDatabaseHelper {
 
     private const val TAG = "ShieldNetDBHelper"
-    const val DEFAULT_SALT = "ShieldNet_Secure_Salt_2026_UQO"
+    const val DEFAULT_SALT = "dev-local-hash-salt-test-do-not-use-in-prod"
 
     /**
      * Recherche le fichier de base de données SQLite créé par Flutter/Sqflite

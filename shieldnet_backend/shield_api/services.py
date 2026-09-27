@@ -425,3 +425,121 @@ class ReputationService:
             FalsePositiveConsensusService.apply_consensus_decision(phone_hash)
 
         return report
+
+
+class BloomFilterService:
+    """
+    Générateur de filtre de Bloom probabiliste pour vérification instantanée en mémoire côté client.
+    Taille standard : 65536 bits (8192 octets = 8 Ko) avec 4 fonctions de hachage.
+    """
+    DEFAULT_SIZE_BITS = 65536
+    DEFAULT_HASH_COUNT = 4
+
+    @classmethod
+    def generate_filter_payload(cls, size_bits=DEFAULT_SIZE_BITS, hash_count=DEFAULT_HASH_COUNT) -> dict:
+        import base64
+        from .models import BlacklistedNumber
+        
+        active_hashes = list(
+            BlacklistedNumber.objects.filter(is_blocked=True, is_whitelisted=False)
+            .values_list('phone_hash', flat=True)
+        )
+        
+        byte_size = (size_bits + 7) // 8
+        bit_array = bytearray(byte_size)
+        
+        for phone_hash in active_hashes:
+            try:
+                h1 = int(phone_hash[:16], 16)
+                h2 = int(phone_hash[16:32], 16) | 1
+            except (ValueError, IndexError):
+                continue
+            
+            for i in range(hash_count):
+                bit_index = (h1 + i * h2) % size_bits
+                byte_pos = bit_index // 8
+                bit_pos = bit_index % 8
+                bit_array[byte_pos] |= (1 << bit_pos)
+                
+        encoded_b64 = base64.b64encode(bit_array).decode('ascii')
+        
+        return {
+            'format': 'bloom_filter_v1',
+            'size_bits': size_bits,
+            'size_bytes': byte_size,
+            'hash_count': hash_count,
+            'entries_count': len(active_hashes),
+            'bit_array_base64': encoded_b64,
+            'generated_at': timezone.now().isoformat(),
+        }
+
+
+class RegionalThreatIntelligenceService:
+    """
+    Détection et analyse des vagues d'attaques téléphoniques régionales (Spoofing ciblé par indicatif).
+    """
+    REGION_NAMES = {
+        '819': 'Outaouais / Gatineau / Laurentides',
+        '514': 'Montréal (Centre-Ville)',
+        '438': 'Grand Montréal & Rive-Sud',
+        '418': 'Capitale-Nationale (Québec) & Est',
+        '450': 'Laval & Couronne Nord/Sud',
+        '613': 'Ottawa / Est Ontarien',
+        '416': 'Toronto (Centre)',
+        '647': 'Grand Toronto',
+        '367': 'Québec / Bas-Saint-Laurent',
+    }
+
+    @classmethod
+    def get_regional_threat_report(cls) -> dict:
+        from .models import BlacklistedNumber
+        
+        numbers = BlacklistedNumber.objects.filter(is_blocked=True, is_whitelisted=False).exclude(masked_number__isnull=True)
+        
+        regional_stats = {}
+        for num in numbers:
+            masked = num.masked_number or ''
+            match = re.search(r'\b(819|514|438|418|450|613|416|647|367)\b', masked)
+            if match:
+                code = match.group(1)
+            else:
+                code = 'AUTRE'
+                
+            if code not in regional_stats:
+                regional_stats[code] = {
+                    'area_code': code,
+                    'region_name': cls.REGION_NAMES.get(code, 'Région indéterminée'),
+                    'total_spams': 0,
+                    'top_category': num.category,
+                    'categories': {},
+                    'max_risk_score': 0,
+                }
+                
+            entry = regional_stats[code]
+            entry['total_spams'] += num.reports_count
+            entry['categories'][num.category] = entry['categories'].get(num.category, 0) + num.reports_count
+            if num.risk_score > entry['max_risk_score']:
+                entry['max_risk_score'] = num.risk_score
+                
+        result_list = []
+        for code, data in regional_stats.items():
+            top_cat = max(data['categories'], key=data['categories'].get) if data['categories'] else 'fraud'
+            data['top_category'] = top_cat
+            del data['categories']
+            
+            if data['total_spams'] >= 20 or data['max_risk_score'] >= 90:
+                data['alert_level'] = 'CRITIQUE'
+            elif data['total_spams'] >= 5 or data['max_risk_score'] >= 60:
+                data['alert_level'] = 'ÉLEVÉ'
+            else:
+                data['alert_level'] = 'MODÉRÉ'
+                
+            result_list.append(data)
+            
+        result_list.sort(key=lambda x: x['total_spams'], reverse=True)
+        
+        return {
+            'generated_at': timezone.now().isoformat(),
+            'total_regions_tracked': len(result_list),
+            'regions': result_list,
+        }

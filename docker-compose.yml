@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-shieldnet_db}
       POSTGRES_USER: ${POSTGRES_USER:-shieldnet_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shieldnet_password_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -44,19 +44,21 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    env_file:
+      - ./shieldnet_backend/.env
     environment:
       DJANGO_DEBUG: "${DJANGO_DEBUG:-True}"
-      SECRET_KEY: "${SECRET_KEY:-django-insecure-shieldnet-docker-secret-key-2026}"
-      API_KEY: "${API_KEY:-ShieldNet_Secret_Token_UQO_2026}"
-      HASH_SALT: "${HASH_SALT:-ShieldNet_Secure_Salt_2026_UQO}"
+      SECRET_KEY: "${SECRET_KEY}"
+      API_KEY: "${API_KEY}"
+      HASH_SALT: "${HASH_SALT}"
       POSTGRES_DB: "${POSTGRES_DB:-shieldnet_db}"
       POSTGRES_USER: "${POSTGRES_USER:-shieldnet_user}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-shieldnet_password_2026}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       POSTGRES_HOST: "db"
       POSTGRES_PORT: "5432"
       ALLOWED_HOSTS: "${ALLOWED_HOSTS:-*}"
       ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@shieldnet.app}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin123}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
     ports:
       - "8000:8000"
     volumes:

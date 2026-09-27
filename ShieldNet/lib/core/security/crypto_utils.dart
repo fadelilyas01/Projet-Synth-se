@@ -62,7 +62,7 @@ class CryptoUtils {
       return _cachedSalt!;
     }
     if (kDebugMode) {
-      return 'ShieldNet_Secure_Salt_2026_UQO';
+      return 'dev-local-hash-salt-test-do-not-use-in-prod';
     }
     throw StateError(
       'Sel cryptographique introuvable en production. '

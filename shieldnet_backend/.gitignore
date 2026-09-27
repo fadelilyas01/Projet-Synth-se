@@ -6,6 +6,10 @@
 .env
 .env.*
 !.env.example
+*.env
+*.key
+*.pem
+*.credentials
 
 # Base de données de développement local
 db.sqlite3

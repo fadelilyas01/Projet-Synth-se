@@ -229,7 +229,7 @@ python manage.py runserver 0.0.0.0:8000
 ```
 
 * **Console d'administration** : [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)  
-  *Courriel* : `admin@shieldnet.app` | *Mot de passe* : `admin123`
+  *Courriel* : `admin@shieldnet.app` | *Mot de passe* : défini via la variable `ADMIN_PASSWORD` dans votre `.env` local
 * **Documentation OpenAPI / Swagger** : [http://127.0.0.1:8000/api/v1/docs/](http://127.0.0.1:8000/api/v1/docs/)
 
 #### Déploiement avec Docker Compose

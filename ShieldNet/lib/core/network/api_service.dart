@@ -3,6 +3,8 @@ import 'package:shieldnet/core/utils/logger.dart';
 import 'package:dio/dio.dart';
 import '../database/database_helper.dart';
 import '../security/crypto_utils.dart';
+import '../security/bloom_filter_client.dart';
+import '../models/regional_threat.dart';
 import 'api_client.dart';
 
 class ApiService {
@@ -245,6 +247,36 @@ class ApiService {
       return null;
     } catch (e) {
       AppLogger.log("Erreur envoi contestation légitime: $e");
+      return null;
+    }
+  }
+
+  /// Récupère l'état d'alerte et l'analyse des menaces téléphoniques régionales
+  Future<RegionalThreatSummary?> getRegionalThreats() async {
+    try {
+      final response = await _dio.get('threats/regional/');
+      if (response.statusCode == 200 && response.data is Map) {
+        return RegionalThreatSummary.fromJson(Map<String, dynamic>.from(response.data as Map));
+      }
+      return null;
+    } catch (e) {
+      AppLogger.log("Erreur récupération menaces régionales: $e");
+      return null;
+    }
+  }
+
+  /// Télécharge le filtre de Bloom compressé pour vérification ultra-rapide en mémoire vive
+  Future<BloomFilterClient?> downloadBloomFilter({int sizeBits = 65536}) async {
+    try {
+      final response = await _dio.get('sync/bloom/', queryParameters: {'size_bits': sizeBits});
+      if (response.statusCode == 200 && response.data is Map) {
+        final filter = BloomFilterClient.fromJson(Map<String, dynamic>.from(response.data as Map));
+        BloomFilterClient.activeFilter = filter;
+        return filter;
+      }
+      return null;
+    } catch (e) {
+      AppLogger.log("Erreur téléchargement filtre de Bloom: $e");
       return null;
     }
   }

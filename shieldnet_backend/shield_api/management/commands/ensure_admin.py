@@ -6,8 +6,13 @@ class Command(BaseCommand):
     help = "Initialise ou met à jour le compte administrateur dédié pour l'accès Web et Mobile"
 
     def handle(self, *args, **options):
+        import secrets
         email = os.environ.get('ADMIN_EMAIL', 'admin@shieldnet.app')
-        password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+        password = os.environ.get('ADMIN_PASSWORD')
+        was_generated = False
+        if not password:
+            password = secrets.token_urlsafe(16)
+            was_generated = True
         username = 'admin'
 
         user = User.objects.filter(email__iexact=email).first()
@@ -30,3 +35,6 @@ class Command(BaseCommand):
                 last_name='ShieldNet'
             )
             self.stdout.write(self.style.SUCCESS(f"Compte administrateur créé avec succès : {email}"))
+
+        if was_generated:
+            self.stdout.write(self.style.WARNING(f"[SECURITE] Aucun ADMIN_PASSWORD defini dans .env. Mot de passe temporaire genere : {password}"))

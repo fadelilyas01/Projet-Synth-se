@@ -3,6 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/database/database_helper.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../core/security/crypto_utils.dart';
+import '../../../../core/security/bloom_filter_client.dart';
 import '../../domain/entities/blacklisted_entry.dart';
 import '../../domain/repositories/blacklist_repository.dart';
 
@@ -41,6 +42,15 @@ class BlacklistRepositoryImpl implements BlacklistRepository {
   @override
   Future<Either<Failure, BlacklistedEntry?>> checkNumberLocally(String rawPhoneNumber) async {
     try {
+      // Évaluation probabiliste en mémoire vive O(1) via le filtre de Bloom
+      // Si absent du filtre, il n'est assurément pas dans la base (zéro faux négatif).
+      if (BloomFilterClient.activeFilter != null) {
+        final hash = await CryptoUtils.hashPhoneNumberAsync(rawPhoneNumber);
+        if (!BloomFilterClient.activeFilter!.contains(hash)) {
+          return const Right(null);
+        }
+      }
+
       final match = await localDatabase.checkNumber(rawPhoneNumber);
       return Right(match != null ? _toDomain(match) : null);
     } catch (e) {

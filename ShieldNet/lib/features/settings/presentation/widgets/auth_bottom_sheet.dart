@@ -357,7 +357,6 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                       onTap: () {
                         setState(() {
                           _emailController.text = 'admin@shieldnet.app';
-                          _passwordController.text = 'admin123';
                         });
                       },
                       borderRadius: BorderRadius.circular(8),
@@ -369,7 +368,7 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                             SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Démo Admin (admin@shieldnet.app)',
+                                'Pré-remplir Admin (admin@shieldnet.app)',
                                 style: TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -383,7 +382,6 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                       onTap: () {
                         setState(() {
                           _emailController.text = 'manager@shieldnet.app';
-                          _passwordController.text = 'manager123';
                         });
                       },
                       borderRadius: BorderRadius.circular(8),
@@ -395,7 +393,7 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                             SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Démo Gestionnaire (manager@shieldnet.app)',
+                                'Pré-remplir Gestionnaire (manager@shieldnet.app)',
                                 style: TextStyle(fontSize: 11, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),

@@ -40,7 +40,7 @@ Write-Host "   - API REST:   http://127.0.0.1:8000/api/v1/" -ForegroundColor Gre
 Write-Host "   - Swagger UI: http://127.0.0.1:8000/api/v1/docs/" -ForegroundColor Green
 Write-Host "   - Admin Web:  http://127.0.0.1:8000/admin/" -ForegroundColor Green
 Write-Host "     * Identifiant / Courriel: admin@shieldnet.app (ou admin)" -ForegroundColor Cyan
-Write-Host "     * Mot de passe admin:     admin123" -ForegroundColor Cyan
+Write-Host "     * Mot de passe admin:     Defini dans shieldnet_backend/.env (ADMIN_PASSWORD)" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Appuyez sur Ctrl+C pour arreter le serveur." -ForegroundColor DarkGray
 

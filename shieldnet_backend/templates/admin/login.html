@@ -222,13 +222,13 @@
     </form>
 
     <div class="demo-credentials-box">
-      <span class="demo-badge">Accès Démo Rapide</span>
+      <span class="demo-badge">Compte Administrateur</span>
       <div style="font-size: 12px; color: #cbd5e1; margin-bottom: 4px;">
-        <strong>admin@shieldnet.app</strong> &bull; <code>admin123</code>
+        <strong>admin@shieldnet.app</strong>
       </div>
       <button type="button" class="demo-btn" onclick="fillDemoCredentials()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="m21 2-9.6 9.6"></path><path d="m15.5 7.5 3 3"></path></svg>
-        <span>Pré-remplir les identifiants</span>
+        <span>Pré-remplir le courriel admin</span>
       </button>
     </div>
   </div>
@@ -242,11 +242,12 @@
 function fillDemoCredentials() {
   const u = document.getElementById('id_username');
   const p = document.getElementById('id_password');
-  if (u && p) {
+  if (u) {
     u.value = 'admin@shieldnet.app';
-    p.value = 'admin123';
     u.dispatchEvent(new Event('input', { bubbles: true }));
-    p.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  if (p) {
+    p.focus();
   }
 }
 </script>

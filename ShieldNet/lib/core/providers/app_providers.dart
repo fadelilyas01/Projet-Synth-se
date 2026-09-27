@@ -7,6 +7,10 @@ import '../services/call_screening_service.dart';
 import '../services/background_sync_service.dart';
 import '../services/citizen_impact_service.dart';
 import '../services/offline_sync_service.dart';
+import '../services/home_widget_sync_service.dart';
+import '../security/device_integrity_checker.dart';
+import '../security/bloom_filter_client.dart';
+import '../models/regional_threat.dart';
 export 'auth_provider.dart';
 
 /// Notifier pour le mode de thème (Clair / Sombre / Système) avec persistance SharedPreferences
@@ -341,5 +345,54 @@ final offlineQueueCountProvider = FutureProvider.autoDispose<int>((ref) async {
 /// Provider pour les statistiques d'impact citoyen
 final citizenImpactProvider = FutureProvider.autoDispose.family<CitizenImpactData, int>((ref, localBlockedCount) async {
   return CitizenImpactService.getImpactData(localBlockedSpams: localBlockedCount);
+});
+
+/// Provider pour l'intégrité de l'appareil (Root / Jailbreak detection)
+final deviceIntegrityProvider = FutureProvider.autoDispose<DeviceIntegrityResult>((ref) async {
+  return await DeviceIntegrityChecker.checkIntegrity();
+});
+
+/// Provider pour les données publiées au widget d'accueil Android
+final homeWidgetDataProvider = FutureProvider.autoDispose<HomeWidgetData>((ref) async {
+  return await HomeWidgetSyncService.getWidgetData();
+});
+
+/// Provider pour les alertes et menaces téléphoniques régionales
+final regionalThreatsProvider = FutureProvider.autoDispose<RegionalThreatSummary?>((ref) async {
+  final api = ref.watch(apiServiceProvider);
+  return await api.getRegionalThreats();
+});
+
+/// Notifier pour le filtre de Bloom en mémoire vive (évaluation probabiliste O(1))
+class BloomFilterNotifier extends StateNotifier<BloomFilterClient?> {
+  final ApiService _api;
+
+  BloomFilterNotifier(this._api) : super(null) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final filter = await _api.downloadBloomFilter();
+      if (filter != null) {
+        state = filter;
+      }
+    } catch (_) {}
+  }
+
+  Future<void> refresh() async {
+    try {
+      final filter = await _api.downloadBloomFilter();
+      if (filter != null) {
+        state = filter;
+      }
+    } catch (_) {}
+  }
+}
+
+/// Provider pour le filtre de Bloom en mémoire vive
+final bloomFilterProvider = StateNotifierProvider<BloomFilterNotifier, BloomFilterClient?>((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return BloomFilterNotifier(api);
 });
 

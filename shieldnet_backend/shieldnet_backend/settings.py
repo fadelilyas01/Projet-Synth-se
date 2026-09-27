@@ -14,7 +14,8 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 SECRET_KEY = os.environ.get('SECRET_KEY')
 if not SECRET_KEY:
     if DEBUG:
-        SECRET_KEY = 'django-insecure-shieldnet-uqo-secret-key-2026-synthese'
+        import secrets
+        SECRET_KEY = 'dev-ephemeral-' + secrets.token_hex(24)
     else:
         raise ImproperlyConfigured("Variable d'environnement SECRET_KEY obligatoire en production.")
 
@@ -24,14 +25,14 @@ ALLOWED_HOSTS = ['*'] if DEBUG else ['api.shieldnet.app', 'localhost', '127.0.0.
 API_KEY = os.environ.get('API_KEY')
 if not API_KEY:
     if DEBUG:
-        API_KEY = 'ShieldNet_Secret_Token_UQO_2026'
+        API_KEY = 'dev-local-api-key-test-do-not-use-in-prod'
     else:
         raise ImproperlyConfigured("Variable d'environnement API_KEY obligatoire en production.")
 
 HASH_SALT = os.environ.get('HASH_SALT')
 if not HASH_SALT:
     if DEBUG:
-        HASH_SALT = 'ShieldNet_Secure_Salt_2026_UQO'
+        HASH_SALT = 'dev-local-hash-salt-test-do-not-use-in-prod'
     else:
         raise ImproperlyConfigured("Variable d'environnement HASH_SALT obligatoire en production.")
 
@@ -90,7 +91,7 @@ if os.environ.get('POSTGRES_DB'):
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.environ.get('POSTGRES_DB', 'shieldnet_db'),
             'USER': os.environ.get('POSTGRES_USER', 'shieldnet_user'),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'shieldnet_password_2026'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
             'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
             'PORT': os.environ.get('POSTGRES_PORT', '5432'),
         }

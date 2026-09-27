@@ -30,8 +30,13 @@ class Command(BaseCommand):
                     assigned_count += 1
 
         # 2. Création ou mise à jour du compte Gestionnaire
+        import secrets
         email = os.environ.get('MANAGER_EMAIL', 'manager@shieldnet.app')
-        password = os.environ.get('MANAGER_PASSWORD', 'manager123')
+        password = os.environ.get('MANAGER_PASSWORD')
+        was_generated = False
+        if not password:
+            password = secrets.token_urlsafe(16)
+            was_generated = True
         username = 'manager'
 
         user = User.objects.filter(email__iexact=email).first()
@@ -60,3 +65,6 @@ class Command(BaseCommand):
             )
             user.groups.add(group)
             self.stdout.write(self.style.SUCCESS(f"Compte gestionnaire créé avec succès : {email}"))
+
+        if was_generated:
+            self.stdout.write(self.style.WARNING(f"[SECURITE] Aucun MANAGER_PASSWORD defini dans .env. Mot de passe temporaire genere : {password}"))

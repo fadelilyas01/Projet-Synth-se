@@ -52,7 +52,7 @@ class ApiClient {
       }
     }
     if (kDebugMode) {
-      return 'ShieldNet_Secret_Token_UQO_2026';
+      return 'dev-local-api-key-test-do-not-use-in-prod';
     }
     return '';
   }

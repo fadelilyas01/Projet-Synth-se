@@ -1400,3 +1400,54 @@ class ApplicationSecurityAuditTests(APITestCase):
 
 
 
+
+
+from rest_framework.test import APIClient
+
+class BloomFilterAndThreatIntelligenceTests(TestCase):
+    def setUp(self):
+        from .models import BlacklistedNumber, CategoryChoices
+        BlacklistedNumber.objects.create(
+            phone_hash='a' * 64,
+            masked_number='+1 819 *** **12',
+            category=CategoryChoices.FRAUD,
+            risk_score=95,
+            reports_count=10,
+            is_blocked=True,
+            is_whitelisted=False,
+        )
+        BlacklistedNumber.objects.create(
+            phone_hash='b' * 64,
+            masked_number='+1 514 *** **34',
+            category=CategoryChoices.FINANCIAL_SCAM,
+            risk_score=75,
+            reports_count=5,
+            is_blocked=True,
+            is_whitelisted=False,
+        )
+        self.client = APIClient()
+
+    def test_bloom_filter_generation_and_api(self):
+        from .services import BloomFilterService
+        payload = BloomFilterService.generate_filter_payload(size_bits=1024, hash_count=3)
+        self.assertEqual(payload['format'], 'bloom_filter_v1')
+        self.assertEqual(payload['size_bits'], 1024)
+        self.assertGreater(payload['entries_count'], 0)
+        self.assertTrue(len(payload['bit_array_base64']) > 0)
+
+        response = self.client.get('/api/v1/sync/bloom/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('bit_array_base64', response.data)
+
+    def test_regional_threat_intelligence_service_and_api(self):
+        from .services import RegionalThreatIntelligenceService
+        report = RegionalThreatIntelligenceService.get_regional_threat_report()
+        self.assertIn('regions', report)
+        self.assertGreater(report['total_regions_tracked'], 0)
+        
+        region_codes = [r['area_code'] for r in report['regions']]
+        self.assertIn('819', region_codes)
+
+        response = self.client.get('/api/v1/threats/regional/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('regions', response.data)

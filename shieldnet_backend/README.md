@@ -93,7 +93,7 @@ python manage.py migrate
 python manage.py ensure_admin
 ```
 * **Courriel** : `admin@shieldnet.app` (ou nom d'utilisateur `admin`)
-* **Mot de passe** : `admin123` (modifiable via la variable `ADMIN_PASSWORD` dans `.env`)
+* **Mot de passe** : défini via la variable `ADMIN_PASSWORD` dans votre fichier `.env` local
 
 ### 4. Lancer les tests unitaires (61 tests, 100% de succès)
 ```bash

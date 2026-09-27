@@ -57,6 +57,13 @@ lib/
 ## 3. Ce que l'utilisateur peut faire avec l'application
 
 * **Tableau de bord de protection** : Permet de vérifier l'état du bouclier, de voir le nombre de menaces filtrées et de tester la réputation d'un numéro manuellement.
+* **Radar des Menaces Régionales & Détection de Spoofing** : Surveillance en temps réel des vagues d'appels frauduleux ciblant les indicatifs canadiens (819, 514, 438, 418, 450, 613, etc.) avec alertes visuelles interactives.
+* **Mode Interface Simplifiée (Aînés / Seniors)** : Interface haute lisibilité avec typographie agrandie, contrastes renforcés et boutons tactiles élargis pour une accessibilité maximale face aux arnaques ciblant les personnes vulnérables.
+* **File d'Attente Hors-Ligne Résiliente (Offline Queue)** : Permet de signaler des numéros ou de contester des faux-positifs même sans connexion Internet. Les signalements sont stockés localement en SQLite et synchronisés automatiquement dès reconnexion.
+* **Filtre de Bloom en Mémoire Vive (O(1) Fast-Path)** : Évaluation probabiliste instantanée (< 0.02 ms) éliminant les accès disque SQLite pour les numéros vérifiés non suspects, garantissant zéro faux négatif.
+* **Vérification d'Intégrité Matérielle & Détection de Root** : Contrôle automatique de la présence de binaires d'élévation de privilèges (`su`, Magisk) pour avertir des risques pesant sur les secrets locaux.
+* **Épinglage SSL (SSL/TLS Pinning)** : Durcissement du client HTTP Dio avec vérification d'empreinte SHA-256 du certificat serveur pour contrer les attaques de type *Man-in-the-Middle*.
+* **Synchronisation Widget d'Accueil Android** : Passerelle SharedPreferences alimentant le composant AppWidget de l'écran d'accueil avec les statistiques de protection en temps réel.
 * **Audit rapide des appels récents** : Dans l'onglet *Activité*, un bouton permet d'analyser les 50 derniers appels reçus en interrogeant le Cloud ShieldNet en une seule requête groupée (*batch check*).
 * **Contester un faux positif** : Si un numéro légitime (clinique médicale, pharmacie, livreur) a été bloqué par erreur, toucher le numéro ouvre une fiche permettant d'envoyer un avis favorable. Plusieurs avis concordants permettent au consensus de le réhabiliter automatiquement.
 * **Protection absolue des urgences** : Les numéros de secours (911, 811, 988) et vos contacts d'urgence personnels ne peuvent jamais être bloqués par l'application.
@@ -70,12 +77,12 @@ lib/
 ## 4. Démarrage de l'Application
 
 ### 1. Fichier d'environnement (`.env`)
-À la racine de `ShieldNet/`, un fichier `.env` est déjà configuré pour le développement local :
+Créez un fichier `.env` à la racine de `ShieldNet/` à partir de `.env.example` :
 
 ```env
 API_BASE_URL=http://127.0.0.1:8000/api/v1  # Utilisez 10.0.2.2 si vous testez sur l'émulateur Android
-API_KEY=ShieldNet_Secret_Token_UQO_2026
-HASH_SALT=ShieldNet_Secure_Salt_2026_UQO
+API_KEY=votre_jeton_api_partage
+HASH_SALT=votre_sel_cryptographique_hmac
 OFFLINE_CACHE_TTL_HOURS=24
 ENABLE_AUTO_BLOCKING=true
 ```
@@ -85,8 +92,11 @@ ENABLE_AUTO_BLOCKING=true
 # Télécharger les dépendances Flutter
 flutter pub get
 
-# Lancer la suite de tests (69 tests unitaires et widgets)
+# Lancer la suite de tests (86 tests unitaires et widgets Flutter)
 flutter test
+
+# Lancer la suite de tests Django backend (64 tests unitaires et d'intégration)
+python manage.py test shield_api
 
 # Vérifier la qualité du code avec l'analyseur
 flutter analyze

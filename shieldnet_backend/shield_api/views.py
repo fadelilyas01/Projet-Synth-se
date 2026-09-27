@@ -944,3 +944,33 @@ class PrometheusMetricsView(APIView):
         metrics_body = "\n".join(lines)
         return HttpResponse(metrics_body, content_type="text/plain; version=0.0.4; charset=utf-8")
 
+
+
+class BloomFilterDownloadView(APIView):
+    """
+    GET /api/v1/sync/bloom/
+    Télécharge le filtre de Bloom compressé pour vérification ultra-rapide en mémoire sur mobile.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        from .services import BloomFilterService
+        try:
+            size = int(request.query_params.get('size_bits', BloomFilterService.DEFAULT_SIZE_BITS))
+        except (ValueError, TypeError):
+            size = BloomFilterService.DEFAULT_SIZE_BITS
+        payload = BloomFilterService.generate_filter_payload(size_bits=size)
+        return Response(payload, status=status.HTTP_200_OK)
+
+
+class RegionalThreatsView(APIView):
+    """
+    GET /api/v1/threats/regional/
+    Fournit un rapport de Threat Intelligence sur les vagues de spoofing ciblées par indicatif régional.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        from .services import RegionalThreatIntelligenceService
+        report = RegionalThreatIntelligenceService.get_regional_threat_report()
+        return Response(report, status=status.HTTP_200_OK)

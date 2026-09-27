@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import (
+    BloomFilterDownloadView,
+    RegionalThreatsView,
     SyncStatusView,
     AdminAuditLogsListView,
     BlacklistDownloadView,
@@ -30,6 +32,8 @@ urlpatterns = [
     path('metrics/', PrometheusMetricsView.as_view(), name='prometheus-metrics'),
     path('ai/diagnose/', AIDiagnoseView.as_view(), name='ai-diagnose'),
     path('health/', HealthCheckView.as_view(), name='health-check'),
+        path('sync/bloom/', BloomFilterDownloadView.as_view(), name='sync-bloom'),
+    path('threats/regional/', RegionalThreatsView.as_view(), name='threats-regional'),
     path('sync/status/', SyncStatusView.as_view(), name='sync-status'),
     path('blacklist/', BlacklistDownloadView.as_view(), name='blacklist-download'),
     path('reports/', SubmitReportView.as_view(), name='submit-report'),

@@ -42,12 +42,12 @@ DB_HOST=127.0.0.1
 DB_PORT=5432
 
 # Sel secret pour le hachage HMAC-SHA256 (doit correspondre à celui de l'application mobile)
-HMAC_SECRET_SALT=ShieldNet_Secret_Token_UQO_2026
+HMAC_SECRET_SALT=votre_sel_cryptographique_hmac_sha256_long_et_securise
 
 # Sécurité des jetons JWT
 JWT_ACCESS_TOKEN_LIFETIME_MINUTES=15
 JWT_REFRESH_TOKEN_LIFETIME_DAYS=7
-ADMIN_PASSWORD=admin123
+ADMIN_PASSWORD=votre_mot_de_passe_administrateur_robuste
 
 # Sécurité HTTPS
 SECURE_SSL_REDIRECT=True

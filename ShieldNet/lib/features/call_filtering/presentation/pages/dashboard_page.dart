@@ -18,6 +18,8 @@ import '../widgets/action_hub_row.dart';
 import '../widgets/zen_shield_card.dart';
 import '../widgets/simple_metric_card.dart';
 import '../widgets/serenity_score_card.dart';
+import '../widgets/regional_threat_card.dart';
+import '../widgets/device_integrity_banner.dart';
 import '../../../community/presentation/widgets/citizen_impact_card.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 
@@ -272,6 +274,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
     final l10n = AppLocalizations.of(context);
     final isProtectionActive = protectionState.value ?? false;
     final isSeniorMode = ref.watch(seniorModeProvider);
+    final integrityAsync = ref.watch(deviceIntegrityProvider);
+    final regionalThreatsAsync = ref.watch(regionalThreatsProvider);
 
     final serenityResult = SerenityScoreCalculator.compute(
       isCallScreeningActive: isProtectionActive,
@@ -296,10 +300,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
         onRefresh: () async {
           await ref.read(blacklistControllerProvider.notifier).syncWithServer();
           ref.invalidate(citizenImpactProvider);
+          ref.invalidate(regionalThreatsProvider);
+          ref.invalidate(deviceIntegrityProvider);
+          ref.invalidate(bloomFilterProvider);
         },
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           children: [
+            // BANDEAU ALERTE INTÉGRITÉ APPAREIL (ROOT)
+            integrityAsync.maybeWhen(
+              data: (integrity) => DeviceIntegrityBanner(result: integrity),
+              orElse: () => const SizedBox.shrink(),
+            ),
+
             // BANDEAU MODE SÉNIORS / ACCESSIBILITÉ
             if (isSeniorMode) ...[
               Container(
@@ -334,6 +347,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                 ),
               ),
             ],
+
+            // BANDEAU ALERTE MENACES RÉGIONALES (SPOOFING CIBLÉ)
+            regionalThreatsAsync.maybeWhen(
+              data: (summary) => summary != null ? RegionalThreatCard(summary: summary) : const SizedBox.shrink(),
+              orElse: () => const SizedBox.shrink(),
+            ),
 
             // BANDEAU DU PRESSE-PAPIER
             if (_detectedClipboardNumber != null) ...[
