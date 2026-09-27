@@ -20,7 +20,7 @@ def task_run_consensus_audit():
     pour réhabiliter automatiquement les faux positifs.
     """
     from .services import FalsePositiveConsensusService
-    logger.info("Dǩmarrage de l'audit de consensus...")
+    logger.info("Demarrage de l'audit de consensus...")
     result = FalsePositiveConsensusService.run_consensus_audit()
     return result
 
