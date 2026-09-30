@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/emergency_whitelist_service.dart';
 import '../../../../core/database/database_helper.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class EmergencyWhitelistPage extends ConsumerStatefulWidget {
   const EmergencyWhitelistPage({super.key});
@@ -29,6 +30,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
   void _showAddContactDialog() {
     _numberController.clear();
     _labelController.clear();
+    final l10n = AppLocalizations.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -48,115 +50,141 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                 color: isDark ? AppTheme.borderDark : AppTheme.borderLight,
               ),
             ),
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 24.0),
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: AppTheme.accentGreen.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add_moderator_rounded, color: AppTheme.accentGreen, size: 24),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text(
-                          'Ajouter à la Liste Blanche',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          color: Colors.grey.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Ce numéro bénéficiera d\'une immunité totale. Il ne sera jamais bloqué ni filtré par ShieldNet.',
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _labelController,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      labelText: 'Nom ou Organisation',
-                      hintText: 'Ex: Hôpital de Gatineau, Dr. Tremblay, École...',
-                      prefixIcon: const Icon(Icons.badge_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return 'Veuillez renseigner un libellé';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  TextFormField(
-                    controller: _numberController,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      labelText: 'Numéro de téléphone',
-                      hintText: 'Ex: +1 819 555 0199 ou 8195550199',
-                      prefixIcon: const Icon(Icons.phone_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return 'Veuillez saisir un numéro';
-                      }
-                      final digits = val.replaceAll(RegExp(r'\D'), '');
-                      if (digits.length < 3) {
-                        return 'Numéro trop court';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        HapticFeedback.mediumImpact();
-                        final messenger = ScaffoldMessenger.of(context);
-                        final navigator = Navigator.of(ctx);
-                        final success = await ref
-                            .read(emergencyWhitelistProvider.notifier)
-                            .addContact(
-                              rawNumber: _numberController.text.trim(),
-                              label: _labelController.text.trim(),
-                            );
-                        navigator.pop();
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              success
-                                  ? 'Contact d\'urgence protégé avec succès.'
-                                  : 'Erreur lors de l\'enregistrement.',
-                            ),
-                            backgroundColor: success ? AppTheme.accentGreen : AppTheme.accentRed,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentGreen.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
                           ),
-                        );
-                      }
-                    },
-                    icon: const Icon(Icons.shield_rounded),
-                    label: const Text('Enregistrer avec Immunité', style: TextStyle(fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.accentGreen,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: const Icon(Icons.add_moderator_rounded, color: AppTheme.accentGreen, size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n?.addWhitelistTitle ?? 'Ajouter à la Liste Blanche',
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n?.addWhitelistDesc ??
+                          'Ce numéro bénéficiera d\'une immunité totale. Il ne sera jamais bloqué ni filtré par ShieldNet.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _labelController,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(
+                        labelText: l10n?.labelField ?? 'Nom ou Organisation',
+                        hintText: l10n?.labelHint ?? 'Ex: Hôpital, Dr. Tremblay...',
+                        prefixIcon: const Icon(Icons.badge_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return l10n?.labelValidator ?? 'Veuillez renseigner un libellé';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      controller: _numberController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: l10n?.phoneField ?? 'Numéro de téléphone',
+                        hintText: l10n?.phoneHint ?? 'Ex: +1 819 555 0199',
+                        prefixIcon: const Icon(Icons.phone_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return l10n?.phoneValidatorEmpty ?? 'Veuillez saisir un numéro';
+                        }
+                        final digits = val.replaceAll(RegExp(r'\D'), '');
+                        if (digits.length < 3) {
+                          return l10n?.phoneValidatorShort ?? 'Numéro trop court';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          HapticFeedback.mediumImpact();
+                          final messenger = ScaffoldMessenger.of(context);
+                          final navigator = Navigator.of(ctx);
+                          final success = await ref
+                              .read(emergencyWhitelistProvider.notifier)
+                              .addContact(
+                                rawNumber: _numberController.text.trim(),
+                                label: _labelController.text.trim(),
+                              );
+                          navigator.pop();
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? (l10n?.addSuccess ?? 'Contact d\'urgence protégé avec succès.')
+                                    : (l10n?.addError ?? 'Erreur lors de l\'enregistrement.'),
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              backgroundColor: success ? AppTheme.accentGreen : AppTheme.accentRed,
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.shield_rounded),
+                      label: Text(
+                        l10n?.btnSaveImmunity ?? 'Enregistrer avec Immunité',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.accentGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -166,17 +194,20 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
   }
 
   void _confirmDelete(EmergencyContact contact) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Retirer de la Liste Blanche ?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l10n?.confirmRemoveTitle ?? 'Retirer de la Liste Blanche ?'),
         content: Text(
-          'Voulez-vous retirer "${contact.label}" (${contact.rawNumber}) de la liste blanche d\'urgence ? Il sera à nouveau soumis aux filtres standards.',
+          l10n?.confirmRemoveDesc ??
+              'Voulez-vous retirer ce contact de la liste blanche d\'urgence ? Il sera à nouveau soumis aux filtres standards.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text(l10n?.btnCancel ?? 'Annuler'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -186,8 +217,10 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                   .removeContact(contact.phoneHash);
               if (mounted && ok) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Contact retiré de la liste blanche.'),
+                  SnackBar(
+                    content: Text(l10n?.removeSuccess ?? 'Contact retiré de la liste blanche.'),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     backgroundColor: AppTheme.accentOrange,
                   ),
                 );
@@ -196,8 +229,9 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accentRed,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Retirer'),
+            child: Text(l10n?.btnRemove ?? 'Retirer'),
           ),
         ],
       ),
@@ -208,15 +242,17 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
   Widget build(BuildContext context) {
     final state = ref.watch(emergencyWhitelistProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     final systemContacts = state.contacts.where((c) => c.isSystemCritical).toList();
     final customContacts = state.contacts.where((c) => !c.isSystemCritical).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Numéros d\'Urgence & Immunité',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Text(
+          l10n?.emergencyWhitelistTitle ?? 'Numéros d\'Urgence & Immunité',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          overflow: TextOverflow.ellipsis,
         ),
         elevation: 0,
       ),
@@ -224,12 +260,16 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
         onPressed: _showAddContactDialog,
         backgroundColor: AppTheme.accentGreen,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text('Ajouter un Contact', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: Text(
+          l10n?.addEmergencyContact ?? 'Ajouter un Contact',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
               children: [
                 // Note d'information sur la politique d'exclusion stricte
                 Container(
@@ -250,9 +290,9 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Garantie Zéro Faux-Positif',
-                              style: TextStyle(
+                            Text(
+                              l10n?.zeroFalsePositiveTitle ?? 'Garantie Zéro Faux-Positif',
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
                                 color: AppTheme.accentGreen,
@@ -260,7 +300,8 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Ces numéros prioritaires ne sont jamais bloqués ni filtrés, même si le mode Bouclier Strict (Contacts uniquement) ou Nocturne est actif.',
+                              l10n?.zeroFalsePositiveDesc ??
+                                  'Ces numéros prioritaires ne sont jamais bloqués ni filtrés, même si le mode Bouclier Strict (Contacts uniquement) ou Nocturne est actif.',
                               style: TextStyle(
                                 fontSize: 13,
                                 height: 1.35,
@@ -279,10 +320,19 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'CONTACTS PRIORITAIRES UTILISATEUR',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5),
+                    Expanded(
+                      child: Text(
+                        l10n?.customEmergencyContactsHeader ?? 'CONTACTS PRIORITAIRES UTILISATEUR',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                          letterSpacing: 0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '${customContacts.length}',
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
@@ -294,17 +344,18 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                 if (customContacts.isEmpty)
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                     decoration: BoxDecoration(
                       color: isDark ? AppTheme.surfaceDark : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: isDark ? AppTheme.borderDark : AppTheme.borderLight),
                     ),
-                    child: const EmptyStateWidget(
+                    child: EmptyStateWidget(
                       icon: Icons.contact_emergency_rounded,
                       iconColor: AppTheme.accentGreen,
-                      title: 'Aucun contact prioritaire ajouté',
-                      message: 'Ajoutez votre médecin, l\'hôpital ou une clinique pour garantir que leurs appels passent toujours.',
+                      title: l10n?.emptyCustomContactsTitle ?? 'Aucun contact prioritaire ajouté',
+                      message: l10n?.emptyCustomContactsDesc ??
+                          'Ajoutez votre médecin, l\'hôpital ou une clinique pour garantir que leurs appels passent toujours.',
                     ),
                   )
                 else
@@ -318,7 +369,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: customContacts.length,
-                      separatorBuilder: (_, index) => const Divider(height: 1, indent: 56),
+                      separatorBuilder: (context, index) => const Divider(height: 1, indent: 56),
                       itemBuilder: (ctx, index) {
                         final contact = customContacts[index];
                         return ListTile(
@@ -326,8 +377,16 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                             backgroundColor: AppTheme.accentGreen.withValues(alpha: 0.15),
                             child: const Icon(Icons.person_pin_rounded, color: AppTheme.accentGreen, size: 20),
                           ),
-                          title: Text(contact.label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                          subtitle: Text(contact.rawNumber, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          title: Text(
+                            contact.label,
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            contact.rawNumber,
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           trailing: IconButton(
                             icon: const Icon(Icons.delete_outline_rounded, color: AppTheme.accentRed, size: 20),
                             onPressed: () => _confirmDelete(contact),
@@ -343,17 +402,33 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'SERVICES D\'URGENCE NATIONAUX (CANADA/QC)',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5),
+                    Expanded(
+                      child: Text(
+                        l10n?.nationalEmergencyServicesHeader ?? 'SERVICES D\'URGENCE NATIONAUX (CANADA/QC)',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                          letterSpacing: 0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppTheme.primaryColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text('Inviolable', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryLightColor)),
+                      child: Text(
+                        l10n?.inviolableBadge ?? 'Inviolable',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryLightColor,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -369,9 +444,10 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: systemContacts.length,
-                    separatorBuilder: (_, index) => const Divider(height: 1, indent: 56),
+                    separatorBuilder: (context, index) => const Divider(height: 1, indent: 56),
                     itemBuilder: (ctx, index) {
                       final item = systemContacts[index];
+                      final shortcutLabel = l10n?.officialShortcut ?? 'Raccourci officiel';
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: AppTheme.accentRed.withValues(alpha: 0.12),
@@ -380,11 +456,19 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.accentRed),
                           ),
                         ),
-                        title: Text(item.label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                        subtitle: Text('Raccourci officiel (${item.rawNumber})', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                        trailing: const Tooltip(
-                          message: 'Protection système non supprimable',
-                          child: Icon(Icons.lock_outline_rounded, size: 16, color: Colors.grey),
+                        title: Text(
+                          item.label,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          '$shortcutLabel (${item.rawNumber})',
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Tooltip(
+                          message: l10n?.systemProtectionTooltip ?? 'Protection système non supprimable',
+                          child: const Icon(Icons.lock_outline_rounded, size: 16, color: Colors.grey),
                         ),
                       );
                     },

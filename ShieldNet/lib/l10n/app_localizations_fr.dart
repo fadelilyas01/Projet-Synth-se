@@ -337,4 +337,91 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportLocal => 'Enregistré localement.';
+
+  @override
+  String get emergencyWhitelistTitle => 'Numéros d\'Urgence & Immunité';
+
+  @override
+  String get addEmergencyContact => 'Ajouter un Contact';
+
+  @override
+  String get addWhitelistTitle => 'Ajouter à la Liste Blanche';
+
+  @override
+  String get addWhitelistDesc =>
+      'Ce numéro bénéficiera d\'une immunité totale. Il ne sera jamais bloqué ni filtré par ShieldNet.';
+
+  @override
+  String get labelField => 'Nom ou Organisation';
+
+  @override
+  String get labelHint => 'Ex: Hôpital de Gatineau, Dr. Tremblay, École...';
+
+  @override
+  String get labelValidator => 'Veuillez renseigner un libellé';
+
+  @override
+  String get phoneField => 'Numéro de téléphone';
+
+  @override
+  String get phoneHint => 'Ex: +1 819 555 0199 ou 8195550199';
+
+  @override
+  String get phoneValidatorEmpty => 'Veuillez saisir un numéro';
+
+  @override
+  String get phoneValidatorShort => 'Numéro trop court';
+
+  @override
+  String get btnSaveImmunity => 'Enregistrer avec Immunité';
+
+  @override
+  String get addSuccess => 'Contact d\'urgence protégé avec succès.';
+
+  @override
+  String get addError => 'Erreur lors de l\'enregistrement.';
+
+  @override
+  String get confirmRemoveTitle => 'Retirer de la Liste Blanche ?';
+
+  @override
+  String get confirmRemoveDesc =>
+      'Voulez-vous retirer ce contact de la liste blanche d\'urgence ? Il sera à nouveau soumis aux filtres standards.';
+
+  @override
+  String get btnRemove => 'Retirer';
+
+  @override
+  String get removeSuccess => 'Contact retiré de la liste blanche.';
+
+  @override
+  String get zeroFalsePositiveTitle => 'Garantie Zéro Faux-Positif';
+
+  @override
+  String get zeroFalsePositiveDesc =>
+      'Ces numéros prioritaires ne sont jamais bloqués ni filtrés, même si le mode Bouclier Strict (Contacts uniquement) ou Nocturne est actif.';
+
+  @override
+  String get customEmergencyContactsHeader =>
+      'CONTACTS PRIORITAIRES UTILISATEUR';
+
+  @override
+  String get emptyCustomContactsTitle => 'Aucun contact prioritaire ajouté';
+
+  @override
+  String get emptyCustomContactsDesc =>
+      'Ajoutez votre médecin, l\'hôpital ou une clinique pour garantir que leurs appels passent toujours.';
+
+  @override
+  String get nationalEmergencyServicesHeader =>
+      'SERVICES D\'URGENCE NATIONAUX (CANADA/QC)';
+
+  @override
+  String get inviolableBadge => 'Inviolable';
+
+  @override
+  String get officialShortcut => 'Raccourci officiel';
+
+  @override
+  String get systemProtectionTooltip => 'Protection système non supprimable';
 }

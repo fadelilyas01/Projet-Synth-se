@@ -727,6 +727,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Enregistré localement.'**
   String get reportLocal;
+
+  /// No description provided for @emergencyWhitelistTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéros d\'Urgence & Immunité'**
+  String get emergencyWhitelistTitle;
+
+  /// No description provided for @addEmergencyContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un Contact'**
+  String get addEmergencyContact;
+
+  /// No description provided for @addWhitelistTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à la Liste Blanche'**
+  String get addWhitelistTitle;
+
+  /// No description provided for @addWhitelistDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro bénéficiera d\'une immunité totale. Il ne sera jamais bloqué ni filtré par ShieldNet.'**
+  String get addWhitelistDesc;
+
+  /// No description provided for @labelField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom ou Organisation'**
+  String get labelField;
+
+  /// No description provided for @labelHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: Hôpital de Gatineau, Dr. Tremblay, École...'**
+  String get labelHint;
+
+  /// No description provided for @labelValidator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez renseigner un libellé'**
+  String get labelValidator;
+
+  /// No description provided for @phoneField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone'**
+  String get phoneField;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex: +1 819 555 0199 ou 8195550199'**
+  String get phoneHint;
+
+  /// No description provided for @phoneValidatorEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez saisir un numéro'**
+  String get phoneValidatorEmpty;
+
+  /// No description provided for @phoneValidatorShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro trop court'**
+  String get phoneValidatorShort;
+
+  /// No description provided for @btnSaveImmunity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer avec Immunité'**
+  String get btnSaveImmunity;
+
+  /// No description provided for @addSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contact d\'urgence protégé avec succès.'**
+  String get addSuccess;
+
+  /// No description provided for @addError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'enregistrement.'**
+  String get addError;
+
+  /// No description provided for @confirmRemoveTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer de la Liste Blanche ?'**
+  String get confirmRemoveTitle;
+
+  /// No description provided for @confirmRemoveDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous retirer ce contact de la liste blanche d\'urgence ? Il sera à nouveau soumis aux filtres standards.'**
+  String get confirmRemoveDesc;
+
+  /// No description provided for @btnRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get btnRemove;
+
+  /// No description provided for @removeSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contact retiré de la liste blanche.'**
+  String get removeSuccess;
+
+  /// No description provided for @zeroFalsePositiveTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garantie Zéro Faux-Positif'**
+  String get zeroFalsePositiveTitle;
+
+  /// No description provided for @zeroFalsePositiveDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces numéros prioritaires ne sont jamais bloqués ni filtrés, même si le mode Bouclier Strict (Contacts uniquement) ou Nocturne est actif.'**
+  String get zeroFalsePositiveDesc;
+
+  /// No description provided for @customEmergencyContactsHeader.
+  ///
+  /// In fr, this message translates to:
+  /// **'CONTACTS PRIORITAIRES UTILISATEUR'**
+  String get customEmergencyContactsHeader;
+
+  /// No description provided for @emptyCustomContactsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contact prioritaire ajouté'**
+  String get emptyCustomContactsTitle;
+
+  /// No description provided for @emptyCustomContactsDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez votre médecin, l\'hôpital ou une clinique pour garantir que leurs appels passent toujours.'**
+  String get emptyCustomContactsDesc;
+
+  /// No description provided for @nationalEmergencyServicesHeader.
+  ///
+  /// In fr, this message translates to:
+  /// **'SERVICES D\'URGENCE NATIONAUX (CANADA/QC)'**
+  String get nationalEmergencyServicesHeader;
+
+  /// No description provided for @inviolableBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inviolable'**
+  String get inviolableBadge;
+
+  /// No description provided for @officialShortcut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Raccourci officiel'**
+  String get officialShortcut;
+
+  /// No description provided for @systemProtectionTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection système non supprimable'**
+  String get systemProtectionTooltip;
 }
 
 class _AppLocalizationsDelegate

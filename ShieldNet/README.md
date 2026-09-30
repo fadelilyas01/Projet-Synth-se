@@ -1,116 +1,135 @@
-# ShieldNet Mobile — Client Android (Flutter)
+# ShieldNet Mobile — Client Android & Module Natif
 
-Bienvenue dans le sous-projet mobile de **ShieldNet**. Il s'agit de l'application cliente développée avec **Flutter (Dart)** et un composant natif Android écrit en **Kotlin**.
+Client mobile de protection contre le démarchage et les fraudes téléphoniques, conçu selon les principes de confidentialité dès la conception (*Privacy by Design*, conformité Loi 25 et LPRPDE). 
 
-L'application permet d'intercepter les appels indésirables en temps réel et d'analyser les SMS suspects, tout en garantissant qu'aucun contact personnel n'est aspiré ni transmis sur Internet.
+L'application intercepte les appels indésirables en temps réel et analyse les SMS frauduleux directement sur l'appareil, sans jamais extraire le carnet d'adresses ni stocker de numéros en clair sur des serveurs distants.
 
 ---
 
-## 1. Comment fonctionne l'interception sur le téléphone ?
+## 1. Architecture d'Interception Télécom
 
-Sur Android, le système d'exploitation fournit une interface dédiée nommée **`CallScreeningService`**.
-
-Quand un appel entrant arrive sur l'appareil :
-1. Android réveille notre service natif Kotlin [`ShieldNetCallScreeningService`](file:///C:/Projet/Projet%20synthese/ShieldNet/android/app/src/main/kotlin/ca/uqo/shieldnet/ShieldNetCallScreeningService.kt) avant de faire sonner l'appareil.
-2. Le service normalise le numéro (au format nord-américain E.164, ex: `+18195550199`) et calcule son empreinte **HMAC-SHA256**.
-3. Il effectue une requête immédiate dans la base de données locale **SQLite** (`shieldnet.db`), configurée en mode **WAL** (*Write-Ahead Logging*).
-4. Si le numéro est répertorié comme malveillant et non blanchi, l'appel est rejeté silencieusement, sans que le téléphone ne vibre ni ne sonne.
-5. **Vitesse d'exécution** : Toute cette chaîne prend **moins de 2 millisecondes**, bien en deçà de la limite maximale imposée par Android (~100 ms).
+L'interception repose sur l'API native Android `CallScreeningService` implémentée en Kotlin, combinée à une base de données embarquée haute performance et un filtre probabiliste en mémoire vive.
 
 ```text
-[ Appel Entrant ] ──> [ Android Telecom ] ──> [ CallScreeningService (Kotlin) ]
-                                                            │
-                                        Calcul HMAC (< 0.2 ms) + Requête SQLite WAL (< 1.5 ms)
-                                                            │
-                            ┌───────────────────────────────┴───────────────────────────────┐
-                            ▼                                                               ▼
-                  [ Numéro Malveillant ]                                          [ Numéro Légitime / Urgence ]
-                  Rejet silencieux immédiat                                       Sonnerie normale prioritaire
+[ Appel Entrant ]
+       │
+       ▼
+[ Android Telecom Framework ]
+       │
+       ▼
+[ ShieldNetCallScreeningService (Kotlin) ]
+       │
+       ├── 1. Normalisation E.164 (+1) & Hachage HMAC-SHA256 (< 0.2 ms)
+       ├── 2. Fast-Path : Vérification Filtre de Bloom en RAM (< 0.02 ms)
+       │         └── Si absent du filtre -> Appel autorisé immédiatement
+       │
+       ├── 3. Requête SQLite locale indexée en mode WAL (< 1.5 ms)
+       │         └── Table local_blacklist (score, seuil de blocage, statut)
+       │
+       ▼
+[ Décision (< 2 ms au total) ]
+  ├── Numéro Malveillant (Score >= Seuil) ──> Rejet silencieux (CallResponse.Builder.setDisallowCall)
+  └── Numéro Légitime ou d'Urgence         ──> Sonnerie normale prioritaire
+```
+
+### Contraintes Temps Réel
+Android impose une réponse du `CallScreeningService` dans une fenêtre stricte (< 100 ms). L'utilisation conjointe de HMAC-SHA256 pré-calculé, du mode WAL (*Write-Ahead Logging*) sur SQLite et du filtre de Bloom assure un temps de traitement inférieur à 2 ms, sans dépendance réseau au moment de l'appel.
+
+---
+
+## 2. Organisation du Code Source (Clean Architecture)
+
+Le projet Dart est structuré selon les principes de la *Clean Architecture* avec gestion d'état réactive via **Riverpod** :
+
+```text
+ShieldNet/
+├── android/
+│   └── app/src/main/kotlin/.../
+│       ├── ShieldNetCallScreeningService.kt   # Interception système des appels
+│       ├── ShieldNetDatabaseHelper.kt         # Accès SQLite natif bas niveau
+│       ├── ShieldNetAppWidgetProvider.kt      # Widget d'écran d'accueil
+│       └── MainActivity.kt                    # Pont EventChannel / MethodChannel
+│
+├── lib/
+│   ├── core/
+│   │   ├── config/             # Environnement (.env) et constantes réseau
+│   │   ├── database/           # SQLite local, migrations, mode WAL et transactions
+│   │   ├── network/            # Client Dio durci (SSL Pinning, retry, rate limit)
+│   │   ├── providers/          # Conteneurs d'injection de dépendances Riverpod
+│   │   ├── security/           # HMAC-SHA256, normalisation E.164, détection de Root
+│   │   ├── services/           # Synchronisation d'arrière-plan, file d'attente hors-ligne
+│   │   └── theme/              # Thèmes clair et sombre, contrastes WCAG AAA
+│   │
+│   ├── features/
+│   │   ├── call_filtering/     # Tableau de bord, historique d'appels, contestations
+│   │   ├── onboarding/         # Parcours d'initialisation et explications réglementaires
+│   │   ├── settings/           # Préférences, diagnostic, console d'administration
+│   │   └── sms_inspector/      # Analyseur heuristique local de SMS suspects
+│   │
+│   ├── l10n/                   # Ressources localisées bilingues (app_fr.arb, app_en.arb)
+│   └── main.dart               # Point d'entrée de l'application
+│
+└── test/                       # 86 tests unitaires, widgets et d'intégration
 ```
 
 ---
 
-## 2. Organisation du Code (Clean Architecture)
+## 3. Fonctionnalités Principales
 
-Le code Dart dans `lib/` est organisé par couches de responsabilités selon les principes de la *Clean Architecture* et géré avec **Riverpod** :
+### Protection Téléphonique & Filtrage
+- **Interception Locale Autonome** : Blocage silencieux avant sonnerie, fonctionnel même hors-ligne.
+- **Immunité Absolue des Urgences** : Les services d'urgence nationaux (911, 811, 988, 211, 311, 511, 112) et les contacts favoris définis par l'utilisateur bénéficient d'une immunité totale non modifiable par la liste de blocage.
+- **Filtre de Bloom en Mémoire Vive** : Évaluation O(1) pour les numéros vérifiés permettant d'éviter les accès disques superflus.
+- **Radar des Menaces Régionales & Détection de Spoofing** : Surveillance en temps réel des vagues d'appels frauduleux ciblant les indicatifs canadiens (819, 514, 438, 418, 450, 613).
+- **Mode « Contacts Uniquement »** : Filtrage strict des numéros inconnus pour les utilisateurs recevant un volume élevé de démarchage ciblé.
+- **Bouclier Nocturne** : Plage horaire programmable pour l'atténuation automatique des sollicitations durant le sommeil.
 
-```text
-lib/
-├── core/
-│   ├── config/             # Paramètres d'environnement (.env) et timeouts
-│   ├── database/           # Gestionnaire SQLite local (mode WAL, index sur les hashes)
-│   ├── network/            # Client Dio pour les échanges avec le backend Django
-│   ├── providers/          # Injection de dépendances globale (Riverpod)
-│   ├── security/           # Hachage HMAC-SHA256 et normalisation des numéros (+1)
-│   ├── services/           # Synchronisation d'arrière-plan et inspecteur SMS
-│   └── theme/              # Thème visuel (modes clair et sombre)
-├── features/
-│   ├── call_filtering/     # Écrans principaux : tableau de bord, historique, contestations
-│   ├── onboarding/         # Présentation du projet et explication de la Loi 25
-│   └── settings/           # Préférences, diagnostic technique et console administrateur
-├── l10n/                   # Traductions bilingues (français et anglais)
-└── main.dart               # Initialisation de l'application
-```
+### Résilience & Qualité d'Expérience
+- **File d'Attente Hors-Ligne (Offline Queue)** : Les signalements et contestations émis sans connexion sont persistés localement et synchronisés automatiquement dès le rétablissement du réseau.
+- **Contestation et Arbitrage Citoyen** : Tout numéro bloqué peut être contesté directement depuis l'historique d'activité pour transmission au moteur de consensus.
+- **Audit Groupé d'Appels Récents (Batch Check)** : Analyse en une seule requête SQL/API des 50 derniers appels de l'historique Android.
+- **Mode Interface Simplifiée (Seniors)** : Ergonomie adaptée avec typographie agrandie, contrastes renforcés et zones tactiles étendues.
+- **Inspecteur de SMS Local** : Détection heuristique des liens bancaires factices et tentatives d'hameçonnage par colis sans aucun transfert de texte vers un serveur tiers.
 
 ---
 
-## 3. Ce que l'utilisateur peut faire avec l'application
+## 4. Configuration & Démarrage
 
-* **Tableau de bord de protection** : Permet de vérifier l'état du bouclier, de voir le nombre de menaces filtrées et de tester la réputation d'un numéro manuellement.
-* **Radar des Menaces Régionales & Détection de Spoofing** : Surveillance en temps réel des vagues d'appels frauduleux ciblant les indicatifs canadiens (819, 514, 438, 418, 450, 613, etc.) avec alertes visuelles interactives.
-* **Mode Interface Simplifiée (Aînés / Seniors)** : Interface haute lisibilité avec typographie agrandie, contrastes renforcés et boutons tactiles élargis pour une accessibilité maximale face aux arnaques ciblant les personnes vulnérables.
-* **File d'Attente Hors-Ligne Résiliente (Offline Queue)** : Permet de signaler des numéros ou de contester des faux-positifs même sans connexion Internet. Les signalements sont stockés localement en SQLite et synchronisés automatiquement dès reconnexion.
-* **Filtre de Bloom en Mémoire Vive (O(1) Fast-Path)** : Évaluation probabiliste instantanée (< 0.02 ms) éliminant les accès disque SQLite pour les numéros vérifiés non suspects, garantissant zéro faux négatif.
-* **Vérification d'Intégrité Matérielle & Détection de Root** : Contrôle automatique de la présence de binaires d'élévation de privilèges (`su`, Magisk) pour avertir des risques pesant sur les secrets locaux.
-* **Épinglage SSL (SSL/TLS Pinning)** : Durcissement du client HTTP Dio avec vérification d'empreinte SHA-256 du certificat serveur pour contrer les attaques de type *Man-in-the-Middle*.
-* **Synchronisation Widget d'Accueil Android** : Passerelle SharedPreferences alimentant le composant AppWidget de l'écran d'accueil avec les statistiques de protection en temps réel.
-* **Audit rapide des appels récents** : Dans l'onglet *Activité*, un bouton permet d'analyser les 50 derniers appels reçus en interrogeant le Cloud ShieldNet en une seule requête groupée (*batch check*).
-* **Contester un faux positif** : Si un numéro légitime (clinique médicale, pharmacie, livreur) a été bloqué par erreur, toucher le numéro ouvre une fiche permettant d'envoyer un avis favorable. Plusieurs avis concordants permettent au consensus de le réhabiliter automatiquement.
-* **Protection absolue des urgences** : Les numéros de secours (911, 811, 988) et vos contacts d'urgence personnels ne peuvent jamais être bloqués par l'application.
-* **Mode « Contacts uniquement »** : Bloque automatiquement tout appel provenant d'un numéro absent du carnet d'adresses (recommandé pour les personnes âgées ciblées par le télémarketing).
-* **Bouclier nocturne** : Permet de filtrer silencieusement les appels inconnus pendant que vous dormez.
-* **Inspecteur de SMS** : Vous copiez un message douteux dans le presse-papier, et l'application analyse le texte localement (sans l'envoyer nulle part) pour vous alerter sur d'éventuels faux liens bancaires ou arnaques de colis.
-* **Console d'administration intégrée** : Si vous vous connectez avec un compte ayant le statut `is_staff`, un onglet supplémentaire permet de modérer les signalements directement depuis le téléphone.
-
----
-
-## 4. Démarrage de l'Application
-
-### 1. Fichier d'environnement (`.env`)
-Créez un fichier `.env` à la racine de `ShieldNet/` à partir de `.env.example` :
+### 1. Variables d'Environnement
+Créer un fichier `.env` à la racine du dossier `ShieldNet/` (modèle fourni dans `.env.example`) :
 
 ```env
-API_BASE_URL=http://127.0.0.1:8000/api/v1  # Utilisez 10.0.2.2 si vous testez sur l'émulateur Android
-API_KEY=votre_jeton_api_partage
+API_BASE_URL=http://127.0.0.1:8000/api/v1  # Utiliser 10.0.2.2 pour l'émulateur standard Android
+API_KEY=votre_cle_api_partagee
 HASH_SALT=votre_sel_cryptographique_hmac
 OFFLINE_CACHE_TTL_HOURS=24
 ENABLE_AUTO_BLOCKING=true
 ```
 
-### 2. Commandes de lancement
+### 2. Commandes Utiles
+
 ```bash
-# Télécharger les dépendances Flutter
+# Récupération des dépendances Flutter
 flutter pub get
 
-# Lancer la suite de tests (86 tests unitaires et widgets Flutter)
+# Génération des fichiers de localisation bilingues
+flutter gen-l10n
+
+# Exécution de la suite de tests (86 tests unitaires et widgets)
 flutter test
 
-# Lancer la suite de tests Django backend (64 tests unitaires et d'intégration)
-python manage.py test shield_api
-
-# Vérifier la qualité du code avec l'analyseur
+# Analyse statique du code (linter Dart officiel)
 flutter analyze
 
-# Démarrer l'application sur votre appareil ou émulateur
+# Lancement de l'application sur appareil connecté ou émulateur
 flutter run
 ```
 
 ---
 
-## 5. Documentation Technique Complémentaire
+## 5. Intégrité & Sécurité
 
-Pour les détails d'architecture logicielle et de sécurité, consultez les documents dans le dossier [`docs/`](file:///C:/Projet/Projet%20synthese/docs/) :
-
-* [**Architecture & Modélisation UML**](file:///C:/Projet/Projet%20synthese/docs/ARCHITECTURE_ET_CONCEPTION.md) : Modèle de classes UML et diagramme de séquence de l'interception d'appel.
-* [**Modèle de Menace & Sécurité Cryptographique**](file:///C:/Projet/Projet%20synthese/docs/SECURITY_AND_THREAT_MODEL.md) : Justification du hachage HMAC-SHA256 face au budget temps réel Android et conformité Loi 25.
-* [**Guide de Déploiement & Pipeline CI/CD**](file:///C:/Projet/Projet%20synthese/docs/DEPLOIEMENT_ET_CI_CD.md) : Compilation automatisée de l'APK via le pipeline Jenkins.
+- **Protection Mémoire & Clés** : Les empreintes téléphoniques sont calculées via HMAC-SHA256 avec sel cryptographique injecté à la compilation ou via environnement sécurisé.
+- **Détection d'Élévation de Privilèges** : Contrôle au démarrage de la présence de binaires `su` ou de mécanismes de rootage pouvant compromettre le bac à sable applicatif Android.
+- **Épinglage de Certificat (SSL/TLS Pinning)** : Vérification de l'empreinte SHA-256 du certificat serveur sur les connexions réseau sortantes.
+- **Zéro Télémétrie Invasive** : Aucun identifiant publicitaire, traceur analytique externe ou donnée personnelle n'est intégré au binaire.

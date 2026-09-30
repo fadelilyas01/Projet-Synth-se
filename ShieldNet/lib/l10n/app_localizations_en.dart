@@ -335,4 +335,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportLocal => 'Saved locally.';
+
+  @override
+  String get emergencyWhitelistTitle => 'Emergency Numbers & Immunity';
+
+  @override
+  String get addEmergencyContact => 'Add a Contact';
+
+  @override
+  String get addWhitelistTitle => 'Add to Whitelist';
+
+  @override
+  String get addWhitelistDesc =>
+      'This number will receive full immunity. It will never be blocked or filtered by ShieldNet.';
+
+  @override
+  String get labelField => 'Name or Organization';
+
+  @override
+  String get labelHint => 'Ex: Hospital, Dr. Smith, School...';
+
+  @override
+  String get labelValidator => 'Please enter a label';
+
+  @override
+  String get phoneField => 'Phone number';
+
+  @override
+  String get phoneHint => 'Ex: +1 819 555 0199 or 8195550199';
+
+  @override
+  String get phoneValidatorEmpty => 'Please enter a number';
+
+  @override
+  String get phoneValidatorShort => 'Number too short';
+
+  @override
+  String get btnSaveImmunity => 'Save with Immunity';
+
+  @override
+  String get addSuccess => 'Emergency contact protected successfully.';
+
+  @override
+  String get addError => 'Error while saving contact.';
+
+  @override
+  String get confirmRemoveTitle => 'Remove from Whitelist?';
+
+  @override
+  String get confirmRemoveDesc =>
+      'Do you want to remove this contact from emergency whitelist? It will be subject to standard filters again.';
+
+  @override
+  String get btnRemove => 'Remove';
+
+  @override
+  String get removeSuccess => 'Contact removed from whitelist.';
+
+  @override
+  String get zeroFalsePositiveTitle => 'Zero False-Positive Guarantee';
+
+  @override
+  String get zeroFalsePositiveDesc =>
+      'These priority numbers are never blocked or filtered, even if Strict Shield (Contacts Only) or Night Mode is active.';
+
+  @override
+  String get customEmergencyContactsHeader => 'USER PRIORITY CONTACTS';
+
+  @override
+  String get emptyCustomContactsTitle => 'No priority contact added';
+
+  @override
+  String get emptyCustomContactsDesc =>
+      'Add your doctor, hospital, or clinic to ensure their calls always go through.';
+
+  @override
+  String get nationalEmergencyServicesHeader =>
+      'NATIONAL EMERGENCY SERVICES (CANADA/QC)';
+
+  @override
+  String get inviolableBadge => 'Inviolable';
+
+  @override
+  String get officialShortcut => 'Official shortcut';
+
+  @override
+  String get systemProtectionTooltip => 'Non-removable system protection';
 }
