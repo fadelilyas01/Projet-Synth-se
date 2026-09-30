@@ -22,8 +22,18 @@ class AuthNotifier extends StateNotifier<UserModel?> {
     state = user;
   }
 
-  Future<void> register(String email, String password, {String? name}) async {
-    final user = await _authService.register(email: email, password: password, name: name);
+  Future<void> register(
+    String email,
+    String password, {
+    String? name,
+    String country = 'CA',
+    String provinceOrState = 'QC',
+  }) async {
+    final user = await _authService.register(
+      email: email,
+      password: password,
+      name: name,
+    );
     state = user;
   }
 
@@ -35,6 +45,18 @@ class AuthNotifier extends StateNotifier<UserModel?> {
   Future<void> logout() async {
     await _authService.logout();
     state = null;
+  }
+
+  Future<void> updateRegion(String country, String provinceOrState) async {
+    try {
+      final updated = await _authService.updateRegion(country: country, provinceOrState: provinceOrState);
+      state = updated;
+    } catch (_) {
+      // Si hors-ligne ou erreur, mettre à jour localement
+      if (state != null) {
+        state = state!.copyWith(country: country, provinceOrState: provinceOrState);
+      }
+    }
   }
 }
 

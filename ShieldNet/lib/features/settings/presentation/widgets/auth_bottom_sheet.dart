@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/services/regional_compliance_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/google_logo.dart';
 import '../../../../core/widgets/google_sign_in_button.dart';
@@ -169,10 +170,13 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
       if (_isLogin) {
         await ref.read(authNotifierProvider.notifier).login(email, password);
       } else {
+        final currentRegion = ref.read(regionalComplianceProvider);
         await ref.read(authNotifierProvider.notifier).register(
           email,
           password,
           name: _nameController.text.trim(),
+          country: currentRegion.country,
+          provinceOrState: currentRegion.provinceOrState,
         );
       }
       if (mounted) {

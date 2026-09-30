@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import BlacklistedNumber, SpamReport, SafeReport, AuditLog, AuditLogAction
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import BlacklistedNumber, SpamReport, SafeReport, AuditLog, AuditLogAction, UserProfile, CountryChoices
 
 admin.site.site_header = "ShieldNet — Administration"
 admin.site.site_title = "ShieldNet Admin"
@@ -230,6 +232,76 @@ class AuditLogAdmin(admin.ModelAdmin):
     source_badge.short_description = "Origine"
 
 
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name = 'Profil Régional'
+    verbose_name_plural = 'Profil Régional ShieldNet'
+    fk_name = 'user'
+
+class CustomUserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline,)
+    list_display = ('username', 'email', 'first_name', 'last_name', 'country_display', 'province_display', 'norm_display', 'is_staff', 'is_superuser')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__country', 'profile__province_or_state')
+
+    def country_display(self, obj):
+        profile = getattr(obj, 'profile', None)
+        if not profile:
+            return '-'
+        flag = "🇨🇦 Canada" if profile.country == 'CA' else ("🇺🇸 USA" if profile.country == 'US' else profile.country)
+        return format_html('<span style="font-weight: 600;">{}</span>', flag)
+    country_display.short_description = "Pays"
+
+    def province_display(self, obj):
+        profile = getattr(obj, 'profile', None)
+        if not profile:
+            return '-'
+        return format_html('<span style="background: rgba(59,130,246,0.15); color: #60A5FA; padding: 2px 6px; border-radius: 4px; font-weight: bold;">{}</span>', profile.province_or_state)
+    province_display.short_description = "Province / État"
+
+    def norm_display(self, obj):
+        profile = getattr(obj, 'profile', None)
+        if not profile:
+            return '-'
+        from .services import RegionalComplianceService
+        norm = RegionalComplianceService.get_compliance_for_region(profile.country, profile.province_or_state)
+        return format_html(
+            '<span style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 11px;">{}</span>',
+            norm['norm_name']
+        )
+    norm_display.short_description = "Norme Appliquée"
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+admin.site.register(User, CustomUserAdmin)
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'country_badge', 'province_or_state_badge', 'norm_badge', 'updated_at')
+    list_filter = ('country', 'province_or_state')
+    search_fields = ('user__username', 'user__email', 'province_or_state')
+
+    def country_badge(self, obj):
+        flag = "🇨🇦 Canada" if obj.country == 'CA' else ("🇺🇸 États-Unis" if obj.country == 'US' else obj.country)
+        return format_html('<span style="font-weight: bold;">{}</span>', flag)
+    country_badge.short_description = "Pays de Résidence"
+
+    def province_or_state_badge(self, obj):
+        return format_html('<span style="background: rgba(16,185,129,0.15); color: #34D399; padding: 3px 8px; border-radius: 4px; font-weight: bold;">{}</span>', obj.province_or_state)
+    province_or_state_badge.short_description = "Province / État"
+
+    def norm_badge(self, obj):
+        from .services import RegionalComplianceService
+        norm = RegionalComplianceService.get_compliance_for_region(obj.country, obj.province_or_state)
+        return format_html(
+            '<span style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 11px;">{}</span>',
+            norm['norm_name']
+        )
+    norm_badge.short_description = "Norme Juridique Régionale"
+
+
 # Métriques pour le tableau de bord d'administration
 original_admin_index = admin.site.index
 
@@ -336,12 +408,45 @@ def custom_admin_index(request, extra_context=None):
                 'ai': ai_diag,
             })
 
+        # Statistiques géographiques des utilisateurs (Canada / États-Unis et Provinces)
+        from .models import UserProfile
+        from .services import RegionalComplianceService
+        users_by_country = {
+            'CA': UserProfile.objects.filter(country='CA').count(),
+            'US': UserProfile.objects.filter(country='US').count(),
+        }
+        provinces_query = list(
+            UserProfile.objects.values('country', 'province_or_state')
+            .annotate(count=Count('id'))
+            .order_by('-count')[:8]
+        )
+        users_regional_breakdown = []
+        for p_item in provinces_query:
+            c = p_item['country']
+            p = p_item['province_or_state']
+            norm = RegionalComplianceService.get_compliance_for_region(c, p)
+            prov_name = (
+                RegionalComplianceService.CANADIAN_PROVINCES.get(p, p)
+                if c == 'CA'
+                else RegionalComplianceService.US_STATES.get(p, p)
+            )
+            users_regional_breakdown.append({
+                'country': c,
+                'country_flag': '🇨🇦' if c == 'CA' else '🇺🇸',
+                'province_code': p,
+                'province_name': prov_name,
+                'norm_name': norm['norm_name'],
+                'count': p_item['count'],
+            })
+
         extra_context.update({
             'kpi_blocked': total_blocked,
             'kpi_whitelisted': total_whitelisted,
             'kpi_reports': total_reports,
             'kpi_safe_reports': total_safe_reports,
             'kpi_users': total_users,
+            'users_by_country': users_by_country,
+            'users_regional_breakdown': users_regional_breakdown,
             'consensus_rate_pct': consensus_rate_pct,
             'resilience_score': resilience_score,
             'area_codes_stats': area_codes,

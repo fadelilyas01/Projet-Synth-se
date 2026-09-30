@@ -18,7 +18,7 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
 
-from .models import BlacklistedNumber, SpamReport, SafeReport
+from .models import BlacklistedNumber, SpamReport, SafeReport, UserProfile, CountryChoices
 from .permissions import (
     HasAPIKeyOrAuthenticated,
     IsAdminStaffUser,
@@ -36,6 +36,7 @@ from .serializers import (
     UserRegisterSerializer,
     EmailLoginSerializer,
     GoogleLoginSerializer,
+    UpdateUserRegionSerializer,
 )
 from .services import (
     ReputationService,
@@ -381,6 +382,9 @@ class GoogleLoginView(APIView):
             first_name = name.split()[0] if name else email.split('@')[0]
             last_name = ' '.join(name.split()[1:]) if len(name.split()) > 1 else ''
             random_password = secrets.token_urlsafe(24)
+            country = serializer.validated_data.get('country', 'CA').upper()
+            province_or_state = serializer.validated_data.get('province_or_state', 'QC').upper()
+
             user = User.objects.create_user(
                 username=email,
                 email=email,
@@ -388,6 +392,10 @@ class GoogleLoginView(APIView):
                 first_name=first_name,
                 last_name=last_name,
             )
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            profile.country = country
+            profile.province_or_state = province_or_state
+            profile.save()
 
         if not user.is_active:
             return Response({'detail': 'Ce compte utilisateur est désactivé.'}, status=status.HTTP_403_FORBIDDEN)
@@ -405,12 +413,77 @@ class UserProfileView(APIView):
     """
     GET /api/v1/auth/me/
     Récupère le profil de l'utilisateur connecté via son jeton JWT.
+    PATCH/PUT /api/v1/auth/me/
+    Met à jour les informations du profil (nom, pays, province/état).
     """
     permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(responses={200: UserSerializer})
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+    def patch(self, request):
+        user = request.user
+        country = request.data.get('country', '').strip().upper()
+        province_or_state = request.data.get('province_or_state', '').strip().upper()
+        name = request.data.get('name', '').strip()
+
+        if country and country not in ['CA', 'US']:
+            return Response({'detail': "Le pays doit être 'CA' (Canada) ou 'US' (États-Unis)."}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if country:
+            profile.country = country
+        if province_or_state:
+            profile.province_or_state = province_or_state
+        profile.save()
+
+        if name:
+            parts = name.split()
+            user.first_name = parts[0]
+            user.last_name = ' '.join(parts[1:]) if len(parts) > 1 else ''
+            user.save()
+
+        return Response(UserSerializer(user).data)
+
+    def put(self, request):
+        return self.patch(request)
+
+class UpdateUserRegionView(APIView):
+    """
+    POST/PATCH/PUT /api/v1/auth/region/
+    Met à jour expressément le pays et la province/état de l'utilisateur connecté.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        return self.patch(request)
+
+    def put(self, request):
+        return self.patch(request)
+
+    def patch(self, request):
+        country = request.data.get('country', '').strip().upper()
+        province_or_state = request.data.get('province_or_state', '').strip().upper()
+
+        if not country and not province_or_state:
+            return Response({'detail': "Veuillez spécifier 'country' ou 'province_or_state'."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if country and country not in ['CA', 'US']:
+            return Response({'detail': "Le pays doit être 'CA' (Canada) ou 'US' (États-Unis)."}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        if country:
+            profile.country = country
+        if province_or_state:
+            profile.province_or_state = province_or_state
+        profile.save()
+
+        return Response({
+            'detail': 'Région mise à jour avec succès.',
+            'user': UserSerializer(request.user).data
+        })
+
 
 class AdminStatsView(APIView):
     """
@@ -427,6 +500,17 @@ class AdminStatsView(APIView):
         total_safe_reports = SafeReport.objects.count()
         total_auto_consensus = BlacklistedNumber.objects.filter(whitelist_reason='auto_consensus').count()
         total_users = User.objects.count()
+
+        from django.db.models import Count
+        users_by_country = {
+            'CA': UserProfile.objects.filter(country='CA').count(),
+            'US': UserProfile.objects.filter(country='US').count(),
+        }
+        users_by_province = list(
+            UserProfile.objects.values('country', 'province_or_state')
+            .annotate(total=Count('id'))
+            .order_by('-total')[:10]
+        )
 
         recent_reports = []
         for r in SpamReport.objects.select_related('reporter').order_by('-created_at')[:15]:
@@ -451,6 +535,8 @@ class AdminStatsView(APIView):
             'total_auto_consensus': total_auto_consensus,
             'total_reports': total_reports,
             'total_users': total_users,
+            'users_by_country': users_by_country,
+            'users_by_province': users_by_province,
             'recent_reports': recent_reports,
         })
 
@@ -594,14 +680,35 @@ class AdminUsersListView(APIView):
     """
     GET /api/v1/admin/users/ : Liste tous les utilisateurs inscrits.
     Réservé exclusivement aux administrateurs système (Superuser).
+    Supporte les filtres d'origine géographique ?country=CA|US et ?province=QC|ON|NY...
     """
     permission_classes = [IsAdminOnlyUser]
 
     def get(self, request):
-        users = User.objects.all().order_by('-date_joined')
+        users = User.objects.all().select_related('profile').order_by('-date_joined')
+        country_filter = request.query_params.get('country', '').strip().upper()
+        province_filter = request.query_params.get('province', '').strip().upper()
+
+        if country_filter:
+            users = users.filter(profile__country=country_filter)
+        if province_filter:
+            users = users.filter(profile__province_or_state=province_filter)
+
+        from .services import RegionalComplianceService
         data = []
         for u in users:
             reports_count = SpamReport.objects.filter(reporter=u).count()
+            profile = getattr(u, 'profile', None)
+            country = profile.country if profile else 'CA'
+            province_or_state = profile.province_or_state if profile else 'QC'
+            norm_info = RegionalComplianceService.get_compliance_for_region(country, province_or_state)
+            country_name = 'Canada' if country == 'CA' else ('États-Unis' if country == 'US' else country)
+            prov_name = (
+                RegionalComplianceService.CANADIAN_PROVINCES.get(province_or_state, province_or_state)
+                if country == 'CA'
+                else RegionalComplianceService.US_STATES.get(province_or_state, province_or_state)
+            )
+
             data.append({
                 'id': u.id,
                 'email': u.email,
@@ -611,6 +718,12 @@ class AdminUsersListView(APIView):
                 'is_superuser': u.is_superuser,
                 'role': 'ADMIN' if u.is_superuser else ('MANAGER' if u.is_staff else 'CITIZEN'),
                 'is_active': u.is_active,
+                'country': country,
+                'province_or_state': province_or_state,
+                'country_name': country_name,
+                'province_name': prov_name,
+                'country_flag': '🇨🇦' if country == 'CA' else '🇺🇸',
+                'compliance_norm': norm_info,
                 'date_joined': u.date_joined.isoformat(),
                 'reports_count': reports_count,
             })
@@ -974,3 +1087,33 @@ class RegionalThreatsView(APIView):
         from .services import RegionalThreatIntelligenceService
         report = RegionalThreatIntelligenceService.get_regional_threat_report()
         return Response(report, status=status.HTTP_200_OK)
+
+
+class RegionalComplianceNormsView(APIView):
+    """
+    GET /api/v1/compliance/norms/?country=CA&province=QC
+    Fournit le détail des normes réglementaires et juridiques applicables
+    pour la juridiction sélectionnée (Loi 25 QC, PIPEDA, TCPA, CCPA).
+    Accessible publiquement pour initialiser l'onboarding mobile ou les paramètres.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        country = request.query_params.get('country', 'CA').strip().upper()
+        province = request.query_params.get('province', 'QC').strip().upper()
+        from .services import RegionalComplianceService
+        compliance = RegionalComplianceService.get_compliance_for_region(country, province)
+        return Response(compliance, status=status.HTTP_200_OK)
+
+
+class RegionalComplianceRegionsView(APIView):
+    """
+    GET /api/v1/compliance/regions/
+    Fournit la liste des pays (Canada, États-Unis) et de toutes leurs provinces/états supportés.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        from .services import RegionalComplianceService
+        return Response(RegionalComplianceService.get_available_regions(), status=status.HTTP_200_OK)
+

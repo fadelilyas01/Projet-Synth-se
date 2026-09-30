@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Shield Body -->
+  <path d="M64 8 L108 24 C108 68 88 102 64 120 C40 102 20 68 20 24 Z" fill="url(#shieldGrad)"/>
+  <!-- Inner Shield Contrast Border -->
+  <path d="M64 16 L100 29 C100 66 83 95 64 110 C45 95 28 66 28 29 Z" fill="#0F172A" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  <!-- Radio / Telecom Waves -->
+  <path d="M48 52 A22 22 0 0 1 80 52" fill="none" stroke="#38BDF8" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M54 62 A14 14 0 0 1 74 62" fill="none" stroke="#38BDF8" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <!-- Central Security Checkmark -->
+  <path d="M48 76 L59 87 L82 60" fill="none" stroke="url(#accentGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

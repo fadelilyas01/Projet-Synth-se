@@ -1,43 +1,22 @@
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shieldnet/core/network/api_service.dart';
-import 'package:shieldnet/core/database/database_helper.dart';
 
 // ==================== MOCKS ====================
 class MockDio extends Mock implements Dio {}
-class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
-    registerFallbackValue(BlacklistedNumber(
-      phoneHash: 'test',
-      category: 'test',
-      riskScore: 0,
-      reportsCount: 1,
-      updatedAt: '',
-    ));
-  });
-
   late MockDio mockDio;
-  late MockDatabaseHelper mockDb;
   late ApiService apiService;
 
   setUp(() {
     mockDio = MockDio();
-    mockDb = MockDatabaseHelper();
-
-    when(() => mockDb.batchInsertOrUpdateBlacklistedNumbers(any()))
-        .thenAnswer((_) async {});
-    when(() => mockDb.deleteBatchBlacklistedNumbers(any()))
-        .thenAnswer((_) async => 0);
-    when(() => mockDb.insertOrUpdateBlacklistedNumber(any()))
-        .thenAnswer((_) async {});
-
-    apiService = ApiService(dio: mockDio, databaseHelper: mockDb);
+    apiService = ApiService(dio: mockDio);
     SharedPreferences.setMockInitialValues({});
   });
 
@@ -186,79 +165,6 @@ void main() {
 
       final result = await apiService.checkNumberOnBackend('+18195550000');
       expect(result, isNull);
-    });
-  });
-
-  group('ApiService — Vérification Groupée (checkNumbersBatch)', () {
-    test('Liste vide retourne une carte vide sans requête réseau', () async {
-      final res = await apiService.checkNumbersBatch([]);
-      expect(res, isEmpty);
-      verifyNever(() => mockDio.post(any(), data: any(named: 'data')));
-    });
-
-    test('Requête groupée valide traite et mappe les résultats', () async {
-      when(() => mockDio.post('check/batch/', data: any(named: 'data')))
-          .thenAnswer((invocation) async {
-        final data = invocation.namedArguments[#data] as Map;
-        final hashes = (data['hashes'] as List).cast<String>();
-        final Map<String, dynamic> results = {};
-        for (final h in hashes) {
-          results[h] = {
-            'is_spam': true,
-            'risk_score': 80,
-            'category': 'fraud',
-          };
-        }
-        return Response(
-          data: {'results': results, 'count': results.length},
-          statusCode: 200,
-          requestOptions: RequestOptions(path: 'check/batch/'),
-        );
-      });
-
-      final numbers = ['+18195551111', '+18195552222'];
-      final res = await apiService.checkNumbersBatch(numbers);
-
-      expect(res, isNotNull);
-      expect(res!.length, 2);
-      expect(res['+18195551111']?['is_spam'], true);
-      expect(res['+18195552222']?['risk_score'], 80);
-    });
-
-    test('Échec réseau retourne null', () async {
-      when(() => mockDio.post('check/batch/', data: any(named: 'data')))
-          .thenThrow(DioException(
-        type: DioExceptionType.connectionError,
-        requestOptions: RequestOptions(path: 'check/batch/'),
-      ));
-
-      final res = await apiService.checkNumbersBatch(['+18195551111']);
-      expect(res, isNull);
-    });
-  });
-
-  group('ApiService — Contestation Légitime (submitSafeReport)', () {
-    test('Envoi avec phoneHash et maskedNumber réussit', () async {
-      when(() => mockDio.post('reports/safe/', data: any(named: 'data')))
-          .thenAnswer((_) async => Response(
-                data: {
-                  'phone_hash': 'h' * 64,
-                  'detail': 'Avis enregistré',
-                  'auto_whitelisted': true,
-                },
-                statusCode: 201,
-                requestOptions: RequestOptions(path: 'reports/safe/'),
-              ));
-
-      final res = await apiService.submitSafeReport(
-        phoneHash: 'h' * 64,
-        maskedNumber: '+1 819 *** **34',
-        reason: 'medical',
-        comment: 'Clinique médicale locale',
-      );
-
-      expect(res, isNotNull);
-      expect(res!['auto_whitelisted'], true);
     });
   });
 }

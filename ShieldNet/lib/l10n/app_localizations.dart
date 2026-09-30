@@ -1771,6 +1771,114 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Tout actualiser'**
   String get adminRefreshAll;
+
+  /// No description provided for @sectionJurisdiction.
+  ///
+  /// In fr, this message translates to:
+  /// **'JURIDICTION & CONFORMITÉ RÉGIONALE'**
+  String get sectionJurisdiction;
+
+  /// No description provided for @regionSelectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pays & Juridiction Régionale'**
+  String get regionSelectionTitle;
+
+  /// No description provided for @regionSelectionSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Application stricte des lois de protection de votre région'**
+  String get regionSelectionSubtitle;
+
+  /// No description provided for @selectCountryPrompt.
+  ///
+  /// In fr, this message translates to:
+  /// **'1. SÉLECTIONNEZ VOTRE PAYS'**
+  String get selectCountryPrompt;
+
+  /// No description provided for @selectProvincePrompt.
+  ///
+  /// In fr, this message translates to:
+  /// **'2. SÉLECTIONNEZ VOTRE PROVINCE / TERRITOIRE'**
+  String get selectProvincePrompt;
+
+  /// No description provided for @selectStatePrompt.
+  ///
+  /// In fr, this message translates to:
+  /// **'2. SÉLECTIONNEZ VOTRE ÉTAT (STATE)'**
+  String get selectStatePrompt;
+
+  /// No description provided for @applyRegionBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer cette juridiction'**
+  String get applyRegionBtn;
+
+  /// No description provided for @onboardingRegionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Normes & Juridictions Locales'**
+  String get onboardingRegionTitle;
+
+  /// No description provided for @onboardingRegionDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'ShieldNet adapte automatiquement son niveau de protection selon votre région : Loi 25 au Québec, LPRPDE/CRTC au Canada ou TCPA & CCPA aux États-Unis.'**
+  String get onboardingRegionDesc;
+
+  /// No description provided for @helpFaqTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Centre d\'Aide & FAQ'**
+  String get helpFaqTitle;
+
+  /// No description provided for @helpFaqSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Questions fréquentes, confidentialité et documentation'**
+  String get helpFaqSubtitle;
+
+  /// No description provided for @openWebHelpBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Consulter le Centre d\'Assistance Web'**
+  String get openWebHelpBtn;
+
+  /// No description provided for @webHelpNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accédez aux guides détaillés, politiques de confidentialité et contact support sur notre portail web.'**
+  String get webHelpNotice;
+
+  /// No description provided for @searchFaqPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une question...'**
+  String get searchFaqPlaceholder;
+
+  /// No description provided for @faqCategoryFiltering.
+  ///
+  /// In fr, this message translates to:
+  /// **'Filtrage & Efficacité'**
+  String get faqCategoryFiltering;
+
+  /// No description provided for @faqCategoryPrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confidentialité & Données'**
+  String get faqCategoryPrivacy;
+
+  /// No description provided for @faqCategoryEmergency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéros d\'Urgence & Faux Positifs'**
+  String get faqCategoryEmergency;
+
+  /// No description provided for @faqCategoryPermissions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Permissions Android'**
+  String get faqCategoryPermissions;
 }
 
 class _AppLocalizationsDelegate

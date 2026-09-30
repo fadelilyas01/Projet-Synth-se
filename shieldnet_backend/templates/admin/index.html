@@ -6,50 +6,33 @@
 {% block content %}
 <div class="soc-dashboard-wrap">
 
-  <!-- 1. Bannière de Bienvenue SOC -->
+  <!-- 1. Bannière Principale SOC -->
   <div class="soc-hero-banner">
     <div style="display: flex; align-items: center; gap: 16px;">
       <div class="brand-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
       </div>
       <div>
         <h1 class="hero-banner-title">
-          Console de Cybersécurité Télécom & Opérations SOC
+          ShieldNet &mdash; Tableau de Bord SOC & Modération Télécom
         </h1>
         <p class="hero-banner-sub">
-          Surveillance en temps réel du réseau NANP (+1), modération collaborative et mitigation des faux-positifs
+          Gestion des listes de réputation NANP (+1), arbitrage des contestations d'abonnés et intégrité cryptographique
         </p>
       </div>
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
       <span class="soc-pill soc-pill-green">
-        <span class="pulse-dot"></span> Moteur Déterministe : En Ligne
+        <span class="status-led online"></span> Filtrage Actif (< 2 ms)
       </span>
       <span class="soc-pill soc-pill-blue">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        Salage HMAC Actif
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        Salage HMAC-SHA256
       </span>
     </div>
   </div>
 
-  <!-- 2. Barre Télémétrie en Direct (Live Stream Mode) -->
-  <div class="live-ticker-wrap">
-    <div class="ticker-content">
-      <span class="live-badge">
-        <span class="pulse-dot"></span> LIVE FEED
-      </span>
-      <span id="live-ticker-text">Surveillance active des flux d'appels entrants et réconciliation de consensus</span>
-    </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <span style="color: var(--text-muted); font-size: 11px;">Actualisation : <strong id="live-countdown" style="color: var(--text-main);">30s</strong></span>
-      <button type="button" id="live-stream-btn" class="live-toggle-btn" onclick="toggleLiveStream()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <span>Actif</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- 3. Cartes KPI Temps Réel -->
+  <!-- 2. Cartes KPI Télécom -->
   <div class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-card-header">
@@ -59,12 +42,12 @@
         </div>
       </div>
       <div id="kpi-blocked-val" class="kpi-val red">{{ kpi_blocked|default:"0" }}</div>
-      <div class="kpi-sub-text">Numéros en liste noire active</div>
+      <div class="kpi-sub-text">Numéros inscrits en liste noire active</div>
     </div>
 
     <div class="kpi-card">
       <div class="kpi-card-header">
-        <span class="kpi-label">Blanchis / Consensus</span>
+        <span class="kpi-label">Contestations Légitimes</span>
         <div class="kpi-icon-pill green">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
@@ -75,7 +58,7 @@
 
     <div class="kpi-card">
       <div class="kpi-card-header">
-        <span class="kpi-label">Signalements Citoyens</span>
+        <span class="kpi-label">Signalements Reçus</span>
         <div class="kpi-icon-pill amber">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         </div>
@@ -86,804 +69,350 @@
 
     <div class="kpi-card">
       <div class="kpi-card-header">
-        <span class="kpi-label">Flotte Protégée</span>
+        <span class="kpi-label">Abonnés & Flotte</span>
         <div class="kpi-icon-pill blue">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
         </div>
       </div>
       <div id="kpi-users-val" class="kpi-val blue">{{ kpi_users|default:"0" }}</div>
-      <div class="kpi-sub-text">Comptes mobiles enregistrés</div>
+      <div class="kpi-sub-text">Comptes mobiles synchronisés</div>
     </div>
   </div>
 
-  <!-- 4. Renseignement Cyber : Posture & Heatmap Indicatifs Canadiens -->
-  <div style="display: grid; grid-template-columns: 340px 1fr; gap: 20px; margin-bottom: 24px;">
-    <!-- Jauge Circulaire de Résilience Réseau -->
-    <div class="posture-widget">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          Posture Cyber Réseau
-        </span>
-        <span style="font-size: 10px; color: var(--accent-cyan); background: var(--accent-cyan-bg); padding: 2px 6px; border-radius: 4px; font-weight: bold;">OPTIMAL</span>
-      </div>
-
-      <div class="gauge-svg-wrap">
-        <svg class="gauge-svg" width="140" height="140" viewBox="0 0 140 140">
-          <defs>
-            <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#06b6d4" />
-              <stop offset="100%" stop-color="#10b981" />
-            </linearGradient>
-          </defs>
-          <circle class="gauge-bg" cx="70" cy="70" r="58" />
-          <circle id="resilience-circle" class="gauge-progress" cx="70" cy="70" r="58" stroke-dasharray="364.4" stroke-dashoffset="15" />
-        </svg>
-        <div class="gauge-text">
-          <span id="resilience-val" class="gauge-percentage">{{ resilience_score|default:"98.6" }}%</span>
-          <span class="gauge-label">Résilience</span>
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 12px;">
-        <div>Faux-positifs : <strong style="color: var(--accent-green);">&lt; 0.04%</strong></div>
-        <div style="text-align: right;">MTTR : <strong style="color: var(--accent-blue);">340ms</strong></div>
-      </div>
-    </div>
-
-    <!-- Carte Radar des Indicatifs Canadiens -->
-    <div class="chart-card">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
-        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text-main);">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-          Distribution des Menaces par Indicatifs Régionaux (Canada NANP)
-        </div>
-        <span style="font-size: 11px; color: var(--text-muted);">Cartographie Télécom</span>
-      </div>
-
-      <div style="padding: 6px 0;">
-        {% for code, item in area_codes_stats.items %}
-        <div class="area-code-row">
-          <div class="area-code-info">
-            <span class="area-code-pill">{{ code }}</span>
-            <span style="color: var(--text-secondary); font-weight: 500;">{{ item.label }}</span>
-          </div>
-          <div class="area-bar-wrap">
-            <div class="area-bar-fill" style="width: {{ item.pct }}%; background: {{ item.color }};"></div>
-          </div>
-          <div class="area-code-stat">
-            {{ item.pct }}%
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-  <!-- 5. Visualisation Graphique (Chart.js) -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-    <div class="chart-card">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);">
-        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text-main);">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-          Typologie des Menaces en Liste Noire
-        </div>
-        <span style="font-size: 11px; color: var(--text-muted);">Répartition</span>
-      </div>
-      <div style="height: 230px; position: relative;">
-        <canvas id="categoryChart"></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);">
-        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text-main);">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          Vélocité des Signalements Télécom (7 Derniers Jours)
-        </div>
-        <span style="font-size: 11px; color: var(--text-muted);">Volume Quotidien</span>
-      </div>
-      <div style="height: 230px; position: relative;">
-        <canvas id="activityChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- 6. Centre de Triage Rapide (SOC Fast Triage Hub) -->
-  <div id="triage-section" class="triage-panel">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
-      <div style="font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-        Centre de Triage Rapide des Signalements Entrants
-      </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span style="font-size: 11px; color: var(--text-muted);">Actions directes en 1 clic</span>
-        <a href="/admin/operations/triage/" class="ops-btn ops-btn-primary" style="font-size: 11px; padding: 6px 12px;">Ouvrir la Console Complète &rarr;</a>
-      </div>
-    </div>
-
-    <table class="triage-table">
-      <thead>
-        <tr>
-          <th>Horodatage</th>
-          <th>Empreinte / Numéro</th>
-          <th>Catégorie</th>
-          <th>Commentaire Citoyen</th>
-          <th>Statut</th>
-          <th style="text-align: right;">Action Immédiate</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in triage_items %}
-        <tr id="triage-row-{{ item.report.id }}">
-          <td class="mono" style="font-size: 11px;">
-            {{ item.report.created_at|date:"d/m H:i" }}
-          </td>
-          <td>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <code class="hash-code">{{ item.report.phone_hash|slice:":12" }}...</code>
-              <button type="button" class="copy-hash-btn" title="Copier l'empreinte complète" onclick="copyTextToClipboard('{{ item.report.phone_hash }}', this)">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
-            </div>
-          </td>
-          <td>
-            <span class="category-chip">
-              {{ item.report.category }}
-            </span>
-            {% if item.ai %}
-              {% if item.ai.recommendation == 'AUTO_WHITELIST' %}
-                <span class="badge-safe" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
-                  <span>Faux-Positif ({{ item.ai.false_positive_confidence }}%)</span>
-                </span>
-              {% elif item.ai.recommendation == 'ESCALATE_BLOCK' %}
-                <span class="badge-critical" title="{{ item.ai.verdict_description }}" style="font-size: 10px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                  <span>Menace ({{ item.ai.composite_risk_score }}%)</span>
-                </span>
-              {% endif %}
-            {% endif %}
-          </td>
-          <td style="color: var(--text-secondary); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            {{ item.report.comment|default:"Aucun commentaire fourni" }}
-          </td>
-          <td>
-            {% if item.is_whitelisted %}
-              <span class="badge-safe">Blanchi</span>
-            {% elif item.is_blocked %}
-              <span class="badge-critical">Bloqué</span>
-            {% else %}
-              <span class="badge-warning">À Traiter</span>
-            {% endif %}
-          </td>
-          <td style="text-align: right;">
-            <div class="triage-actions-group" style="justify-content: flex-end;">
-              <button type="button" class="triage-action-btn triage-btn-block" title="Confirmer la menace et bloquer sur tout le réseau" onclick="executeTriage('{{ item.report.id }}', 'escalate_block')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                Bloquer
-              </button>
-              <button type="button" class="triage-action-btn triage-btn-whitelist" title="Valider comme faux positif et autoriser" onclick="executeTriage('{{ item.report.id }}', 'dismiss_safe')">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Blanchir
-              </button>
-            </div>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">Aucun signalement en attente de modération.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <!-- 7. Simulateur & Bac à Sable de Numéro en Direct (Cyber Sandbox) -->
-  <div id="sandbox-section" class="sandbox-panel">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
-      <div style="font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-        Simulateur & Analyseur de Numéro en Direct (Cyber Sandbox)
-      </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span style="font-size: 11px; color: var(--accent-blue); background: var(--accent-blue-bg); padding: 4px 10px; border-radius: 6px;">
-          Calculateur HMAC-SHA256 & Risque NANP
-        </span>
-        <a href="/admin/operations/sandbox/" class="ops-btn ops-btn-primary" style="font-size: 11px; padding: 6px 12px;">Ouvrir le Laboratoire Complet &rarr;</a>
-      </div>
-    </div>
-
-    <div style="display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
-      <input type="text" id="sandbox-phone-input" class="sandbox-input" placeholder="+1 819 555 0199 ou 5145551234" style="flex: 1; min-width: 260px;">
-      <button type="button" class="ops-btn ops-btn-primary" onclick="runSandboxDiagnostic()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        Tester la Réputation
-      </button>
-    </div>
-
-    <!-- Résultats Dynamiques Sandbox -->
-    <div id="sandbox-result" style="display: none; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; margin-top: 14px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span id="sb-status-chip" class="badge-critical">BLOQUÉ</span>
-          <span id="sb-masked-num" style="font-size: 15px; font-weight: 700; color: var(--text-main);"></span>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="triage-action-btn triage-btn-block" onclick="applySandboxAction('block')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-            Bloquer Réseau
-          </button>
-          <button type="button" class="triage-action-btn triage-btn-whitelist" onclick="applySandboxAction('whitelist')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Blanchir & Réhabiliter
-          </button>
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; font-size: 12px;">
-        <div>
-          <span style="color: var(--text-muted);">Empreinte HMAC-SHA256 :</span><br>
-          <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-            <code id="sb-hash" class="hash-code" style="word-break: break-all;"></code>
-            <button type="button" class="copy-hash-btn" title="Copier le hash" onclick="copyTextToClipboard(document.getElementById('sb-hash').textContent, this)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </button>
-          </div>
-        </div>
-        <div>
-          <span style="color: var(--text-muted);">Score de Risque Heuristique :</span><br>
-          <strong id="sb-score" style="font-size: 16px; color: var(--text-main);"></strong>
-        </div>
-        <div>
-          <span style="color: var(--text-muted);">Typologie Détectée :</span><br>
-          <strong id="sb-category" style="color: var(--text-main);"></strong>
-        </div>
-        <div>
-          <span style="color: var(--text-muted);">Signalements / Avis Sûrs :</span><br>
-          <strong id="sb-reports" style="color: var(--text-main);"></strong>
-        </div>
-      </div>
-
-      <div id="sb-anomalies-box" style="margin-top: 12px; font-size: 11px; color: var(--accent-red); display: none; padding: 8px 12px; background: var(--accent-red-bg); border-radius: 6px; border: 1px solid var(--accent-red);"></div>
-
-      <!-- Diagnostic & Détection des faux positifs -->
-      <div id="sb-ai-badge-row" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 11px; font-weight: 700; color: var(--accent-blue);">Diagnostic du modèle :</span>
-          <span id="sb-ai-verdict" class="badge-safe" style="font-size: 11px;">-</span>
-          <span id="sb-ai-fp-pct" style="font-size: 11px; color: var(--text-muted);"></span>
-        </div>
-        <a href="/admin/operations/sandbox/" class="ops-btn" style="font-size: 11px; padding: 4px 10px;">
-          Voir l'analyse détaillée &rarr;
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- 8. Barre d'Opérations & Maintenance Système -->
+  <!-- 3. Actions Rapides de Modération -->
   <div class="ops-bar">
-    <div style="font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      <span>Opérations & Maintenance Système</span>
+    <div class="ops-bar-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      <span>Actions Rapides de Modération</span>
     </div>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-      <a href="/admin/operations/export/csv/" class="ops-btn ops-btn-primary" title="Télécharger la liste noire au format CSV">
+    <div class="ops-bar-actions">
+      <a href="/admin/operations/triage/" class="ops-btn ops-btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        <span>Ouvrir la File de Triage</span>
+      </a>
+      <a href="/admin/operations/sandbox/" class="ops-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span>Auditer un Numéro</span>
+      </a>
+      <a href="/admin/operations/export/csv/" class="ops-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Exporter Blacklist (CSV)
+        <span>Export CSV Blacklist</span>
       </a>
-      <a href="/admin/operations/report/executive/" target="_blank" class="ops-btn" title="Ouvrir le rapport exécutif pour impression ou PDF">
+      <a href="/admin/operations/report/executive/" target="_blank" class="ops-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-        Rapport Exécutif PDF
-      </a>
-      <button type="button" class="ops-btn" onclick="runConsensusAudit()" title="Balayage algorithmique pour détecter et réhabiliter les faux positifs">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-        Consensus Auto
-      </button>
-      <button type="button" class="ops-btn" onclick="runPurgeJunk()" title="Nettoyage des signalements isolés obsolètes">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        Purger Orphelins
-      </button>
-      <a href="/api/v1/docs/" target="_blank" class="ops-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-        Swagger API
+        <span>Rapport Mensuel PDF</span>
       </a>
     </div>
   </div>
 
-  <!-- 9. Hub des Registres & Modèles SOC -->
-  <div style="margin-top: 32px;">
-    <h2 style="font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-      Registres & Accès aux Données du Réseau
-    </h2>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 30px;">
-      <!-- Carte 1 : Blacklist -->
-      <div class="kpi-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+  <!-- 4. Graphiques d'Activité Télécom -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-card-header">
         <div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-red)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-              Liste Noire Télécom
-            </div>
-            <span class="badge-critical">{{ kpi_blocked }} bloqués</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
-            Base déterministe des numéros bloqués ou blanchis, synchronisée aux mobiles.
-          </p>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <a href="{% url 'admin:shield_api_blacklistednumber_changelist' %}" class="ops-btn ops-btn-primary" style="flex: 1; justify-content: center;">Consulter la liste</a>
-          <a href="{% url 'admin:shield_api_blacklistednumber_add' %}" class="ops-btn" style="padding: 8px 12px;" title="Ajouter">+</a>
+          <h3 class="chart-title">Évolution des Signalements (7 Derniers Jours)</h3>
+          <p class="chart-sub">Volume journalier des spams rapportés vs numéros réhabilités</p>
         </div>
       </div>
-
-      <!-- Carte 2 : Signalements -->
-      <div class="kpi-card" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-              Signalements Spams
-            </div>
-            <span class="badge-warning">{{ kpi_reports }} rapports</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
-            Retours utilisateurs sur les appels frauduleux, robocalls et phishing par SMS.
-          </p>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <a href="{% url 'admin:shield_api_spamreport_changelist' %}" class="ops-btn ops-btn-primary" style="flex: 1; justify-content: center;">Modérer les signalements</a>
-          <a href="{% url 'admin:shield_api_spamreport_add' %}" class="ops-btn" style="padding: 8px 12px;" title="Ajouter">+</a>
-        </div>
-      </div>
-
-      <!-- Carte 3 : Avis de légitimité -->
-      <div class="kpi-card" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              Avis de Légitimité
-            </div>
-            <span class="badge-safe">{{ kpi_safe_reports }} avis</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
-            Contestations de numéros légitimes alimentant l'algorithme de consensus.
-          </p>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <a href="{% url 'admin:shield_api_safereport_changelist' %}" class="ops-btn ops-btn-primary" style="flex: 1; justify-content: center;">Examiner les avis</a>
-          <a href="{% url 'admin:shield_api_safereport_add' %}" class="ops-btn" style="padding: 8px 12px;" title="Ajouter">+</a>
-        </div>
-      </div>
-
-      <!-- Carte 4 : Journaux d'Audit -->
-      <div class="kpi-card" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-              Journaux d'Audit
-            </div>
-            <span style="font-size: 11px; color: var(--accent-blue); font-weight: bold;">Immuable</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
-            Traçabilité intégrale de toutes les actions de blocage, blanchiment et maintenance.
-          </p>
-        </div>
-        <a href="{% url 'admin:shield_api_auditlog_changelist' %}" class="ops-btn ops-btn-primary" style="justify-content: center;">Consulter les journaux</a>
-      </div>
-
-      <!-- Carte 5 : Utilisateurs & Permissions -->
-      <div class="kpi-card" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              Utilisateurs & Accès
-            </div>
-            <span style="font-size: 11px; color: var(--accent-purple); font-weight: bold;">{{ kpi_users }} comptes</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
-            Comptes d'administration SOC et gestion des rôles de supervision.
-          </p>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <a href="{% url 'admin:auth_user_changelist' %}" class="ops-btn ops-btn-primary" style="flex: 1; justify-content: center;">Gérer les utilisateurs</a>
-          <a href="{% url 'admin:auth_user_add' %}" class="ops-btn" style="padding: 8px 12px;" title="Ajouter">+</a>
-        </div>
-      </div>
-
-      <!-- Carte 6 : Documentation Swagger -->
-      <div class="kpi-card" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-              Spécification OpenAPI
-            </div>
-            <span style="font-size: 11px; color: var(--accent-cyan); font-weight: bold;">Swagger 3.0</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
-            Documentation interactive des points d'accès API pour les clients mobiles et PBX.
-          </p>
-        </div>
-        <a href="/api/v1/docs/" target="_blank" class="ops-btn ops-btn-primary" style="justify-content: center;">Ouvrir Swagger UI</a>
+      <div style="height: 220px; position: relative;">
+        <canvas id="trafficTrendChart"></canvas>
       </div>
     </div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <h3 class="chart-title">Répartition des Nuisances par Catégorie</h3>
+          <p class="chart-sub">Typologie des menaces enregistrées sur le réseau</p>
+        </div>
+      </div>
+      <div style="height: 220px; position: relative;">
+        <canvas id="categoryDonutChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4.5. Répartition Géographique des Utilisateurs & Normes Régionales -->
+  <div class="data-card" style="margin-bottom: 24px;">
+    <div class="data-card-header">
+      <div>
+        <h3 class="data-card-title">Origine Géographique des Utilisateurs & Conformité Régionale</h3>
+        <p class="data-card-sub">Localisation des utilisateurs (Canada 🇨🇦 / États-Unis 🇺🇸) et application des cadres réglementaires</p>
+      </div>
+      <a href="{% url 'admin:auth_user_changelist' %}" class="see-all-link">Gestion des utilisateurs &rarr;</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 18px;">
+      <!-- Carte Canada -->
+      <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">🇨🇦</span>
+            <div>
+              <strong style="font-size: 15px;">Canada</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">Loi 25 QC • LPRPDE / PIPEDA & CRTC</div>
+            </div>
+          </div>
+          <span style="font-size: 18px; font-weight: 800; color: #3b82f6;">{{ users_by_country.CA|default:"0" }}</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+          Les utilisateurs canadiens sont protégés par la Loi 25 au Québec et la LPRPDE au niveau fédéral, avec conservation stricte et immunité 911/811/988.
+        </div>
+      </div>
+
+      <!-- Carte USA -->
+      <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">🇺🇸</span>
+            <div>
+              <strong style="font-size: 15px;">États-Unis</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">TCPA • FCC STIR/SHAKEN • CCPA (Californie)</div>
+            </div>
+          </div>
+          <span style="font-size: 18px; font-weight: 800; color: #10b981;">{{ users_by_country.US|default:"0" }}</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+          Les utilisateurs américains sont protégés par la réglementation TCPA / FCC et la législation CCPA/CPRA en Californie contre le démarchage et les robocalls.
+        </div>
+      </div>
+    </div>
+
+    <!-- Répartition par Province / État -->
+    {% if users_regional_breakdown %}
+    <div style="padding: 0 18px 18px 18px;">
+      <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">
+        Détail par Province / État & Norme Juridique
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        {% for reg in users_regional_breakdown %}
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); padding: 6px 12px; border-radius: 8px;">
+          <span>{{ reg.country_flag }}</span>
+          <strong style="font-size: 13px;">{{ reg.province_name }} ({{ reg.province_code }})</strong>
+          <span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{{ reg.norm_name }}</span>
+          <span style="font-size: 12px; font-weight: 800; color: var(--text-primary); margin-left: 4px;">{{ reg.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 5. Tables de Données Récentes (Triage Prioritaire & Journal d'Audit) -->
+  <div class="data-dual-row">
+    
+    <!-- File de Triage Récente -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div>
+          <h3 class="data-card-title">Derniers Signalements à Arbitrer</h3>
+          <p class="data-card-sub">Numéros suspects en attente de validation manuelle</p>
+        </div>
+        <a href="/admin/operations/triage/" class="see-all-link">Consulter tout &rarr;</a>
+      </div>
+      
+      <div class="soc-table-responsive">
+        <table class="soc-data-table">
+          <thead>
+            <tr>
+              <th>Numéro</th>
+              <th>Catégorie</th>
+              <th>Score Risque</th>
+              <th>Signalements</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent_pending %}
+            <tr>
+              <td>
+                <span class="mono-badge">{{ item.phone_number }}</span>
+              </td>
+              <td>
+                <span class="badge-cat {{ item.category }}">{{ item.get_category_display|default:item.category }}</span>
+              </td>
+              <td>
+                <strong style="color: {% if item.risk_score >= 80 %}var(--accent-red){% elif item.risk_score >= 50 %}var(--accent-amber){% else %}var(--accent-green){% endif %};">
+                  {{ item.risk_score }}%
+                </strong>
+              </td>
+              <td>{{ item.reports_count|default:"1" }}</td>
+              <td style="text-align: right;">
+                <a href="/admin/operations/triage/" class="triage-quick-btn" title="Arbitrer dans le centre de triage">
+                  Examiner
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                Aucun signalement en attente d'arbitrage. La file de triage est à jour.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Journal d'Audit Récent -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div>
+          <h3 class="data-card-title">Traçabilité & Journal d'Audit</h3>
+          <p class="data-card-sub">Dernières actions administratives enregistrées</p>
+        </div>
+        <a href="{% url 'admin:shield_api_auditlog_changelist' %}" class="see-all-link">Journal complet &rarr;</a>
+      </div>
+
+      <div class="soc-table-responsive">
+        <table class="soc-data-table">
+          <thead>
+            <tr>
+              <th>Opérateur</th>
+              <th>Action</th>
+              <th>Date & Heure</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in recent_audit_logs %}
+            <tr>
+              <td>
+                <strong>{{ log.user.username|default:"Système" }}</strong>
+              </td>
+              <td>
+                <span class="badge-action {{ log.action }}">{{ log.get_action_display|default:log.action }}</span>
+              </td>
+              <td style="color: var(--text-muted); font-size: 12px;">
+                {{ log.created_at|date:"d/m H:i" }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                Aucune entrée d'audit récente.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
 </div>
 
-<!-- Scripts SOC Interactifs -->
+<!-- Initialisation des Graphiques Chart.js et gestion du thème -->
 <script>
-  let currentTestedNumber = '';
-  let liveStreamInterval = null;
-  let countdownSec = 30;
+let trendChartInstance = null;
+let donutChartInstance = null;
 
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
+function updateChartsForTheme(isLight) {
+  const textColor = isLight ? '#475569' : '#94a3b8';
+  const gridColor = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)';
+
+  if (trendChartInstance) {
+    trendChartInstance.options.scales.x.ticks.color = textColor;
+    trendChartInstance.options.scales.y.ticks.color = textColor;
+    trendChartInstance.options.scales.y.grid.color = gridColor;
+    trendChartInstance.options.plugins.legend.labels.color = textColor;
+    trendChartInstance.update();
   }
 
-  // Variables globales pour les instances Chart.js
-  let categoryChartInstance = null;
-  let activityChartInstance = null;
-
-  function updateChartsForTheme(isLight) {
-    const legendColor = isLight ? '#0f172a' : '#94a3b8';
-    const ticksColor = isLight ? '#334155' : '#64748b';
-    const gridColor = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.05)';
-
-    if (categoryChartInstance) {
-      if (categoryChartInstance.options.plugins && categoryChartInstance.options.plugins.legend) {
-        categoryChartInstance.options.plugins.legend.labels.color = legendColor;
-      }
-      categoryChartInstance.update();
-    }
-
-    if (activityChartInstance) {
-      if (activityChartInstance.options.scales) {
-        if (activityChartInstance.options.scales.x) {
-          activityChartInstance.options.scales.x.ticks.color = ticksColor;
-        }
-        if (activityChartInstance.options.scales.y) {
-          activityChartInstance.options.scales.y.ticks.color = ticksColor;
-          activityChartInstance.options.scales.y.grid.color = gridColor;
-        }
-      }
-      activityChartInstance.update();
-    }
+  if (donutChartInstance) {
+    donutChartInstance.options.plugins.legend.labels.color = textColor;
+    donutChartInstance.update();
   }
+}
 
-  // Écoute de l'événement de basculement de thème
-  window.addEventListener('shieldnet-theme-changed', (e) => {
-    updateChartsForTheme(e.detail.isLight);
-  });
+window.addEventListener('shieldnet-theme-changed', function(e) {
+  updateChartsForTheme(e.detail.isLight);
+});
 
-  // Initialisation Graphiques
-  document.addEventListener('DOMContentLoaded', () => {
-    const isLightInitial = document.documentElement.classList.contains('light-mode');
-    const legendColor = isLightInitial ? '#0f172a' : '#94a3b8';
-    const ticksColor = isLightInitial ? '#334155' : '#64748b';
-    const gridColor = isLightInitial ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.05)';
+document.addEventListener('DOMContentLoaded', function() {
+  const isLight = document.documentElement.classList.contains('light-mode');
+  const textColor = isLight ? '#475569' : '#94a3b8';
+  const gridColor = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)';
 
-    // 1. Chart Donut Catégories
-    const catCtx = document.getElementById('categoryChart');
-    if (catCtx) {
-      categoryChartInstance = new Chart(catCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Fraude', 'Démarchage', 'Arnaque Fin.', 'Phishing', 'Robocalls', 'Autre'],
-          datasets: [{
-            data: [{{ cat_fraud|default:12 }}, {{ cat_telemarketing|default:8 }}, {{ cat_financial_scam|default:5 }}, {{ cat_phishing|default:4 }}, {{ cat_robocall|default:7 }}, {{ cat_other|default:2 }}],
-            backgroundColor: ['#ef4444', '#f59e0b', '#dc2626', '#3b82f6', '#8b5cf6', '#64748b'],
-            borderWidth: 0,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                color: legendColor,
-                font: { family: 'Inter', size: 11, weight: '600' },
-                boxWidth: 12,
-                padding: 10
-              }
-            }
-          },
-          cutout: '70%'
-        }
-      });
-    }
+  const trendCtx = document.getElementById('trafficTrendChart');
+  if (trendCtx) {
+    const trendLabels = {{ trend_labels_json|default:"[]"|safe }};
+    const trendReports = {{ trend_reports_json|default:"[]"|safe }};
+    const trendBlocked = {{ trend_blocked_json|default:"[]"|safe }};
 
-    // 2. Chart Courbe d'activité
-    const actCtx = document.getElementById('activityChart');
-    if (actCtx) {
-      activityChartInstance = new Chart(actCtx, {
-        type: 'line',
-        data: {
-          labels: {{ activity_dates|safe|default:"['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\\'hui']" }},
-          datasets: [{
-            label: 'Signalements',
-            data: {{ activity_counts|safe|default:"[4, 8, 5, 12, 9, 14, 11]" }},
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true,
-            tension: 0.4,
+    trendChartInstance = new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: trendLabels.length ? trendLabels : ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'Hier', 'Auj.'],
+        datasets: [
+          {
+            label: 'Signalements Reçus',
+            data: trendReports.length ? trendReports : [12, 19, 14, 25, 22, 30, 28],
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.08)',
             borderWidth: 2,
-            pointRadius: 3,
-            pointBackgroundColor: '#60a5fa'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: { color: ticksColor, font: { family: 'Inter', size: 10, weight: '600' } }
-            },
-            y: {
-              grid: { color: gridColor },
-              ticks: { color: ticksColor, font: { family: 'Inter', size: 10, weight: '600' }, stepSize: 5 }
-            }
+            tension: 0.3,
+            fill: true,
+            pointRadius: 3
           },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    // Lancement du compte à rebours
-    startLiveTickerCountdown();
-  });
-
-  // Synchronisation dynamique des graphiques lors du basculement de thème
-  window.addEventListener('shieldnet-theme-changed', (e) => {
-    const isLight = e.detail && e.detail.isLight;
-    const legendColor = isLight ? '#0f172a' : '#94a3b8';
-    const ticksColor = isLight ? '#334155' : '#64748b';
-    const gridColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.05)';
-
-    if (categoryChartInstance && categoryChartInstance.options && categoryChartInstance.options.plugins && categoryChartInstance.options.plugins.legend) {
-      categoryChartInstance.options.plugins.legend.labels.color = legendColor;
-      categoryChartInstance.update();
-    }
-
-    if (activityChartInstance && activityChartInstance.options && activityChartInstance.options.scales) {
-      if (activityChartInstance.options.scales.x && activityChartInstance.options.scales.x.ticks) {
-        activityChartInstance.options.scales.x.ticks.color = ticksColor;
-      }
-      if (activityChartInstance.options.scales.y) {
-        if (activityChartInstance.options.scales.y.ticks) {
-          activityChartInstance.options.scales.y.ticks.color = ticksColor;
-        }
-        if (activityChartInstance.options.scales.y.grid) {
-          activityChartInstance.options.scales.y.grid.color = gridColor;
-        }
-      }
-      activityChartInstance.update();
-    }
-  });
-
-  // Triage Rapide AJAX
-  function executeTriage(reportId, action) {
-    const csrftoken = getCookie('csrftoken');
-    fetch('/admin/operations/triage/action/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken
+          {
+            label: 'Numéros Bloqués',
+            data: trendBlocked.length ? trendBlocked : [8, 15, 11, 18, 19, 24, 21],
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.08)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            pointRadius: 3
+          }
+        ]
       },
-      body: JSON.stringify({ report_id: reportId, action: action })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        showSocToast(data.message, action === 'escalate_block' ? 'error' : 'success');
-        const row = document.getElementById(`triage-row-${reportId}`);
-        if (row) {
-          const badgeCell = row.cells[4];
-          if (data.is_blocked) {
-            badgeCell.innerHTML = '<span class="badge-critical">Bloqué</span>';
-          } else if (data.is_whitelisted) {
-            badgeCell.innerHTML = '<span class="badge-safe">Blanchi</span>';
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: textColor, boxWidth: 12, font: { size: 12 } }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
+          y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } }, beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  const donutCtx = document.getElementById('categoryDonutChart');
+  if (donutCtx) {
+    const catLabels = {{ category_labels_json|default:"[]"|safe }};
+    const catData = {{ category_counts_json|default:"[]"|safe }};
+
+    donutChartInstance = new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: catLabels.length ? catLabels : ['Fraude', 'Démarchage', 'Phishing', 'Robocall'],
+        datasets: [{
+          data: catData.length ? catData : [45, 25, 20, 10],
+          backgroundColor: ['#dc2626', '#f59e0b', '#1d4ed8', '#64748b'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { color: textColor, boxWidth: 12, font: { size: 11 } }
           }
         }
-      } else {
-        showSocToast(data.error || 'Erreur lors de l\'action.', 'error');
-      }
-    })
-    .catch(() => {
-      showSocToast('Erreur de communication avec le serveur.', 'error');
-    });
-  }
-
-  // Diagnostic Sandbox
-  function runSandboxDiagnostic() {
-    const input = document.getElementById('sandbox-phone-input');
-    const phone = input.value.trim();
-    if (!phone) {
-      showSocToast('Veuillez entrer un numéro de téléphone.', 'error');
-      return;
-    }
-    currentTestedNumber = phone;
-
-    fetch(`/admin/operations/sandbox/check/?phone_number=${encodeURIComponent(phone)}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.error) {
-        showSocToast(data.error, 'error');
-        return;
-      }
-      const resBox = document.getElementById('sandbox-result');
-      resBox.style.display = 'block';
-
-      document.getElementById('sb-masked-num').textContent = data.masked_number || data.phone_number;
-      document.getElementById('sb-hash').textContent = data.phone_hash;
-      document.getElementById('sb-score').textContent = `${data.risk_score} / 100`;
-      document.getElementById('sb-category').textContent = data.category_display || data.category;
-      document.getElementById('sb-reports').textContent = `${data.reports_count} signalements / ${data.safe_reports_count} avis légitimes`;
-
-      const chip = document.getElementById('sb-status-chip');
-      chip.textContent = data.status;
-      chip.className = data.is_blocked ? 'badge-critical' : (data.is_whitelisted ? 'badge-safe' : 'badge-warning');
-
-      const anomBox = document.getElementById('sb-anomalies-box');
-      if (data.anomalies && data.anomalies.length > 0) {
-        anomBox.style.display = 'block';
-        anomBox.innerHTML = `<strong>Anomalies heuristiques :</strong> ${data.anomalies.join(' &bull; ')}`;
-      } else {
-        anomBox.style.display = 'none';
-      }
-
-      // Traitement IA ShieldNet
-      const aiRow = document.getElementById('sb-ai-badge-row');
-      if (data.ai) {
-        aiRow.style.display = 'flex';
-        const vEl = document.getElementById('sb-ai-verdict');
-        vEl.textContent = data.ai.verdict_label;
-        if (data.ai.verdict === 'FAUX_POSITIF_CONFIRME' || data.ai.verdict === 'FAUX_POSITIF_PROBABLE') {
-          vEl.className = 'badge-safe';
-        } else if (data.ai.verdict === 'CYBER_MENACE_CRITIQUE' || data.ai.verdict === 'FRAUDE_SUSPECTEE') {
-          vEl.className = 'badge-critical';
-        } else if (data.ai.verdict === 'NUMERO_LEGITIME') {
-          vEl.className = 'soc-pill soc-pill-blue';
-        } else {
-          vEl.className = 'badge-warning';
-        }
-        document.getElementById('sb-ai-fp-pct').textContent = `Indice faux-positif : ${data.ai.false_positive_confidence}% | Risque IA : ${data.ai.composite_risk_score}/100`;
-      } else {
-        aiRow.style.display = 'none';
-      }
-
-      showSocToast('Diagnostic IA & heuristique achevé.', 'info');
-    })
-    .catch(() => {
-      showSocToast('Erreur lors de l\'appel au moteur sandbox.', 'error');
-    });
-  }
-
-  // Action Sandbox
-  function applySandboxAction(action) {
-    if (!currentTestedNumber) return;
-    const csrftoken = getCookie('csrftoken');
-    fetch('/admin/operations/sandbox/action/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken
-      },
-      body: JSON.stringify({ phone_number: currentTestedNumber, action: action })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        showSocToast(data.message, action === 'block' ? 'error' : 'success');
-        runSandboxDiagnostic();
-      } else {
-        showSocToast(data.error || 'Erreur lors de l\'action.', 'error');
       }
     });
   }
-
-  // Actions Maintenance Globale
-  function runConsensusAudit() {
-    showSocToast('Balayage algorithmique du consensus en cours...', 'info');
-    fetch('/admin/operations/consensus/', {
-      method: 'POST',
-      headers: { 'X-CSRFToken': getCookie('csrftoken') }
-    })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        showSocToast(`Consensus terminé : ${d.rehabilitated_count} faux-positifs réhabilités.`, 'success');
-      } else {
-        showSocToast(d.error || 'Erreur consensus.', 'error');
-      }
-    });
-  }
-
-  function runPurgeJunk() {
-    if (!confirm('Confirmez-vous la purge des signalements orphelins obsolètes (> 90 jours) ?')) return;
-    fetch('/admin/operations/purge/', {
-      method: 'POST',
-      headers: { 'X-CSRFToken': getCookie('csrftoken') }
-    })
-    .then(r => r.json())
-    .then(d => {
-      if (d.success) {
-        showSocToast(`Purge réussie : ${d.purged_count} enregistrements nettoyés.`, 'success');
-      } else {
-        showSocToast(d.error || 'Erreur de purge.', 'error');
-      }
-    });
-  }
-
-  // Télémétrie en Direct
-  function fetchLiveTelemetry() {
-    fetch('/admin/operations/telemetry/live/')
-    .then(r => r.json())
-    .then(d => {
-      const kpiBlocked = document.getElementById('kpi-blocked-val');
-      if (kpiBlocked) kpiBlocked.textContent = d.kpi_blocked;
-      const kpiWhite = document.getElementById('kpi-whitelisted-val');
-      if (kpiWhite) kpiWhite.textContent = d.kpi_whitelisted;
-      const kpiRep = document.getElementById('kpi-reports-val');
-      if (kpiRep) kpiRep.textContent = d.kpi_reports;
-      const resVal = document.getElementById('resilience-val');
-      if (resVal) resVal.textContent = `${d.resilience_score}%`;
-      const tickerText = document.getElementById('live-ticker-text');
-      if (tickerText && d.latest_event) {
-        tickerText.innerHTML = `<strong>[${d.timestamp}]</strong> ${d.latest_event}`;
-      }
-    });
-  }
-
-  function startLiveTickerCountdown() {
-    if (liveStreamInterval) clearInterval(liveStreamInterval);
-    countdownSec = 30;
-    liveStreamInterval = setInterval(() => {
-      countdownSec--;
-      const el = document.getElementById('live-countdown');
-      if (el) el.textContent = `${countdownSec}s`;
-      if (countdownSec <= 0) {
-        countdownSec = 30;
-        fetchLiveTelemetry();
-      }
-    }, 1000);
-  }
-
-  function toggleLiveStream() {
-    const btn = document.getElementById('live-stream-btn');
-    if (liveStreamInterval) {
-      clearInterval(liveStreamInterval);
-      liveStreamInterval = null;
-      btn.classList.add('paused');
-      btn.innerHTML = '<span>En Pause</span>';
-      showSocToast('Télémétrie automatique suspendue.', 'info');
-    } else {
-      btn.classList.remove('paused');
-      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> <span>Actif</span>';
-      startLiveTickerCountdown();
-      showSocToast('Télémétrie automatique réactivée.', 'success');
-    }
-  }
+});
 </script>
 {% endblock %}

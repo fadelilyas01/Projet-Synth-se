@@ -196,3 +196,59 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"[{self.source}] {self.action} par {self.user or 'Système'} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
+
+
+class CountryChoices(models.TextChoices):
+    CANADA = 'CA', 'Canada'
+    USA = 'US', 'États-Unis'
+
+class UserProfile(models.Model):
+    """
+    Profil régional et juridictionnel étendu associé à un compte utilisateur.
+    Permet d'appliquer les réglementations locales (Loi 25 QC, CRTC, TCPA FCC)
+    et de localiser les utilisateurs dans les interfaces d'administration Web et Mobile.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    country = models.CharField(
+        max_length=2,
+        choices=CountryChoices.choices,
+        default=CountryChoices.CANADA,
+        db_index=True,
+        help_text="Pays de résidence de l'utilisateur (CA: Canada, US: États-Unis)"
+    )
+    province_or_state = models.CharField(
+        max_length=50,
+        default='QC',
+        db_index=True,
+        help_text="Province/Territoire canadien (ex: QC, ON) ou État américain (ex: NY, CA)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Profil Régional Utilisateur"
+        verbose_name_plural = "Profils Régionaux Utilisateurs"
+        indexes = [
+            models.Index(fields=['country', 'province_or_state'], name='idx_profile_region'),
+        ]
+
+    def __str__(self):
+        country_display = "Canada (CA)" if self.country == 'CA' else "États-Unis (US)"
+        return f"{self.user.username} [{country_display} - {self.province_or_state}]"
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    """
+    Garantit que chaque utilisateur Django dispose systématiquement
+    d'un profil régional UserProfile associé dès sa création.
+    """
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+    else:
+        if hasattr(instance, 'profile'):
+            instance.profile.save()
+

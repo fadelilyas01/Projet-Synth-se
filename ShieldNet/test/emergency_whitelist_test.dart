@@ -22,6 +22,7 @@ class MockDatabaseHelper implements DatabaseHelper {
     ),
     EmergencyContact(
       phoneHash: 'hash_811',
+      
       rawNumber: '811',
       label: 'Info-Santé / Info-Social Québec',
       isSystemCritical: true,
@@ -53,6 +54,7 @@ class MockDatabaseHelper implements DatabaseHelper {
     _inMemoryContacts.add(contact);
     return contact;
   }
+
 
   @override
   Future<bool> removeEmergencyContact(String phoneHash) async {
@@ -141,10 +143,6 @@ void main() {
     });
 
     testWidgets('Rendu de EmergencyWhitelistPage avec badges Système et bouton d\'ajout', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
       await tester.pumpWidget(
         ProviderScope(
           overrides: [

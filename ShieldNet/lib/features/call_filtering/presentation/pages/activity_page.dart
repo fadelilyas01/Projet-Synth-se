@@ -101,85 +101,92 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
         builder: (ctx, setModalState) {
           final l10n = AppLocalizations.of(context);
           return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n?.blockAndReport ?? 'Bloquer & Signaler',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 24,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n?.blockAndReport ?? 'Bloquer & Signaler',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.pop(ctx)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  CryptoUtils.maskPhoneNumber(rawNumber),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.accentRed),
-                ),
-                const SizedBox(height: 16),
-                Text(l10n?.reportReason ?? 'Motif du signalement :', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildChoiceChip(l10n?.categoryScam ?? 'Arnaque', 'fraud', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
-                    _buildChoiceChip(l10n?.categoryTelemarketing ?? 'Démarchage', 'telemarketing', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
-                    _buildChoiceChip(l10n?.categoryPhishing ?? 'Phishing', 'phishing', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
-                    _buildChoiceChip(l10n?.categoryRobocall ?? 'Automate / Silence', 'robocall', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: isSubmitting
-                      ? null
-                      : () async {
-                          setModalState(() => isSubmitting = true);
-                          final messenger = ScaffoldMessenger.of(context);
-                          final navigator = Navigator.of(ctx);
-                          final result = await ref.read(blacklistProvider.notifier).reportSpam(
-                            rawPhoneNumber: rawNumber,
-                            category: selectedCategory,
-                          );
-
-                          navigator.pop();
-                          result.fold(
-                            (failure) {
-                              messenger.showSnackBar(
-                                SnackBar(content: Text(failure.message), backgroundColor: AppTheme.accentRed),
-                              );
-                            },
-                            (_) async {
-                              await CitizenImpactService.incrementReportsCount();
-                              ref.read(blacklistControllerProvider.notifier).loadBlacklist();
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n?.reportSuccessMessage ?? 'Numéro bloqué et signalé avec succès.'),
-                                  backgroundColor: AppTheme.accentGreen,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accentRed,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.pop(ctx)),
+                    ],
                   ),
-                  child: isSubmitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : Text(l10n?.btnBlockThisNumber ?? 'Bloquer ce numéro', style: const TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    CryptoUtils.maskPhoneNumber(rawNumber),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.accentRed),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n?.reportReason ?? 'Motif du signalement :', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildChoiceChip(l10n?.categoryScam ?? 'Arnaque', 'fraud', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
+                      _buildChoiceChip(l10n?.categoryTelemarketing ?? 'Démarchage', 'telemarketing', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
+                      _buildChoiceChip(l10n?.categoryPhishing ?? 'Phishing', 'phishing', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
+                      _buildChoiceChip(l10n?.categoryRobocall ?? 'Automate / Silence', 'robocall', selectedCategory, (cat) => setModalState(() => selectedCategory = cat)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: isSubmitting
+                        ? null
+                        : () async {
+                            setModalState(() => isSubmitting = true);
+                            final messenger = ScaffoldMessenger.of(context);
+                            final navigator = Navigator.of(ctx);
+                            final result = await ref.read(blacklistProvider.notifier).reportSpam(
+                              rawPhoneNumber: rawNumber,
+                              category: selectedCategory,
+                            );
+
+                            navigator.pop();
+                            result.fold(
+                              (failure) {
+                                messenger.showSnackBar(
+                                  SnackBar(content: Text(failure.message), backgroundColor: AppTheme.accentRed),
+                                );
+                              },
+                              (_) async {
+                                await CitizenImpactService.incrementReportsCount();
+                                ref.read(blacklistControllerProvider.notifier).loadBlacklist();
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n?.reportSuccessMessage ?? 'Numéro bloqué et signalé avec succès.'),
+                                    backgroundColor: AppTheme.accentGreen,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.accentRed,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: isSubmitting
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : Text(l10n?.btnBlockThisNumber ?? 'Bloquer ce numéro', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -277,81 +284,83 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
         final catColor = _getCategoryColor(item.category);
         return Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: catColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      item.category.toUpperCase(),
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: catColor),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                item.maskedNumber.isNotEmpty ? item.maskedNumber : (l10n?.disputeProtectedNumber ?? 'Numéro protégé'),
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.accentRed),
-                  const SizedBox(width: 6),
-                  Text(
-                    l10n?.disputeRiskScore(item.riskScore, item.reportsCount) ?? 'Score de risque : ${item.riskScore}% (${item.reportsCount} signalement(s))',
-                    style: const TextStyle(fontSize: 13, color: AppTheme.accentRed, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  l10n?.disputeFilteredNotice ?? 'Ce numéro est actuellement filtré par ShieldNet. S\'il s\'agit d\'un médecin, d\'un livreur ou d\'un proche légitime, vous pouvez contester ce blocage pour accélérer sa réhabilitation.',
-                  style: const TextStyle(fontSize: 13, height: 1.4),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: catColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      icon: const Icon(Icons.verified_outlined, size: 18, color: AppTheme.accentGreen),
-                      label: Text(
-                        l10n?.disputeBtnContest ?? 'Contester (Faux positif)',
-                        style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                      child: Text(
+                        item.category.toUpperCase(),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: catColor),
                       ),
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        _showContestModal(context, item);
-                      },
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  item.maskedNumber.isNotEmpty ? item.maskedNumber : (l10n?.disputeProtectedNumber ?? 'Numéro protégé'),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.accentRed),
+                    const SizedBox(width: 6),
+                    Text(
+                      l10n?.disputeRiskScore(item.riskScore, item.reportsCount) ?? 'Score de risque : ${item.riskScore}% (${item.reportsCount} signalement(s))',
+                      style: const TextStyle(fontSize: 13, color: AppTheme.accentRed, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
-              ),
-            ],
+                  child: Text(
+                    l10n?.disputeFilteredNotice ?? 'Ce numéro est actuellement filtré par ShieldNet. S\'il s\'agit d\'un médecin, d\'un livreur ou d\'un proche légitime, vous pouvez contester ce blocage pour accélérer sa réhabilitation.',
+                    style: const TextStyle(fontSize: 13, height: 1.4),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon: const Icon(Icons.verified_outlined, size: 18, color: AppTheme.accentGreen),
+                        label: Text(
+                          l10n?.disputeBtnContest ?? 'Contester (Faux positif)',
+                          style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _showContestModal(context, item);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -379,19 +388,20 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
               top: 24,
               bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n?.disputeModalTitle ?? 'Contestation de Faux-Positif',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n?.disputeModalTitle ?? 'Contestation de Faux-Positif',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded),
                       onPressed: () => Navigator.pop(ctx),
@@ -499,11 +509,12 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                 ),
               ],
             ),
-          );
-        },
-      ),
-    );
-  }
+          ),
+        );
+      },
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

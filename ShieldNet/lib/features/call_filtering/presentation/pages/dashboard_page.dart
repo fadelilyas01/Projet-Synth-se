@@ -291,12 +291,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              width: 32,
+              height: 32,
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: AppTheme.primaryColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.shield_outlined, size: 20, color: AppTheme.primaryColor),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.asset(
+                  'assets/images/shieldnet_logo.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.shield, size: 20, color: AppTheme.primaryColor),
+                ),
+              ),
             ),
             const SizedBox(width: 10),
             const Text('ShieldNet', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5)),

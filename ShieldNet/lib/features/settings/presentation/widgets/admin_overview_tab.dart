@@ -92,7 +92,7 @@ class AdminOverviewTab extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1.6,
+          childAspectRatio: 1.38,
           children: [
             _buildStatBox('Numéros Bloqués', '${stats?['total_blocked'] ?? 0}', AppTheme.accentRed, Icons.block_rounded, cardBg, borderColor),
             _buildStatBox('Numéros Blanchis', '${stats?['total_whitelisted'] ?? 0}', AppTheme.accentGreen, Icons.verified_user_rounded, cardBg, borderColor),
@@ -101,6 +101,123 @@ class AdminOverviewTab extends ConsumerWidget {
             _buildStatBox('Avis Légitimes', '${stats?['total_safe_reports'] ?? 0}', Colors.teal, Icons.thumb_up_alt_rounded, cardBg, borderColor),
             _buildStatBox('Auto-Consensus', '${stats?['total_auto_consensus'] ?? 0}', Colors.deepPurpleAccent, Icons.how_to_reg_rounded, cardBg, borderColor),
           ],
+        ),
+        const SizedBox(height: 24),
+
+        // Répartition Régionale de la Flotte
+        const Text('RÉPARTITION GÉOGRAPHIQUE DES ABONNÉS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.1)),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.public_rounded, color: AppTheme.primaryColor, size: 22),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text('Juridictions & Régions Actives', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(color: AppTheme.primaryColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
+                    child: const Text('Conformité Active', style: TextStyle(color: AppTheme.primaryColor, fontSize: 10, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF0284C7).withValues(alpha: 0.25)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('🇨🇦 Canada', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text(
+                                '${(stats?['users_by_country'] as Map?)?['CA'] ?? 0}',
+                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF0284C7)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          const Text('Loi 25 QC • LPRPDE / CRTC', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.25)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('🇺🇸 États-Unis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text(
+                                '${(stats?['users_by_country'] as Map?)?['US'] ?? 0}',
+                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF10B981)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          const Text('TCPA • FCC STIR/SHAKEN • CCPA', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (stats?['users_by_province'] is List && (stats?['users_by_province'] as List).isNotEmpty) ...[
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 10),
+                const Text('Top Provinces & États :', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: ((stats!['users_by_province'] as List)).map((item) {
+                    final prov = item['province_or_state'] ?? '';
+                    final country = item['country'] ?? 'CA';
+                    final count = item['total'] ?? item['count'] ?? 1;
+                    final flag = country == 'CA' ? '🇨🇦' : '🇺🇸';
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: Text(
+                        '$flag $prov : $count',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ],
+          ),
         ),
         const SizedBox(height: 24),
 
@@ -246,11 +363,24 @@ class AdminOverviewTab extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
+              Flexible(
+                child: Text(
+                  value,
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               Icon(icon, color: color, size: 20),
             ],
           ),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

@@ -11,6 +11,11 @@ class UserModel {
   final bool isStaff;
   final bool isSuperuser;
   final String role;
+  final String country;
+  final String provinceOrState;
+  final String? countryName;
+  final String? provinceName;
+  final Map<String, dynamic>? complianceNorm;
 
   UserModel({
     required this.id,
@@ -19,6 +24,11 @@ class UserModel {
     this.isStaff = false,
     this.isSuperuser = false,
     this.role = 'CITIZEN',
+    this.country = 'CA',
+    this.provinceOrState = 'QC',
+    this.countryName,
+    this.provinceName,
+    this.complianceNorm,
   });
 
   bool get isAdmin => isStaff || isSuperuser || role == 'ADMIN';
@@ -26,11 +36,51 @@ class UserModel {
   bool get isManager => (role == 'MANAGER' || isStaff) && !isSuperuser && role != 'ADMIN';
   bool get canModerate => isAdmin || isManager;
 
+  String get countryFlag => country == 'CA' ? '🇨🇦' : (country == 'US' ? '🇺🇸' : '');
+  String get resolvedCountryName => countryName ?? (country == 'CA' ? 'Canada' : 'États-Unis');
+  String get resolvedProvinceName =>
+      provinceName ?? (country == 'CA' && provinceOrState == 'QC' ? 'Québec' : provinceOrState);
+  String get normTitle =>
+      complianceNorm?['norm_name'] as String? ??
+      (country == 'CA' && provinceOrState == 'QC'
+          ? 'Loi 25 du Québec'
+          : (country == 'CA' ? 'LPRPDE / PIPEDA & LCAP' : 'TCPA & FCC'));
+
+  UserModel copyWith({
+    int? id,
+    String? email,
+    String? name,
+    bool? isStaff,
+    bool? isSuperuser,
+    String? role,
+    String? country,
+    String? provinceOrState,
+    String? countryName,
+    String? provinceName,
+    Map<String, dynamic>? complianceNorm,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      isStaff: isStaff ?? this.isStaff,
+      isSuperuser: isSuperuser ?? this.isSuperuser,
+      role: role ?? this.role,
+      country: country ?? this.country,
+      provinceOrState: provinceOrState ?? this.provinceOrState,
+      countryName: countryName ?? this.countryName,
+      provinceName: provinceName ?? this.provinceName,
+      complianceNorm: complianceNorm ?? this.complianceNorm,
+    );
+  }
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final staff = json['is_staff'] as bool? ?? false;
     final superuser = json['is_superuser'] as bool? ?? false;
     final rawRole = json['role'] as String?;
     final resolvedRole = rawRole ?? (superuser ? 'ADMIN' : (staff ? 'MANAGER' : 'CITIZEN'));
+    final country = (json['country'] as String? ?? 'CA').toUpperCase();
+    final prov = (json['province_or_state'] as String? ?? 'QC').toUpperCase();
 
     return UserModel(
       id: json['id'] as int,
@@ -39,6 +89,11 @@ class UserModel {
       isStaff: staff,
       isSuperuser: superuser,
       role: resolvedRole,
+      country: country,
+      provinceOrState: prov,
+      countryName: json['country_name'] as String?,
+      provinceName: json['province_name'] as String?,
+      complianceNorm: json['compliance_norm'] as Map<String, dynamic>?,
     );
   }
 
@@ -49,6 +104,11 @@ class UserModel {
     'is_staff': isStaff,
     'is_superuser': isSuperuser,
     'role': role,
+    'country': country,
+    'province_or_state': provinceOrState,
+    'country_name': countryName,
+    'province_name': provinceName,
+    'compliance_norm': complianceNorm,
   };
 }
 
@@ -104,6 +164,8 @@ class AuthService {
     required String email,
     required String password,
     String? name,
+    String? country,
+    String? provinceOrState,
   }) async {
     try {
       final response = await _dio.post(
@@ -112,6 +174,8 @@ class AuthService {
           'email': email.trim().toLowerCase(),
           'password': password,
           'name': name ?? '',
+          if (country != null) 'country': country,
+          if (provinceOrState != null) 'province_or_state': provinceOrState,
         },
       );
 
@@ -473,6 +537,60 @@ class AuthService {
       return (response.data as List).map((e) => e as Map<String, dynamic>).toList();
     }
     throw Exception('Impossible de récupérer les contestations légitimes.');
+  }
+
+  /// Met à jour la région et juridiction de l'utilisateur (Pays & Province/État)
+  Future<UserModel> updateRegion({
+    required String country,
+    required String provinceOrState,
+  }) async {
+    final token = await getAccessToken();
+    final response = await _dio.post(
+      'auth/region/',
+      data: {
+        'country': country.trim().toUpperCase(),
+        'province_or_state': provinceOrState.trim().toUpperCase(),
+      },
+      options: Options(
+        headers: {
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+    if (response.statusCode == 200 && response.data != null) {
+      final data = response.data as Map<String, dynamic>;
+      final updatedUser = UserModel.fromJson(data['user'] as Map<String, dynamic>);
+      await _storage.write(key: _kUserData, value: jsonEncode(updatedUser.toJson()));
+      return updatedUser;
+    }
+    throw Exception('Échec de la mise à jour de la région.');
+  }
+
+  /// Récupère le détail des normes réglementaires pour une juridiction
+  Future<Map<String, dynamic>> getComplianceNorms({
+    required String country,
+    required String provinceOrState,
+  }) async {
+    final response = await _dio.get(
+      'compliance/norms/',
+      queryParameters: {
+        'country': country.trim().toUpperCase(),
+        'province': provinceOrState.trim().toUpperCase(),
+      },
+    );
+    if (response.statusCode == 200 && response.data != null) {
+      return response.data as Map<String, dynamic>;
+    }
+    throw Exception('Impossible de récupérer les normes réglementaires.');
+  }
+
+  /// Récupère la liste des pays et subdivisions supportées
+  Future<Map<String, dynamic>> getAvailableRegions() async {
+    final response = await _dio.get('compliance/regions/');
+    if (response.statusCode == 200 && response.data != null) {
+      return response.data as Map<String, dynamic>;
+    }
+    throw Exception('Impossible de récupérer les régions supportées.');
   }
 }
 

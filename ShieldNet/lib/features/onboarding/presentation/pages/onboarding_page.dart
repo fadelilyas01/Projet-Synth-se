@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shieldnet/core/theme/app_theme.dart';
+import 'package:shieldnet/core/services/regional_compliance_service.dart';
 import 'package:shieldnet/l10n/app_localizations.dart';
 import 'package:shieldnet/main.dart';
 
@@ -75,18 +76,22 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     child: const Icon(Icons.language_rounded, color: AppTheme.primaryColor, size: 24),
                   ),
                   const SizedBox(width: 12),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Bienvenue / Welcome',
-                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-                      ),
-                      Text(
-                        'Sélectionnez votre langue / Select language',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bienvenue / Welcome',
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Sélectionnez / Select language',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -196,7 +201,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   void _nextPage() {
     HapticFeedback.selectionClick();
-    if (_currentPage < 2) {
+    if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -211,7 +216,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final l10n = AppLocalizations.of(context);
     final currentLocale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isLastPage = _currentPage == 2;
+    final isLastPage = _currentPage == 3;
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.backgroundDark : AppTheme.backgroundLight,
@@ -224,28 +229,43 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Logo
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
+                  // Logo — Expanded pour éviter l'overflow
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.asset(
+                              'assets/images/shieldnet_logo.png',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.shield, color: AppTheme.primaryColor, size: 20),
+                            ),
+                          ),
                         ),
-                        child: const Icon(Icons.shield_outlined, color: AppTheme.primaryColor, size: 20),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ShieldNet',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          letterSpacing: -0.5,
-                          color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'ShieldNet',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                              letterSpacing: -0.5,
+                              color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
                   // Sélecteur de langue interactif FR / EN
@@ -257,6 +277,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildLangPill(
                           code: 'fr',
@@ -310,6 +331,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 children: [
                   _buildSlide1(isDark, l10n),
                   _buildSlide2(isDark, l10n),
+                  _buildSlideRegion(isDark, l10n),
                   _buildSlide3(isDark, l10n),
                 ],
               ),
@@ -324,7 +346,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   // Indicateurs à étapes
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(3, (index) {
+                    children: List.generate(4, (index) {
                       final isActive = index == _currentPage;
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
@@ -359,11 +381,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            isLastPage
-                                ? (l10n?.onboardingActivate ?? 'Activer la protection')
-                                : (l10n?.onboardingContinue ?? 'Continuer'),
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                          Flexible(
+                            child: Text(
+                              isLastPage
+                                  ? (l10n?.onboardingActivate ?? 'Activer la protection')
+                                  : (l10n?.onboardingContinue ?? 'Continuer'),
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           Icon(
@@ -437,32 +462,38 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accentRed.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentRed.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.call_end_rounded, color: AppTheme.accentRed, size: 20),
                           ),
-                          child: const Icon(Icons.call_end_rounded, color: AppTheme.accentRed, size: 20),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isEn ? 'Incoming call intercepted' : 'Appel entrant intercepté',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isEn ? 'Incoming call intercepted' : 'Appel entrant intercepté',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  isEn ? '2 minutes ago' : 'Il y a 2 minutes',
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
                             ),
-                            Text(
-                              isEn ? '2 minutes ago' : 'Il y a 2 minutes',
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -482,12 +513,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      '+1 (800) 555-0199',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                    Flexible(
+                      child: Text(
+                        '+1 (800) 555-0199',
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
-                      isEn ? 'Aggressive Robocall' : 'Démarchage agressif',
+                      isEn ? 'Robocall' : 'Démarchage',
                       style: const TextStyle(color: AppTheme.accentRed, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -589,6 +624,310 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
+              color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Diapositive Région & Juridiction : Demande de pays puis de province avec adaptation des normes
+  Widget _buildSlideRegion(bool isDark, AppLocalizations? l10n) {
+    final regionalState = ref.watch(regionalComplianceProvider);
+    final isEn = ref.watch(localeProvider).languageCode == 'en';
+    final cardBg = isDark ? AppTheme.surfaceDark : Colors.white;
+    final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
+    final norm = regionalState.complianceNorm;
+    final normName = norm['norm_name'] as String? ?? 'Norme de protection';
+    final normDesc = norm['description'] as String? ?? '';
+    final retentionDays = norm['data_retention_days'] as int? ?? 30;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Column(
+        children: [
+          const SizedBox(height: 8),
+
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.public_rounded, color: AppTheme.primaryColor, size: 20),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isEn ? 'Select your region' : 'Votre pays & territoire',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          Text(
+                            isEn ? 'Rules & privacy laws adapt dynamically' : 'Adaptation des normes et lois en direct',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Étape 1 : Choix du Pays (Canada ou États-Unis)
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          ref.read(regionalComplianceProvider.notifier).setRegion(
+                            country: 'CA',
+                            provinceOrState: 'QC',
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: regionalState.country == 'CA'
+                                ? AppTheme.primaryColor.withValues(alpha: 0.12)
+                                : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: regionalState.country == 'CA' ? AppTheme.primaryColor : borderColor,
+                              width: regionalState.country == 'CA' ? 2 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('🇨🇦', style: TextStyle(fontSize: 20)),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Canada',
+                                  style: TextStyle(
+                                    fontWeight: regionalState.country == 'CA' ? FontWeight.bold : FontWeight.w600,
+                                    fontSize: 13,
+                                    color: regionalState.country == 'CA' ? AppTheme.primaryColor : null,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          ref.read(regionalComplianceProvider.notifier).setRegion(
+                            country: 'US',
+                            provinceOrState: 'NY',
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: regionalState.country == 'US'
+                                ? AppTheme.primaryColor.withValues(alpha: 0.12)
+                                : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: regionalState.country == 'US' ? AppTheme.primaryColor : borderColor,
+                              width: regionalState.country == 'US' ? 2 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('🇺🇸', style: TextStyle(fontSize: 20)),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  isEn ? 'United States' : 'États-Unis',
+                                  style: TextStyle(
+                                    fontWeight: regionalState.country == 'US' ? FontWeight.bold : FontWeight.w600,
+                                    fontSize: 13,
+                                    color: regionalState.country == 'US' ? AppTheme.primaryColor : null,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Étape 2 : Choix Province ou État
+                Text(
+                  regionalState.country == 'CA'
+                      ? (isEn ? 'Province or Territory' : 'Province ou Territoire')
+                      : (isEn ? 'State' : 'État américain (State)'),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: regionalState.provinceOrState,
+                      isExpanded: true,
+                      icon: const Icon(Icons.arrow_drop_down_rounded),
+                      items: regionalState.country == 'CA'
+                          ? RegionalComplianceManager.canadianProvinces.entries.map((e) {
+                              return DropdownMenuItem<String>(
+                                value: e.key,
+                                child: Text(
+                                  e.key == 'QC' ? '${e.value} (Loi 25 QC)' : e.value,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: e.key == 'QC' ? FontWeight.bold : FontWeight.normal,
+                                    color: e.key == 'QC' ? AppTheme.primaryColor : null,
+                                  ),
+                                ),
+                              );
+                            }).toList()
+                          : RegionalComplianceManager.usStates.entries.map((e) {
+                              return DropdownMenuItem<String>(
+                                value: e.key,
+                                child: Text(
+                                  e.key == 'CA' ? '${e.value} (CCPA)' : e.value,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: e.key == 'CA' ? FontWeight.bold : FontWeight.normal,
+                                    color: e.key == 'CA' ? AppTheme.accentOrange : null,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                      onChanged: (newProv) {
+                        if (newProv != null) {
+                          HapticFeedback.selectionClick();
+                          ref.read(regionalComplianceProvider.notifier).setRegion(
+                            country: regionalState.country,
+                            provinceOrState: newProv,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Étape 3 : Carte d'Adaptation & Norme Appliquée
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: regionalState.country == 'CA' && regionalState.provinceOrState == 'QC'
+                        ? const Color(0xFF0284C7).withValues(alpha: 0.1)
+                        : AppTheme.primaryColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: regionalState.country == 'CA' && regionalState.provinceOrState == 'QC'
+                          ? const Color(0xFF0284C7).withValues(alpha: 0.3)
+                          : AppTheme.primaryColor.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.shield_outlined, size: 16, color: AppTheme.accentGreen),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              normName,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.accentGreen),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        normDesc,
+                        style: TextStyle(fontSize: 11, color: isDark ? Colors.white70 : Colors.black87, height: 1.35),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentCyan.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Rétention : $retentionDays jours',
+                              style: const TextStyle(color: AppTheme.accentCyan, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentGreen.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              isEn ? 'Immunity: 911 / 811 / 988' : 'Immunité : 911 / 811 / 988',
+                              style: const TextStyle(color: AppTheme.accentGreen, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            isEn ? 'Regional Protection & Standards' : 'Normes & Juridictions Locales',
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isEn
+                ? 'ShieldNet applies privacy regulations based on your location: Loi 25 in Québec, PIPEDA across Canada, or TCPA & CCPA in the United States.'
+                : 'ShieldNet adapte automatiquement son niveau de protection selon votre région : Loi 25 au Québec, LPRPDE/CRTC au Canada ou TCPA & CCPA aux États-Unis.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.45,
               color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
             ),
           ),

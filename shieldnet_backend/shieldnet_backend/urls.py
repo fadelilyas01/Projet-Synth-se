@@ -1,7 +1,8 @@
-from django.contrib import admin
+﻿from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from shield_api.public_views import help_center_view
 
 from shield_api.admin_views import (
     sandbox_check_view,
@@ -17,7 +18,7 @@ from shield_api.admin_views import (
 )
 
 urlpatterns = [
-    # Opérations & Outils Avancés de la Console Web SOC
+    # OpÃ©rations & Outils AvancÃ©s de la Console Web SOC
     path('admin/operations/triage/', admin_triage_dashboard_view, name='admin-triage-dashboard'),
     path('admin/operations/sandbox/', admin_sandbox_dashboard_view, name='admin-sandbox-dashboard'),
     path('admin/operations/sandbox/check/', sandbox_check_view, name='admin-sandbox-check'),
@@ -28,6 +29,11 @@ urlpatterns = [
     path('admin/operations/triage/action/', triage_action_view, name='admin-triage-action'),
     path('admin/operations/telemetry/live/', telemetry_live_view, name='admin-telemetry-live'),
     path('admin/operations/report/executive/', executive_report_view, name='admin-report-executive'),
+
+    # Centre d'Aide & FAQ Public (Web & Mobile)
+    path('', help_center_view, name='home'),
+    path('help/', help_center_view, name='help-center'),
+    path('faq/', help_center_view, name='faq-center'),
 
     # Administration Django Admin
     path('admin/', admin.site.urls),
@@ -49,3 +55,4 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
+

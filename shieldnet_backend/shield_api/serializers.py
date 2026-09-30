@@ -91,14 +91,26 @@ class BatchCheckRequestSerializer(serializers.Serializer):
         return list(set(cleaned))
 
 from django.contrib.auth.models import User
+from .models import UserProfile, CountryChoices
+
+from .services import RegionalComplianceService
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
+    province_or_state = serializers.SerializerMethodField()
+    country_name = serializers.SerializerMethodField()
+    province_name = serializers.SerializerMethodField()
+    compliance_norm = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'is_staff', 'is_superuser', 'role', 'date_joined']
+        fields = [
+            'id', 'email', 'name', 'is_staff', 'is_superuser', 'role',
+            'country', 'province_or_state', 'country_name', 'province_name',
+            'compliance_norm', 'date_joined'
+        ]
 
     def get_name(self, obj):
         full_name = f"{obj.first_name} {obj.last_name}".strip()
@@ -111,10 +123,36 @@ class UserSerializer(serializers.ModelSerializer):
             return 'MANAGER'
         return 'CITIZEN'
 
+    def get_country(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.country if profile else 'CA'
+
+    def get_province_or_state(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.province_or_state if profile else 'QC'
+
+    def get_country_name(self, obj):
+        country = self.get_country(obj)
+        return 'Canada' if country == 'CA' else ('États-Unis' if country == 'US' else country)
+
+    def get_province_name(self, obj):
+        country = self.get_country(obj)
+        prov = self.get_province_or_state(obj)
+        if country == 'CA':
+            return RegionalComplianceService.CANADIAN_PROVINCES.get(prov, prov)
+        return RegionalComplianceService.US_STATES.get(prov, prov)
+
+    def get_compliance_norm(self, obj):
+        country = self.get_country(obj)
+        prov = self.get_province_or_state(obj)
+        return RegionalComplianceService.get_compliance_for_region(country, prov)
+
 class UserRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=6)
     name = serializers.CharField(required=False, allow_blank=True, default='')
+    country = serializers.ChoiceField(choices=CountryChoices.choices, required=False, default=CountryChoices.CANADA)
+    province_or_state = serializers.CharField(max_length=50, required=False, default='QC')
 
     def validate_email(self, value):
         email_clean = value.strip().lower()
@@ -126,6 +164,8 @@ class UserRegisterSerializer(serializers.Serializer):
         email = validated_data['email']
         password = validated_data['password']
         name = validated_data.get('name', '').strip()
+        country = validated_data.get('country', 'CA').upper()
+        province_or_state = validated_data.get('province_or_state', 'QC').upper()
         first_name = name.split()[0] if name else ''
         last_name = ' '.join(name.split()[1:]) if len(name.split()) > 1 else ''
 
@@ -136,6 +176,10 @@ class UserRegisterSerializer(serializers.Serializer):
             first_name=first_name,
             last_name=last_name,
         )
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile.country = country
+        profile.province_or_state = province_or_state
+        profile.save()
         return user
 
 class EmailLoginSerializer(serializers.Serializer):
@@ -163,9 +207,16 @@ class GoogleLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
     id_token = serializers.CharField(required=False, allow_blank=True, default='')
+    country = serializers.ChoiceField(choices=CountryChoices.choices, required=False, default=CountryChoices.CANADA)
+    province_or_state = serializers.CharField(max_length=50, required=False, default='QC')
 
     def validate_email(self, value):
         return value.strip().lower()
+
+class UpdateUserRegionSerializer(serializers.Serializer):
+    country = serializers.ChoiceField(choices=CountryChoices.choices, required=False)
+    province_or_state = serializers.CharField(max_length=50, required=False)
+
 
 
 

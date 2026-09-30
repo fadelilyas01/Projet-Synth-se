@@ -915,4 +915,63 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminRefreshAll => 'Tout actualiser';
+
+  @override
+  String get sectionJurisdiction => 'JURIDICTION & CONFORMITÉ RÉGIONALE';
+
+  @override
+  String get regionSelectionTitle => 'Pays & Juridiction Régionale';
+
+  @override
+  String get regionSelectionSubtitle =>
+      'Application stricte des lois de protection de votre région';
+
+  @override
+  String get selectCountryPrompt => '1. SÉLECTIONNEZ VOTRE PAYS';
+
+  @override
+  String get selectProvincePrompt =>
+      '2. SÉLECTIONNEZ VOTRE PROVINCE / TERRITOIRE';
+
+  @override
+  String get selectStatePrompt => '2. SÉLECTIONNEZ VOTRE ÉTAT (STATE)';
+
+  @override
+  String get applyRegionBtn => 'Appliquer cette juridiction';
+
+  @override
+  String get onboardingRegionTitle => 'Normes & Juridictions Locales';
+
+  @override
+  String get onboardingRegionDesc =>
+      'ShieldNet adapte automatiquement son niveau de protection selon votre région : Loi 25 au Québec, LPRPDE/CRTC au Canada ou TCPA & CCPA aux États-Unis.';
+
+  @override
+  String get helpFaqTitle => 'Centre d\'Aide & FAQ';
+
+  @override
+  String get helpFaqSubtitle =>
+      'Questions fréquentes, confidentialité et documentation';
+
+  @override
+  String get openWebHelpBtn => 'Consulter le Centre d\'Assistance Web';
+
+  @override
+  String get webHelpNotice =>
+      'Accédez aux guides détaillés, politiques de confidentialité et contact support sur notre portail web.';
+
+  @override
+  String get searchFaqPlaceholder => 'Rechercher une question...';
+
+  @override
+  String get faqCategoryFiltering => 'Filtrage & Efficacité';
+
+  @override
+  String get faqCategoryPrivacy => 'Confidentialité & Données';
+
+  @override
+  String get faqCategoryEmergency => 'Numéros d\'Urgence & Faux Positifs';
+
+  @override
+  String get faqCategoryPermissions => 'Permissions Android';
 }

@@ -12,6 +12,9 @@ import '../../../../core/services/night_shield_service.dart';
 import '../../../../core/services/offline_sync_service.dart';
 import '../../../sms_inspector/presentation/pages/sms_inspector_page.dart';
 import 'emergency_whitelist_page.dart';
+import '../../../../core/services/regional_compliance_service.dart';
+import '../widgets/region_selection_sheet.dart';
+import 'faq_page.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -352,6 +355,112 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
+          // Juridiction & Conformité Régionale (Loi 25 QC, PIPEDA, TCPA, CCPA)
+          _buildSectionHeader(l10n?.sectionJurisdiction ?? 'JURIDICTION & CONFORMITÉ RÉGIONALE'),
+          _buildCard(
+            cardBg: cardBg,
+            borderColor: borderColor,
+            children: [
+              Consumer(
+                builder: (context, ref, _) {
+                  final regionalState = ref.watch(regionalComplianceProvider);
+                  final norm = regionalState.complianceNorm;
+                  final normName = norm['norm_name'] as String? ?? 'Norme de protection';
+                  final regulator = norm['regulator'] as String? ?? 'CRTC / FCC';
+                  final retentionDays = norm['data_retention_days'] as int? ?? 30;
+
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.12),
+                          child: Text(regionalState.countryFlag, style: const TextStyle(fontSize: 18)),
+                        ),
+                        title: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                '${regionalState.countryName} • ${regionalState.provinceName}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                regionalState.provinceOrState,
+                                style: const TextStyle(
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: Text(
+                          normName,
+                          style: const TextStyle(fontSize: 12, color: AppTheme.accentGreen, fontWeight: FontWeight.w600),
+                        ),
+                        trailing: ElevatedButton(
+                          onPressed: () => RegionSelectionSheet.show(context),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            backgroundColor: AppTheme.primaryColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text('Modifier', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Organisme de régulation', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    regulator,
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentCyan.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Rétention max: $retentionDays j',
+                                style: const TextStyle(color: AppTheme.accentCyan, fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
           // Espace modération pour les comptes administrateurs et gestionnaires
           if (user != null && user.canModerate) ...[
             _buildSectionHeader(user.isSuperAdmin ? (l10n?.sectionAdmin ?? 'ADMINISTRATION') : (l10n?.sectionModeration ?? 'GESTION & MODÉRATION')),
@@ -382,13 +491,60 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 16),
           ],
 
+          // Assistance, FAQ & Documentation Web — visible pour tous les utilisateurs
+          _buildSectionHeader('ASSISTANCE & DOCUMENTATION'),
+          _buildCard(
+            cardBg: cardBg,
+            borderColor: borderColor,
+            children: [
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.help_outline_rounded, color: AppTheme.primaryColor, size: 20),
+                ),
+                title: Text(
+                  l10n?.helpFaqTitle ?? 'Centre d\'Aide & FAQ',
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  l10n?.helpFaqSubtitle ?? 'Questions fréquentes, confidentialité et portail web',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HelpFaqPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
           // Informations de version et licence
           Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Text(
-                l10n?.appVersionFooter ?? 'ShieldNet v1.0.0 • Sécurité Télécom',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/shieldnet_logo.png',
+                    width: 32,
+                    height: 32,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n?.appVersionFooter ?? 'ShieldNet v1.0.0 • Sécurité Télécom',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
               ),
             ),
           ),

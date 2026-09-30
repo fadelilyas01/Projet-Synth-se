@@ -1,0 +1,1930 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title|safe }} — ShieldNet</title>
+  <meta name="description" content="Trouvez des réponses claires sur ShieldNet : blocage d'appels spams, confidentialité, numéros d'urgence et autorisations.">
+  <link rel="icon" type="image/png" href="{% static 'shield_api/img/favicon.png' %}">
+
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* ============================================================
+       TOKENS & VARIABLES THÈME
+    ============================================================ */
+    :root {
+      --color-bg:        #07090f;
+      --color-surface:   #0d1220;
+      --color-card:      #111827;
+      --color-border:    rgba(255, 255, 255, 0.08);
+      --color-text:      #f1f5f9;
+      --color-muted:     #94a3b8;
+      --color-primary:   #2563eb;
+      --color-primary-bg: rgba(37, 99, 235, 0.12);
+      --color-primary-bd: rgba(59, 130, 246, 0.35);
+      --color-green:     #10b981;
+      --color-green-bg:  rgba(16, 185, 129, 0.12);
+      --color-green-bd:  rgba(16, 185, 129, 0.35);
+      --shadow-card:     0 2px 8px rgba(0, 0, 0, 0.35);
+      --radius:          12px;
+      --radius-sm:       8px;
+    }
+
+    [data-theme="light"] {
+      --color-bg:        #f8fafc;
+      --color-surface:   #ffffff;
+      --color-card:      #ffffff;
+      --color-border:    #e2e8f0;
+      --color-text:      #0f172a;
+      --color-muted:     #64748b;
+      --color-primary:   #1d4ed8;
+      --color-primary-bg: rgba(37, 99, 235, 0.08);
+      --color-primary-bd: rgba(37, 99, 235, 0.25);
+      --color-green:     #059669;
+      --color-green-bg:  rgba(16, 185, 129, 0.08);
+      --color-green-bd:  rgba(16, 185, 129, 0.25);
+      --shadow-card:     0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.65;
+      font-size: 15px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* ============================================================
+       BARRE DE NAVIGATION (sticky)
+    ============================================================ */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background-color: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      backdrop-filter: blur(12px);
+    }
+
+    .navbar-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--color-text);
+      text-decoration: none;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .navbar-brand:hover {
+      text-decoration: none;
+      opacity: 0.9;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: contain;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .brand-logo-fallback {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background-color: var(--color-primary-bg);
+      border: 1px solid var(--color-primary-bd);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+    }
+
+    .brand-sep {
+      color: var(--color-border);
+      font-weight: 300;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .brand-section {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--color-border);
+      background-color: transparent;
+      border-radius: var(--radius-sm);
+      color: var(--color-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .btn-icon:hover {
+      background-color: var(--color-primary-bg);
+      border-color: var(--color-primary-bd);
+      color: var(--color-primary);
+    }
+
+    .btn-nav-support {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-nav-support:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-bg);
+    }
+
+    /* ============================================================
+       HERO & RECHERCHE
+    ============================================================ */
+    .hero {
+      padding: 56px 24px 44px;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--color-green);
+      background-color: var(--color-green-bg);
+      border: 1px solid var(--color-green-bd);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      font-size: clamp(28px, 4.5vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .hero-title strong {
+      color: var(--color-primary);
+    }
+
+    .hero-subtitle {
+      font-size: clamp(14px, 2vw, 16px);
+      color: var(--color-muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .search-container {
+      position: relative;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .search-icon-wrap {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-muted);
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 44px 14px 46px;
+      font-family: inherit;
+      font-size: 15px;
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      background-color: var(--color-card);
+      color: var(--color-text);
+      outline: none;
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-bg);
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--color-muted);
+      cursor: pointer;
+      display: none;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .search-clear-btn:hover {
+      color: var(--color-text);
+    }
+
+    /* ============================================================
+       ONGLETS DE CATÉGORIES
+    ============================================================ */
+    .tabs-section {
+      border-bottom: 1px solid var(--color-border);
+      background-color: var(--color-surface);
+      position: sticky;
+      top: 58px;
+      z-index: 100;
+    }
+
+    .tabs-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 16px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--color-muted);
+      font-size: 13.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-text);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-count {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background-color: var(--color-border);
+      color: var(--color-muted);
+    }
+
+    .tab-btn.active .tab-count {
+      background-color: var(--color-primary-bg);
+      color: var(--color-primary);
+    }
+
+    /* ============================================================
+       LAYOUT PRINCIPAL : SIDEBAR + CONTENU
+    ============================================================ */
+    .page-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 48px;
+      align-items: start;
+      flex: 1;
+    }
+
+    /* Sidebar de navigation */
+    .sidebar {
+      position: sticky;
+      top: 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      padding-left: 12px;
+    }
+
+    .sidebar-nav {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--color-muted);
+      font-size: 13.5px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .sidebar-link:hover {
+      background-color: var(--color-primary-bg);
+      color: var(--color-text);
+      text-decoration: none;
+    }
+
+    .sidebar-link.active {
+      background-color: var(--color-primary-bg);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .sidebar-link .link-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-box {
+      margin-top: 12px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      font-size: 12.5px;
+      color: var(--color-muted);
+      line-height: 1.5;
+    }
+
+    .sidebar-box strong {
+      color: var(--color-text);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Contenu FAQ */
+    .faq-content {
+      min-width: 0;
+    }
+
+    .category-block {
+      margin-bottom: 44px;
+      scroll-margin-top: 130px; /* Espace propre avec navbar + tabs sticky */
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .category-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-primary-bg);
+      border: 1px solid var(--color-primary-bd);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .category-meta {
+      min-width: 0;
+    }
+
+    .category-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--color-text);
+    }
+
+    .category-desc {
+      font-size: 13px;
+      color: var(--color-muted);
+      margin-top: 2px;
+    }
+
+    /* Accordéon items */
+    .faq-item {
+      background-color: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s;
+    }
+
+    .faq-item:hover {
+      border-color: var(--color-primary-bd);
+    }
+
+    .faq-item.is-open {
+      border-color: var(--color-primary);
+    }
+
+    .faq-question {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 20px;
+      background: none;
+      border: none;
+      color: var(--color-text);
+      font-size: 14.5px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .faq-question:hover {
+      background-color: var(--color-primary-bg);
+    }
+
+    .faq-question-text {
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .faq-chevron {
+      color: var(--color-muted);
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+
+    .faq-item.is-open .faq-chevron {
+      transform: rotate(180deg);
+      color: var(--color-primary);
+    }
+
+    .faq-answer {
+      display: none;
+      padding: 6px 20px 20px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .faq-item.is-open .faq-answer {
+      display: block;
+    }
+
+    .faq-answer p {
+      font-size: 14px;
+      color: var(--color-muted);
+      line-height: 1.75;
+      margin-top: 12px;
+    }
+
+    .faq-answer strong {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    .inline-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background-color: var(--color-primary-bg);
+      border: 1px solid var(--color-primary-bd);
+      color: #60a5fa;
+      vertical-align: middle;
+    }
+
+    .inline-tag.green {
+      background-color: var(--color-green-bg);
+      border-color: var(--color-green-bd);
+      color: var(--color-green);
+    }
+
+    .no-results {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--color-card);
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius);
+      margin-bottom: 30px;
+    }
+
+    .no-results-icon {
+      color: var(--color-muted);
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 12px;
+      display: block;
+    }
+
+    .no-results-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .no-results-text {
+      font-size: 13.5px;
+      color: var(--color-muted);
+    }
+
+    /* ============================================================
+       CARTE SUPPORT
+    ============================================================ */
+    .support-section {
+      max-width: 1100px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    .support-card {
+      background-color: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-card);
+    }
+
+    .support-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-primary-bg);
+      border: 1px solid var(--color-primary-bd);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .support-body {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .support-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .support-desc {
+      font-size: 13.5px;
+      color: var(--color-muted);
+      line-height: 1.55;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      background-color: var(--color-primary);
+      color: #ffffff;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+      text-decoration: none;
+      color: #ffffff;
+    }
+
+    /* ============================================================
+       PIED DE PAGE
+    ============================================================ */
+    .footer {
+      background-color: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      padding: 28px 24px;
+      margin-top: auto;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-muted);
+      font-size: 13px;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-btn-link {
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: var(--color-muted);
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.15s;
+    }
+
+    .footer-btn-link:hover {
+      color: var(--color-primary);
+      text-decoration: underline;
+    }
+
+    /* ============================================================
+       MODALES ACCESSIBLES (Support, Confidentialité, Conditions)
+    ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 620px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      transform: scale(0.96);
+      transition: transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      background: var(--color-card);
+      z-index: 10;
+    }
+
+    .modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-icon-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--color-primary-bg);
+      border: 1px solid var(--color-primary-bd);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    .modal-close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: var(--color-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .modal-close-btn:hover {
+      background: var(--color-primary-bg);
+      color: var(--color-text);
+      border-color: var(--color-primary-bd);
+    }
+
+    .modal-body {
+      padding: 24px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--color-muted);
+    }
+
+    .modal-body h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin: 18px 0 8px;
+    }
+
+    .modal-body h3:first-child {
+      margin-top: 0;
+    }
+
+    .modal-body p {
+      margin-bottom: 12px;
+    }
+
+    .modal-body strong {
+      color: var(--color-text);
+    }
+
+    .modal-body ul {
+      margin: 8px 0 16px 20px;
+    }
+
+    .modal-body li {
+      margin-bottom: 6px;
+    }
+
+    .support-options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .support-channel-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    .support-channel-info {
+      min-width: 0;
+    }
+
+    .support-channel-title {
+      font-weight: 600;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    .support-channel-val {
+      font-size: 13px;
+      color: var(--color-muted);
+      margin-top: 2px;
+      font-family: monospace;
+    }
+
+    .btn-action-sm {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+      border: 1px solid var(--color-border);
+      background: var(--color-card);
+      color: var(--color-text);
+    }
+
+    .btn-action-sm:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-bg);
+      text-decoration: none;
+    }
+
+    .btn-action-sm.primary {
+      background: var(--color-primary);
+      color: #ffffff;
+      border-color: var(--color-primary);
+    }
+
+    .btn-action-sm.primary:hover {
+      background: #1d4ed8;
+      color: #ffffff;
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 2000;
+    }
+
+    /* ============================================================
+       RESPONSIVE DESIGN
+    ============================================================ */
+    @media (max-width: 900px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 32px 20px 48px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .navbar-inner {
+        padding: 0 16px;
+      }
+
+      .brand-sep,
+      .brand-section {
+        display: none;
+      }
+
+      .hero {
+        padding: 36px 16px 28px;
+      }
+
+      .tabs-inner {
+        padding: 0 16px;
+      }
+
+      .page-layout {
+        padding: 24px 16px 40px;
+      }
+
+      .support-section {
+        padding: 0 16px;
+      }
+
+      .support-card {
+        padding: 22px 18px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .support-body {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+
+      .faq-question {
+        padding: 14px 16px;
+        font-size: 14px;
+      }
+
+      .faq-answer {
+        padding: 4px 16px 16px;
+      }
+
+      .support-channel-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .support-channel-card .btn-action-sm {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       BARRE DE NAVIGATION
+  ============================================================ -->
+  <nav class="navbar" role="navigation" aria-label="Navigation principale">
+    <div class="navbar-inner">
+      <a href="/help/" class="navbar-brand" title="Retour à l'accueil du Centre d'Aide">
+        <img
+          src="{% static 'shield_api/img/shieldnet_logo.png' %}"
+          alt="ShieldNet Logo"
+          class="brand-logo"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+        >
+        <span class="brand-logo-fallback" style="display:none;" aria-hidden="true">
+          <i data-lucide="shield" style="width:18px; height:18px;"></i>
+        </span>
+        <span class="brand-name">ShieldNet</span>
+        <span class="brand-sep" aria-hidden="true">/</span>
+        <span class="brand-section">{{ page_title|default:"Centre d'Assistance &amp; FAQ" }}</span>
+      </a>
+
+      <div class="navbar-actions">
+        <button class="btn-nav-support" onclick="openModal('modal-support')" title="Contacter le support">
+          <i data-lucide="headphones" style="width:15px; height:15px;"></i>
+          <span>Support</span>
+        </button>
+        <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()" title="Changer de thème" aria-label="Changer de thème">
+          <i data-lucide="sun" id="theme-icon" style="width:17px; height:17px;"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       SECTION HÉRO + RECHERCHE INSTANTANÉE
+  ============================================================ -->
+  <header class="hero" role="banner">
+    <div class="hero-label">
+      <i data-lucide="shield-check" style="width:13px; height:13px;"></i>
+      Protection &amp; Assistance Télécom
+    </div>
+    <h1 class="hero-title">Comment pouvons-nous<br><strong>vous aider ?</strong></h1>
+    <p class="hero-subtitle">
+      Retrouvez rapidement des explications simples sur le fonctionnement de ShieldNet,
+      la confidentialité de vos données et le réglage de vos protections.
+    </p>
+
+    <div class="search-container" role="search">
+      <span class="search-icon-wrap" aria-hidden="true">
+        <i data-lucide="search" style="width:18px; height:18px;"></i>
+      </span>
+      <input
+        type="search"
+        id="search-input"
+        class="search-input"
+        placeholder="Rechercher une question (ex: batterie, urgence, blocage)..."
+        oninput="handleSearch(this.value)"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Rechercher dans la FAQ"
+      >
+      <button id="search-clear" class="search-clear-btn" onclick="clearSearch()" title="Effacer la recherche">
+        <i data-lucide="x" style="width:16px; height:16px;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       ONGLETS DE NAVIGATION PAR CATÉGORIE
+  ============================================================ -->
+  <div class="tabs-section" role="tablist" aria-label="Catégories de la FAQ">
+    <div class="tabs-inner">
+      <button class="tab-btn active" data-cat="all" role="tab" aria-selected="true" onclick="switchTab('all', this)">
+        <i data-lucide="layout-grid" style="width:15px; height:15px;"></i>
+        Toutes les rubriques
+        <span class="tab-count">9</span>
+      </button>
+      <button class="tab-btn" data-cat="protection" role="tab" aria-selected="false" onclick="switchTab('protection', this)">
+        <i data-lucide="shield-check" style="width:15px; height:15px;"></i>
+        Protection des appels
+        <span class="tab-count">3</span>
+      </button>
+      <button class="tab-btn" data-cat="confidentialite" role="tab" aria-selected="false" onclick="switchTab('confidentialite', this)">
+        <i data-lucide="lock" style="width:15px; height:15px;"></i>
+        Confidentialité
+        <span class="tab-count">2</span>
+      </button>
+      <button class="tab-btn" data-cat="urgences" role="tab" aria-selected="false" onclick="switchTab('urgences', this)">
+        <i data-lucide="phone-call" style="width:15px; height:15px;"></i>
+        Urgences &amp; contestations
+        <span class="tab-count">2</span>
+      </button>
+      <button class="tab-btn" data-cat="autorisations" role="tab" aria-selected="false" onclick="switchTab('autorisations', this)">
+        <i data-lucide="smartphone" style="width:15px; height:15px;"></i>
+        Autorisations
+        <span class="tab-count">2</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MISE EN PAGE PRINCIPALE : SIDEBAR + FAQ
+  ============================================================ -->
+  <div class="page-layout">
+
+    <!-- SIDEBAR SOMMAIRE (Sticky sur Desktop) -->
+    <aside class="sidebar" aria-label="Sommaire de la page">
+      <p class="sidebar-title">Accès direct</p>
+      <ul class="sidebar-nav" role="list">
+        <li>
+          <a class="sidebar-link active" data-cat="protection" href="#protection" onclick="handleSidebarClick(event, 'protection')">
+            <i data-lucide="shield-check" class="link-icon"></i>
+            Protection des appels
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-link" data-cat="confidentialite" href="#confidentialite" onclick="handleSidebarClick(event, 'confidentialite')">
+            <i data-lucide="lock" class="link-icon"></i>
+            Confidentialité
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-link" data-cat="urgences" href="#urgences" onclick="handleSidebarClick(event, 'urgences')">
+            <i data-lucide="phone-call" class="link-icon"></i>
+            Urgences &amp; Erreurs
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-link" data-cat="autorisations" href="#autorisations" onclick="handleSidebarClick(event, 'autorisations')">
+            <i data-lucide="smartphone" class="link-icon"></i>
+            Autorisations requises
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-box">
+        <strong>Besoin d'aide immédiate ?</strong>
+        Nos spécialistes sont à votre écoute pour débloquer un numéro ou vous guider.
+        <div style="margin-top: 10px;">
+          <button class="btn-action-sm" onclick="openModal('modal-support')" style="width:100%; justify-content:center;">
+            <i data-lucide="mail" style="width:14px; height:14px;"></i>
+            Écrire au support
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENU FAQ -->
+    <main class="faq-content" id="faq-content" role="main">
+
+      <!-- Message aucun résultat -->
+      <div class="no-results" id="no-results" aria-live="polite">
+        <i data-lucide="search-x" class="no-results-icon"></i>
+        <p class="no-results-title">Aucun résultat pour cette recherche</p>
+        <p class="no-results-text">Vérifiez l'orthographe ou parcourez les catégories complètes ci-dessous.</p>
+        <button class="btn-action-sm" onclick="clearSearch()" style="margin-top: 14px;">
+          Réinitialiser la recherche
+        </button>
+      </div>
+
+      <!-- ─── CATÉGORIE 1 : Protection des appels ─── -->
+      <section
+        id="protection"
+        class="category-block"
+        data-category="protection"
+        aria-labelledby="cat-protection-title"
+      >
+        <header class="category-header">
+          <div class="category-icon-box" aria-hidden="true">
+            <i data-lucide="shield-check" style="width:20px; height:20px;"></i>
+          </div>
+          <div class="category-meta">
+            <h2 class="category-title" id="cat-protection-title">Protection des appels</h2>
+            <p class="category-desc">Comment ShieldNet analyse, filtre et bloque les numéros malveillants.</p>
+          </div>
+        </header>
+
+        <article class="faq-item" data-category="protection">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">Comment ShieldNet bloque-t-il les appels indésirables ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              Dès qu'un appel arrive sur votre téléphone, ShieldNet vérifie ce numéro en une fraction de seconde
+              dans sa base de données locale. Si ce numéro est identifié comme dangereux, votre téléphone
+              <strong>ne sonne pas du tout</strong> — vous n'êtes jamais dérangé.
+            </p>
+            <p>
+              Imaginez un portier discret posté devant votre porte : il vérifie chaque visiteur avant même
+              de vous appeler. Les inconnus connus pour faire du démarchage ou des arnaques n'arrivent simplement jamais jusqu'à vous.
+            </p>
+          </div>
+        </article>
+
+        <article class="faq-item" data-category="protection">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">La protection fonctionne-t-elle sans connexion Internet ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              <strong>Oui, en permanence.</strong> La liste des numéros dangereux est synchronisée et stockée
+              directement sur votre téléphone. Même en voyage, dans un sous-sol sans réseau ou en mode avion avec Wi-Fi coupé,
+              la protection reste active.
+            </p>
+            <p>
+              La connexion Internet sert uniquement à synchroniser les nouvelles mises à jour de la base de données.
+              Entre les synchronisations, tout fonctionne de manière 100% autonome et locale.
+            </p>
+          </div>
+        </article>
+
+        <article class="faq-item" data-category="protection">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">Est-ce que l'application consomme beaucoup de batterie ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              <strong>Non, pratiquement rien.</strong> ShieldNet reste totalement silencieux en arrière-plan et ne se réveille
+              qu'une fraction de seconde lorsqu'un appel arrive sur votre appareil.
+            </p>
+            <p>
+              Grâce à son moteur de vérification locale ultra-optimisé et à sa structure compacte (filtre de Bloom),
+              l'impact sur votre autonomie est <strong>inférieur à 0,5% par jour</strong>. C'est l'équivalent d'un détecteur de fumée :
+              il veille en permanence sans dépenser d'énergie inutile.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ─── CATÉGORIE 2 : Confidentialité ─── -->
+      <section
+        id="confidentialite"
+        class="category-block"
+        data-category="confidentialite"
+        aria-labelledby="cat-confidentialite-title"
+      >
+        <header class="category-header">
+          <div class="category-icon-box" aria-hidden="true">
+            <i data-lucide="lock" style="width:20px; height:20px;"></i>
+          </div>
+          <div class="category-meta">
+            <h2 class="category-title" id="cat-confidentialite-title">Vos informations personnelles</h2>
+            <p class="category-desc">Ce que ShieldNet protège, et ce qu'il ne consulte jamais.</p>
+          </div>
+        </header>
+
+        <article class="faq-item" data-category="confidentialite">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">Est-ce que ShieldNet consulte mes contacts ou mes messages privés ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              <strong>Non, jamais.</strong> ShieldNet ne téléverse pas vos contacts, ne lit pas le contenu de vos messages
+              et ne conserve aucun historique nominatif sur des serveurs externes.
+            </p>
+            <p>
+              Pour vérifier un numéro suspect, l'application génère une <span class="inline-tag">empreinte anonyme</span>
+              — un code mathématique cryptographique irréversible (SHA-256). Seul ce code est confronté à la base de données.
+              Personne, pas même les ingénieurs de ShieldNet, ne peut retrouver votre numéro ou l'identité de vos correspondants.
+            </p>
+          </div>
+        </article>
+
+        <article class="faq-item" data-category="confidentialite">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">Mes signalements de spam sont-ils vraiment anonymes ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              Oui, à 100%. Avant d'envoyer un signalement, votre téléphone convertit automatiquement le numéro en
+              <strong>empreinte mathématique à sens unique</strong>. C'est cette empreinte, associée à la catégorie de fraude,
+              qui alimente notre consensus communautaire.
+            </p>
+            <p>
+              Aucun identifiant personnel, nom, adresse ou donnée de géolocalisation n'est associé au signalement.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ─── CATÉGORIE 3 : Urgences & Erreurs ─── -->
+      <section
+        id="urgences"
+        class="category-block"
+        data-category="urgences"
+        aria-labelledby="cat-urgences-title"
+      >
+        <header class="category-header">
+          <div class="category-icon-box" aria-hidden="true">
+            <i data-lucide="phone-call" style="width:20px; height:20px;"></i>
+          </div>
+          <div class="category-meta">
+            <h2 class="category-title" id="cat-urgences-title">Numéros importants &amp; contestations</h2>
+            <p class="category-desc">Numéros d'urgence, faux positifs et comment débloquer un appel légitime.</p>
+          </div>
+        </header>
+
+        <article class="faq-item" data-category="urgences">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">Le 911, mon médecin ou le 811 peuvent-ils être bloqués par erreur ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              <strong>C'est strictement impossible.</strong> Les services d'urgence (911, 112, 988, 811, etc.)
+              sont inscrits dans une liste de contournement prioritaire codée en dur dans l'application mobile.
+            </p>
+            <p>
+              Cette liste est vérifiée <strong>en priorité absolue</strong> au niveau du système, avant toute évaluation
+              du filtre anti-spam. De plus, vos contacts enregistrés bénéficient par défaut d'une immunité totale.
+            </p>
+          </div>
+        </article>
+
+        <article class="faq-item" data-category="urgences">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">Un livreur ou ma clinique a été bloqué par erreur. Comment corriger ça ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              Dans l'application, ouvrez votre <strong>Journal d'appels</strong>, sélectionnez le numéro bloqué et cliquez
+              sur <strong>« Contester ce blocage »</strong> (Avis Sûr).
+            </p>
+            <p>
+              Notre algorithme de consensus prend immédiatement en compte votre avis. Dès que plusieurs utilisateurs confirment
+              la légitimité d'un numéro, celui-ci est retiré de la liste noire générale en moins de 10 minutes.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ─── CATÉGORIE 4 : Autorisations ─── -->
+      <section
+        id="autorisations"
+        class="category-block"
+        data-category="autorisations"
+        aria-labelledby="cat-autorisations-title"
+      >
+        <header class="category-header">
+          <div class="category-icon-box" aria-hidden="true">
+            <i data-lucide="smartphone" style="width:20px; height:20px;"></i>
+          </div>
+          <div class="category-meta">
+            <h2 class="category-title" id="cat-autorisations-title">Autorisations système Android</h2>
+            <p class="category-desc">Pourquoi certaines permissions sont nécessaires pour agir à temps.</p>
+          </div>
+        </header>
+
+        <article class="faq-item" data-category="autorisations">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">Pourquoi définir ShieldNet comme application de filtrage par défaut ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              Depuis Android 10, Google exige que toute application capable de couper la sonnerie d'un appel malveillant
+              possède le rôle officiel de filtrage d'appels (<span class="inline-tag">CallScreeningService</span>).
+            </p>
+            <p>
+              Sans ce rôle, ShieldNet pourrait vous avertir après coup, mais ne pourrait pas empêcher votre téléphone de sonner
+              lors d'un appel de télémarketing ou d'escroquerie. Cette autorisation n'accorde aucun accès à votre microphone
+              ni à vos conversations.
+            </p>
+          </div>
+        </article>
+
+        <article class="faq-item" data-category="autorisations">
+          <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-question-text">La permission de lecture des SMS est-elle obligatoire ?</span>
+            <i data-lucide="chevron-down" class="faq-chevron" style="width:18px; height:18px;"></i>
+          </button>
+          <div class="faq-answer" role="region">
+            <p>
+              Non, cette permission est <strong>totalement optionnelle</strong>. Elle est demandée uniquement si vous activez
+              l'<span class="inline-tag">Inspecteur de liens SMS</span> — un outil qui vous avertit lorsqu'un SMS contient
+              un lien de phishing suspect (fausse livraison, faux remboursement fiscal, etc.).
+            </p>
+            <p>
+              Même activée, cette analyse est réalisée <strong>exclusivement en local sur votre appareil</strong>. Aucun contenu
+              de message n'est transmis sur internet.
+            </p>
+          </div>
+        </article>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================================
+       CARTE SUPPORT EN BAS DE PAGE
+  ============================================================ -->
+  <section class="support-section" aria-label="Assistance directe">
+    <div class="support-card">
+      <div class="support-body">
+        <div class="support-icon-box" aria-hidden="true">
+          <i data-lucide="mail" style="width:24px; height:24px;"></i>
+        </div>
+        <div class="support-text">
+          <h2 class="support-title">Vous avez une question spécifique ?</h2>
+          <p class="support-desc">
+            Notre équipe d'assistance technique répond du lundi au vendredi, de 9 h à 17 h (EST).
+            Réponse rapide garantie en moins de 24 heures ouvrables.
+          </p>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="openModal('modal-support')">
+        <i data-lucide="send" style="width:16px; height:16px;"></i>
+        Contacter l'équipe Support
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PIED DE PAGE AVEC LIENS FONCTIONNELS
+  ============================================================ -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <i data-lucide="shield" style="width:15px; height:15px;" aria-hidden="true"></i>
+        &copy; {% now "Y" %} ShieldNet Protection Télécom &bull; Plateforme zéro-connaissance conforme CRTC / FCC &amp; RGPD.
+      </div>
+      <nav class="footer-links" aria-label="Liens légaux et support">
+        <button class="footer-btn-link" onclick="openModal('modal-privacy')">Confidentialité</button>
+        <button class="footer-btn-link" onclick="openModal('modal-terms')">Conditions d'Utilisation</button>
+        <button class="footer-btn-link" onclick="openModal('modal-support')">Support Technique</button>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       MODAL 1 : SUPPORT TECHNIQUE
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-support" role="dialog" aria-modal="true" aria-labelledby="modal-support-title" onclick="closeModalOnBackdrop(event, 'modal-support')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <i data-lucide="headphones" style="width:18px; height:18px;"></i>
+          </div>
+          <h2 class="modal-title" id="modal-support-title">Contacter le Support ShieldNet</h2>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-support')" aria-label="Fermer la boîte de dialogue">
+          <i data-lucide="x" style="width:18px; height:18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Une question sur un numéro bloqué, une anomalie de filtrage ou un problème technique ?
+          Nos équipes de surveillance télécom sont à votre service.
+        </p>
+
+        <div class="support-options-grid">
+          <div class="support-channel-card">
+            <div class="support-channel-info">
+              <div class="support-channel-title">Courriel direct du support</div>
+              <div class="support-channel-val" id="support-email-text">support@shieldnet.app</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-action-sm" onclick="copySupportEmail()">
+                <i data-lucide="copy" style="width:14px; height:14px;"></i>
+                Copier
+              </button>
+              <a href="mailto:support@shieldnet.app?subject=Demande%20d%27assistance%20ShieldNet" class="btn-action-sm primary">
+                <i data-lucide="external-link" style="width:14px; height:14px;"></i>
+                Écrire
+              </a>
+            </div>
+          </div>
+
+          <div class="support-channel-card">
+            <div class="support-channel-info">
+              <div class="support-channel-title">Délais d'intervention</div>
+              <div style="font-size:13px; color:var(--color-muted);">
+                Lundi au Vendredi &bull; 09:00 - 17:00 (EST)<br>
+                Prise en charge sous 24h ouvrables
+              </div>
+            </div>
+          </div>
+
+          <div class="support-channel-card">
+            <div class="support-channel-info">
+              <div class="support-channel-title">Contestation urgente de faux positif</div>
+              <div style="font-size:13px; color:var(--color-muted);">
+                Vous pouvez contester un numéro directement dans l'application mobile ShieldNet
+                via le bouton « Avis Sûr ». Le consensus s'applique en ~10 minutes.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 2 : POLITIQUE DE CONFIDENTIALITÉ
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-privacy" role="dialog" aria-modal="true" aria-labelledby="modal-privacy-title" onclick="closeModalOnBackdrop(event, 'modal-privacy')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <i data-lucide="lock" style="width:18px; height:18px;"></i>
+          </div>
+          <h2 class="modal-title" id="modal-privacy-title">Politique de Confidentialité</h2>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-privacy')" aria-label="Fermer la boîte de dialogue">
+          <i data-lucide="x" style="width:18px; height:18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h3>1. Engagement Zéro-Connaissance</h3>
+        <p>
+          ShieldNet est conçu selon le principe de la <strong>minimisation absolue des données</strong>.
+          Aucune donnée nominative (nom, prénom, carnet d'adresses, contenu audio d'appel ou SMS) n'est transmise
+          à nos serveurs ni partagée avec des tiers publicitaires.
+        </p>
+
+        <h3>2. Hachage cryptographique sur votre appareil</h3>
+        <p>
+          Lorsqu'un numéro entrant est vérifié ou signalé comme frauduleux, votre appareil calcule un condensé
+          cryptographique SHA-256 local. Seul ce code anonymisé et irréversible transite pour la mise à jour
+          des listes de consensus.
+        </p>
+
+        <h3>3. Contacts téléphoniques protégés</h3>
+        <p>
+          Votre liste de contacts reste confinée dans la mémoire sécurisée de votre téléphone.
+          ShieldNet l'interroge en lecture seule et en local pour garantir que vos proches ne soient jamais bloqués.
+        </p>
+
+        <h3>4. Conformité réglementaire internationale</h3>
+        <p>
+          Nos infrastructures respectent les normes les plus exigeantes en matière de télécommunication et de vie privée :
+          le <strong>Règlement Général sur la Protection des Données (RGPD)</strong>, la <strong>LPRPDE (Canada)</strong>
+          et les exigences de filtrage du <strong>CRTC et de la FCC</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 3 : CONDITIONS D'UTILISATION
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-terms" role="dialog" aria-modal="true" aria-labelledby="modal-terms-title" onclick="closeModalOnBackdrop(event, 'modal-terms')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <i data-lucide="file-text" style="width:18px; height:18px;"></i>
+          </div>
+          <h2 class="modal-title" id="modal-terms-title">Conditions d'Utilisation</h2>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-terms')" aria-label="Fermer la boîte de dialogue">
+          <i data-lucide="x" style="width:18px; height:18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h3>1. Objet du Service</h3>
+        <p>
+          ShieldNet est une solution collaborative de cybersécurité télécom conçue pour identifier et filtrer
+          les appels téléphoniques automatisés, frauduleux ou non sollicités.
+        </p>
+
+        <h3>2. Garantie absolue des numéros d'urgence</h3>
+        <p>
+          Conformément aux exigences légales en matière de sécurité publique, l'application intègre une dérogation matérielle
+          permanente interdisant tout filtrage ou rejet sur les numéros d'urgence officiels (911, 112, 988, 811 et équivalents régionaux).
+        </p>
+
+        <h3>3. Consensus communautaire et intégrité</h3>
+        <p>
+          Les signalements d'appels sont soumis à des mécanismes de preuve d'intégrité et de consensus algorithmique
+          afin d'empêcher les abus, le harcèlement ou le blocage ciblé de numéros légitimes.
+        </p>
+
+        <h3>4. Disponibilité du service</h3>
+        <p>
+          La base de données locale assure un fonctionnement continu hors-ligne. Les mises à jour du filtre de Bloom
+          sont distribuées périodiquement dès qu'une connectivité réseau sécurisée est disponible.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de notification (copie email, etc.) -->
+  <div class="toast-msg" id="toast-msg" role="status" aria-live="polite">
+    <i data-lucide="check-circle-2" style="width:18px; height:18px;"></i>
+    <span id="toast-text">Adresse email copiée !</span>
+  </div>
+
+  <!-- ============================================================
+       SCRIPTS JAVASCRIPT
+  ============================================================ -->
+  <script>
+    // Initialisation immédiate des icônes Lucide
+    document.addEventListener('DOMContentLoaded', function() {
+      lucide.createIcons();
+    });
+
+    // ── Accordéon FAQ ──────────────────────────────────────────────
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('is-open');
+
+      // Fermer tous les items ouverts pour une lecture aérée
+      document.querySelectorAll('.faq-item.is-open').forEach(function(el) {
+        el.classList.remove('is-open');
+        const qBtn = el.querySelector('.faq-question');
+        if (qBtn) qBtn.setAttribute('aria-expanded', 'false');
+      });
+
+      // Ouvrir l'item cliqué s'il n'était pas déjà ouvert
+      if (!isOpen) {
+        item.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    // ── Recherche instantanée ──────────────────────────────────────
+    function handleSearch(query) {
+      const q = query.toLowerCase().trim();
+      const items = document.querySelectorAll('.faq-item');
+      const categories = document.querySelectorAll('.category-block');
+      const clearBtn = document.getElementById('search-clear');
+      let anyMatch = false;
+
+      if (clearBtn) {
+        clearBtn.style.display = q ? 'block' : 'none';
+      }
+
+      items.forEach(function(item) {
+        const text = item.textContent.toLowerCase();
+        const matches = !q || text.includes(q);
+        item.style.display = matches ? '' : 'none';
+
+        if (matches && q.length > 1) {
+          item.classList.add('is-open');
+          const qBtn = item.querySelector('.faq-question');
+          if (qBtn) qBtn.setAttribute('aria-expanded', 'true');
+        } else if (!q) {
+          item.classList.remove('is-open');
+          const qBtn = item.querySelector('.faq-question');
+          if (qBtn) qBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        if (matches) anyMatch = true;
+      });
+
+      // Afficher ou masquer les catégories selon la visibilité de leurs items
+      categories.forEach(function(cat) {
+        const hasVisible = Array.from(cat.querySelectorAll('.faq-item')).some(function(i) {
+          return i.style.display !== 'none';
+        });
+        cat.style.display = hasVisible ? '' : 'none';
+      });
+
+      // Afficher l'encadré d'absence de résultat si nécessaire
+      const noResults = document.getElementById('no-results');
+      if (noResults) {
+        noResults.style.display = anyMatch || !q ? 'none' : 'block';
+      }
+
+      // Revenir à l'onglet "Toutes les rubriques" pendant la recherche
+      if (q) {
+        document.querySelectorAll('.tab-btn').forEach(function(tab) {
+          tab.classList.remove('active');
+          tab.setAttribute('aria-selected', 'false');
+        });
+        const allTab = document.querySelector('.tab-btn[data-cat="all"]');
+        if (allTab) {
+          allTab.classList.add('active');
+          allTab.setAttribute('aria-selected', 'true');
+        }
+      }
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      if (input) {
+        input.value = '';
+        handleSearch('');
+        input.focus();
+      }
+    }
+
+    // ── Onglets de Catégorie ───────────────────────────────────────
+    function switchTab(category, clickedBtn) {
+      // Nettoyer la recherche active
+      const searchInput = document.getElementById('search-input');
+      if (searchInput && searchInput.value) {
+        searchInput.value = '';
+        const clearBtn = document.getElementById('search-clear');
+        if (clearBtn) clearBtn.style.display = 'none';
+      }
+
+      // Mise à jour de l'onglet actif
+      document.querySelectorAll('.tab-btn').forEach(function(tab) {
+        tab.classList.remove('active');
+        tab.setAttribute('aria-selected', 'false');
+      });
+      if (clickedBtn) {
+        clickedBtn.classList.add('active');
+        clickedBtn.setAttribute('aria-selected', 'true');
+      }
+
+      // Afficher ou cacher les catégories
+      const categories = document.querySelectorAll('.category-block');
+      categories.forEach(function(cat) {
+        const isTarget = (category === 'all' || cat.dataset.category === category);
+        cat.style.display = isTarget ? '' : 'none';
+      });
+
+      // Remettre tous les items en display standard
+      document.querySelectorAll('.faq-item').forEach(function(item) {
+        item.style.display = '';
+      });
+
+      const noResults = document.getElementById('no-results');
+      if (noResults) noResults.style.display = 'none';
+
+      // Synchroniser la sidebar
+      document.querySelectorAll('.sidebar-link').forEach(function(link) {
+        link.classList.remove('active');
+        if (category === 'all' || link.dataset.cat === category) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    // ── Navigation via la Sidebar ──────────────────────────────────
+    function handleSidebarClick(e, categoryId) {
+      e.preventDefault();
+
+      // S'assurer que toutes les catégories ou la catégorie ciblée est visible
+      const targetSec = document.getElementById(categoryId);
+      if (!targetSec) return;
+
+      // Si la section est masquée par un filtre d'onglets, réactiver toutes les rubriques
+      if (targetSec.style.display === 'none') {
+        const allTab = document.querySelector('.tab-btn[data-cat="all"]');
+        switchTab('all', allTab);
+      }
+
+      // Scroll doux
+      targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Mettre en évidence le lien cliqué
+      document.querySelectorAll('.sidebar-link').forEach(function(link) {
+        link.classList.remove('active');
+      });
+      const activeLink = document.querySelector('.sidebar-link[data-cat="' + categoryId + '"]');
+      if (activeLink) activeLink.classList.add('active');
+
+      // Mettre à jour l'URL sans rechargement
+      if (history.pushState) {
+        history.pushState(null, null, '#' + categoryId);
+      }
+    }
+
+    // ── Modales ────────────────────────────────────────────────────
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        lucide.createIcons();
+      }
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function closeModalOnBackdrop(e, modalId) {
+      if (e.target.id === modalId) {
+        closeModal(modalId);
+      }
+    }
+
+    // Fermeture avec la touche Échap
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
+          closeModal(m.id);
+        });
+      }
+    });
+
+    // ── Copie de l'email Support ───────────────────────────────────
+    function copySupportEmail() {
+      const email = 'support@shieldnet.app';
+      navigator.clipboard.writeText(email).then(function() {
+        showToast('Adresse ' + email + ' copiée dans le presse-papier !');
+      }).catch(function() {
+        showToast('Adresse : ' + email);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-msg');
+      const text = document.getElementById('toast-text');
+      if (toast && text) {
+        text.textContent = message;
+        toast.style.display = 'flex';
+        setTimeout(function() {
+          toast.style.display = 'none';
+        }, 3200);
+      }
+    }
+
+    // ── Thème Sombre / Clair ───────────────────────────────────────
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('shieldnet_web_theme', next);
+      updateThemeIcon(next);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('theme-icon');
+      if (!icon) return;
+      icon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
+      lucide.createIcons();
+    }
+
+    // Initialisation du thème au chargement
+    (function() {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const saved = localStorage.getItem('shieldnet_web_theme') || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

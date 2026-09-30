@@ -8,7 +8,7 @@
    1. DYNAMIC COLOR TOKENS & CSS VARIABLES
    ===================================================================== */
 :root {
-  --primary: #2563eb;
+  --primary: #1d4ed8;
   --primary-hover: #1d4ed8;
   --primary-glow: rgba(37, 99, 235, 0.25);
   
@@ -31,16 +31,16 @@
   
   --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   
-  --accent-green: #10b981;
+  --accent-green: #059669;
   --accent-green-bg: rgba(16, 185, 129, 0.15);
-  --accent-red: #ef4444;
+  --accent-red: #dc2626;
   --accent-red-bg: rgba(239, 68, 68, 0.15);
-  --accent-amber: #f59e0b;
+  --accent-amber: #d97706;
   --accent-amber-bg: rgba(245, 158, 11, 0.15);
   --accent-cyan: #06b6d4;
   --accent-cyan-bg: rgba(6, 182, 212, 0.15);
-  --accent-purple: #8b5cf6;
-  --accent-purple-bg: rgba(139, 92, 246, 0.15);
+  --accent-purple: #2563eb;
+  --accent-purple-bg: rgba(37, 99, 235, 0.15);
   --accent-blue: #3b82f6;
   --accent-blue-bg: rgba(59, 130, 246, 0.15);
 }
@@ -51,7 +51,7 @@ body.light-mode,
 html[data-theme="light"],
 body[data-theme="light"],
 [data-theme="light"] {
-  --primary: #2563eb;
+  --primary: #1d4ed8;
   --primary-hover: #1d4ed8;
   --primary-glow: rgba(37, 99, 235, 0.2);
   
@@ -2283,12 +2283,11 @@ ul.errorlist li {
 
 /* =====================================================================
    DARK MODE: HIGH-CONTRAST DUAL-ENGINE ARCHITECTURE & VISIBILITY GUARDS
-   Universal Compatibility: html:not(.light-mode), body:not(.light-mode), [data-theme="dark"]
+   Universal Compatibility: html:not(.light-mode), html:not(.light-mode), [data-theme="dark"]
    ===================================================================== */
 
 /* 1. Global Backgrounds & Container Shells */
 html:not(.light-mode),
-body:not(.light-mode),
 html[data-theme="dark"],
 body[data-theme="dark"],
 [data-theme="dark"] {
@@ -2297,26 +2296,25 @@ body[data-theme="dark"],
 }
 
 html:not(.light-mode) body,
-body:not(.light-mode),
 [data-theme="dark"] body {
   background-color: #070b14 !important;
   color: #f8fafc !important;
 }
 
 html:not(.light-mode) .soc-shell,
-body:not(.light-mode) .soc-shell,
+html:not(.light-mode) .soc-shell,
 [data-theme="dark"] .soc-shell,
 html:not(.light-mode) .soc-main-area,
-body:not(.light-mode) .soc-main-area,
+html:not(.light-mode) .soc-main-area,
 [data-theme="dark"] .soc-main-area,
 html:not(.light-mode) .soc-canvas,
-body:not(.light-mode) .soc-canvas,
+html:not(.light-mode) .soc-canvas,
 [data-theme="dark"] .soc-canvas,
 html:not(.light-mode) #content,
-body:not(.light-mode) #content,
+html:not(.light-mode) #content,
 [data-theme="dark"] #content,
 html:not(.light-mode) #content-main,
-body:not(.light-mode) #content-main,
+html:not(.light-mode) #content-main,
 [data-theme="dark"] #content-main {
   background-color: #070b14 !important;
   color: #f8fafc !important;
@@ -2324,7 +2322,7 @@ body:not(.light-mode) #content-main,
 
 /* 2. Topbar & Sidebar in Dark Mode */
 html:not(.light-mode) .soc-top-bar,
-body:not(.light-mode) .soc-top-bar,
+html:not(.light-mode) .soc-top-bar,
 [data-theme="dark"] .soc-top-bar {
   background: #0b0f19 !important;
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
@@ -2332,20 +2330,20 @@ body:not(.light-mode) .soc-top-bar,
 }
 
 html:not(.light-mode) .soc-sidebar,
-body:not(.light-mode) .soc-sidebar,
+html:not(.light-mode) .soc-sidebar,
 [data-theme="dark"] .soc-sidebar {
   background: #0b0f19 !important;
   border-right-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 html:not(.light-mode) .sidebar-brand,
-body:not(.light-mode) .sidebar-brand,
+html:not(.light-mode) .sidebar-brand,
 [data-theme="dark"] .sidebar-brand {
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 html:not(.light-mode) .sidebar-footer,
-body:not(.light-mode) .sidebar-footer,
+html:not(.light-mode) .sidebar-footer,
 [data-theme="dark"] .sidebar-footer {
   background: #0b0f19 !important;
   border-top-color: rgba(255, 255, 255, 0.08) !important;
@@ -4295,3 +4293,612 @@ fieldset.module,
               box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+
+/* Status LED Indicators */
+.status-led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.status-led.online {
+  background-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+}
+.status-led.warning {
+  background-color: #d97706;
+}
+.status-led.offline {
+  background-color: #dc2626;
+}
+.triage-quick-btn {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(29, 78, 216, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(29, 78, 216, 0.3);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.triage-quick-btn:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+
+/* ==========================================================================
+   BARRE SUPÉRIEURE (SOC TOPBAR) & BOUTON THÈME ULTRA-STYLISÉ
+   ========================================================================== */
+.soc-topbar,
+.soc-top-bar {
+  height: 60px !important;
+  background: var(--bg-sidebar) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 28px !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 900 !important;
+}
+
+.topbar-left,
+.top-bar-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.topbar-right,
+.top-bar-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+/* Badge Indicateur d'état */
+.status-indicator {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 14px !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  border-radius: 9999px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #34d399 !important;
+  letter-spacing: 0.4px !important;
+  text-transform: uppercase !important;
+  user-select: none !important;
+}
+
+/* Boutons d'Action Topbar */
+.topbar-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 16px !important;
+  background: rgba(30, 41, 59, 0.6) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 9999px !important;
+  color: var(--text-main) !important;
+  font-family: 'Inter', -apple-system, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+  user-select: none !important;
+  line-height: 1 !important;
+}
+
+.topbar-action-btn:hover {
+  background: rgba(51, 65, 85, 0.85) !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2) !important;
+}
+
+.action-btn-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #60a5fa !important;
+  transition: transform 0.3s ease !important;
+}
+
+.topbar-action-btn:hover .action-btn-icon {
+  transform: rotate(45deg) !important;
+  color: #93c5fd !important;
+}
+
+/* --------------------------------------------------------------------------
+   Bouton Thème Stylisé (.soc-theme-btn)
+   -------------------------------------------------------------------------- */
+.soc-theme-btn {
+  padding: 4px 14px 4px 6px !important;
+  background: rgba(30, 41, 59, 0.75) !important;
+  border: 1px solid rgba(71, 85, 105, 0.6) !important;
+  gap: 9px !important;
+}
+
+.theme-icon-disc {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.25) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  color: #fbbf24 !important;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  flex-shrink: 0 !important;
+}
+
+.soc-theme-btn:hover .theme-icon-disc {
+  transform: rotate(25deg) scale(1.1) !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.5) !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0.4) 100%) !important;
+}
+
+.theme-icon-svg {
+  display: block !important;
+  transition: transform 0.3s ease !important;
+}
+
+/* En mode sombre par défaut : afficher le soleil (pour passer au clair) */
+.theme-icon-sun {
+  display: block !important;
+}
+.theme-icon-moon {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Variations en Mode Clair (Light Mode)
+   -------------------------------------------------------------------------- */
+html.light-mode .soc-topbar,
+html.light-mode .soc-top-bar,
+[data-theme="light"] .soc-topbar,
+[data-theme="light"] .soc-top-bar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html.light-mode .topbar-action-btn,
+[data-theme="light"] .topbar-action-btn {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light-mode .topbar-action-btn:hover,
+[data-theme="light"] .topbar-action-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #2563eb !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+}
+
+html.light-mode .soc-theme-btn,
+[data-theme="light"] .soc-theme-btn {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light-mode .theme-icon-disc,
+[data-theme="light"] .theme-icon-disc {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.2) 100%) !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+  color: #4f46e5 !important;
+}
+
+html.light-mode .soc-theme-btn:hover .theme-icon-disc,
+[data-theme="light"] .soc-theme-btn:hover .theme-icon-disc {
+  transform: rotate(-25deg) scale(1.1) !important;
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* En mode clair : masquer le soleil et afficher la lune */
+html.light-mode .theme-icon-sun,
+[data-theme="light"] .theme-icon-sun {
+  display: none !important;
+}
+
+html.light-mode .theme-icon-moon,
+[data-theme="light"] .theme-icon-moon {
+  display: block !important;
+}
+
+
+/* ==========================================================================
+   GLOBAL THEME HARMONIZATION: COMPLETE HIGH-CONTRAST VISIBILITY ENGINE
+   Garantit que 100% des pages basculent de couleur instantanément sans écriture invisible
+   ========================================================================== */
+
+/* Structure principale de la page */
+.soc-shell {
+  display: flex !important;
+  min-height: 100vh !important;
+  background: var(--bg-dark) !important;
+  color: var(--text-main) !important;
+}
+
+.soc-content-pane {
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: var(--bg-dark) !important;
+  color: var(--text-main) !important;
+}
+
+.soc-body-container,
+#content,
+#content-main {
+  flex: 1 !important;
+  background: var(--bg-dark) !important;
+  color: var(--text-main) !important;
+  padding: 24px 28px !important;
+}
+
+/* Cartes génériques et dashboard */
+.data-card,
+.chart-card,
+.kpi-card,
+.soc-hero-banner,
+.ops-bar,
+.triage-panel,
+.sandbox-panel,
+fieldset.module {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  border-radius: 12px !important;
+}
+
+.data-card-title,
+.chart-title,
+.hero-banner-title,
+.ops-bar-title,
+.triage-panel h2,
+.triage-panel h3,
+.sandbox-panel h2,
+.sandbox-panel h3 {
+  color: var(--text-main) !important;
+  font-weight: 700 !important;
+}
+
+.data-card-sub,
+.chart-sub,
+.hero-banner-sub,
+.kpi-sub-text,
+.kpi-label {
+  color: var(--text-muted) !important;
+}
+
+.mono-badge {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  display: inline-block !important;
+}
+
+.see-all-link {
+  color: var(--primary) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+.see-all-link:hover {
+  text-decoration: underline !important;
+}
+
+.triage-quick-btn {
+  display: inline-block !important;
+  padding: 5px 12px !important;
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+}
+
+/* Tables de données (SOC data table et tables Django Admin) */
+.soc-data-table,
+#result_list,
+table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  color: var(--text-main) !important;
+}
+
+.soc-data-table thead th,
+#result_list thead th,
+table thead th {
+  background: var(--bg-surface) !important;
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.soc-data-table tbody td,
+#result_list tbody td,
+table tbody td {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.soc-data-table tbody tr:hover td,
+#result_list tbody tr:hover td,
+table tbody tr:hover td {
+  background: var(--bg-hover) !important;
+}
+
+/* ==========================================================================
+   EXPLICIT LIGHT MODE RULES (FORÇAGE CONTRASTE ÉLEVÉ & FOND CLAIR)
+   ========================================================================== */
+html.light-mode,
+body.light-mode,
+html[data-theme="light"],
+body[data-theme="light"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light-mode .soc-shell,
+html.light-mode .soc-content-pane,
+html.light-mode .soc-body-container,
+html.light-mode #content,
+html.light-mode #content-main,
+[data-theme="light"] .soc-shell,
+[data-theme="light"] .soc-content-pane,
+[data-theme="light"] .soc-body-container,
+[data-theme="light"] #content,
+[data-theme="light"] #content-main {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light-mode .soc-sidebar,
+[data-theme="light"] .soc-sidebar {
+  background-color: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light-mode .brand-name,
+[data-theme="light"] .brand-name,
+html.light-mode .nav-item,
+[data-theme="light"] .nav-item {
+  color: #1e293b !important;
+}
+
+html.light-mode .nav-item:hover,
+[data-theme="light"] .nav-item:hover {
+  background-color: #f1f5f9 !important;
+  color: #1d4ed8 !important;
+}
+
+html.light-mode .nav-item.active,
+[data-theme="light"] .nav-item.active {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-left: 3px solid #1d4ed8 !important;
+}
+
+html.light-mode .nav-section-label,
+[data-theme="light"] .nav-section-label {
+  color: #64748b !important;
+}
+
+html.light-mode .sidebar-user,
+[data-theme="light"] .sidebar-user {
+  background: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+html.light-mode .user-name,
+[data-theme="light"] .user-name {
+  color: #0f172a !important;
+}
+
+html.light-mode .user-role,
+[data-theme="light"] .user-role {
+  color: #64748b !important;
+}
+
+/* Cartes en mode clair */
+html.light-mode .data-card,
+html.light-mode .chart-card,
+html.light-mode .kpi-card,
+html.light-mode .soc-hero-banner,
+html.light-mode .ops-bar,
+html.light-mode .triage-panel,
+html.light-mode .sandbox-panel,
+html.light-mode fieldset.module,
+html.light-mode .module,
+[data-theme="light"] .data-card,
+[data-theme="light"] .chart-card,
+[data-theme="light"] .kpi-card,
+[data-theme="light"] .soc-hero-banner,
+[data-theme="light"] .ops-bar,
+[data-theme="light"] .triage-panel,
+[data-theme="light"] .sandbox-panel,
+[data-theme="light"] fieldset.module,
+[data-theme="light"] .module {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light-mode .data-card-title,
+html.light-mode .chart-title,
+html.light-mode .hero-banner-title,
+html.light-mode .ops-bar-title,
+html.light-mode h1, html.light-mode h2, html.light-mode h3, html.light-mode h4,
+[data-theme="light"] .data-card-title,
+[data-theme="light"] .chart-title,
+[data-theme="light"] .hero-banner-title,
+[data-theme="light"] .ops-bar-title,
+[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3, [data-theme="light"] h4 {
+  color: #0f172a !important;
+}
+
+html.light-mode .data-card-sub,
+html.light-mode .chart-sub,
+html.light-mode .hero-banner-sub,
+html.light-mode .kpi-sub-text,
+html.light-mode .kpi-label,
+html.light-mode p,
+[data-theme="light"] .data-card-sub,
+[data-theme="light"] .chart-sub,
+[data-theme="light"] .hero-banner-sub,
+[data-theme="light"] .kpi-sub-text,
+[data-theme="light"] .kpi-label,
+[data-theme="light"] p {
+  color: #475569 !important;
+}
+
+/* Tables en mode clair */
+html.light-mode .soc-data-table tbody td,
+html.light-mode #result_list tbody td,
+html.light-mode table tbody td,
+[data-theme="light"] .soc-data-table tbody td,
+[data-theme="light"] #result_list tbody td,
+[data-theme="light"] table tbody td {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html.light-mode .soc-data-table thead th,
+html.light-mode #result_list thead th,
+html.light-mode table thead th,
+[data-theme="light"] .soc-data-table thead th,
+[data-theme="light"] #result_list thead th,
+[data-theme="light"] table thead th {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+}
+
+html.light-mode .soc-data-table tbody tr:hover td,
+html.light-mode #result_list tbody tr:hover td,
+html.light-mode table tbody tr:hover td,
+[data-theme="light"] .soc-data-table tbody tr:hover td,
+[data-theme="light"] #result_list tbody tr:hover td,
+[data-theme="light"] table tbody tr:hover td {
+  background-color: #f8fafc !important;
+}
+
+html.light-mode .mono-badge,
+[data-theme="light"] .mono-badge {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+/* Formulaires et champs en mode clair */
+html.light-mode input[type="text"],
+html.light-mode input[type="password"],
+html.light-mode select,
+html.light-mode textarea,
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="password"],
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light-mode input[type="text"]:focus,
+html.light-mode input[type="password"]:focus,
+html.light-mode select:focus,
+html.light-mode textarea:focus,
+[data-theme="light"] input[type="text"]:focus,
+[data-theme="light"] input[type="password"]:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15) !important;
+  color: #0f172a !important;
+}
+
+html.light-mode label,
+[data-theme="light"] label {
+  color: #334155 !important;
+}
+
+/* Filtres Django Admin en mode clair */
+html.light-mode #changelist-filter,
+[data-theme="light"] #changelist-filter {
+  background: #ffffff !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+html.light-mode #changelist-filter h2,
+[data-theme="light"] #changelist-filter h2 {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html.light-mode #changelist-filter h3,
+[data-theme="light"] #changelist-filter h3 {
+  color: #334155 !important;
+}
+
+html.light-mode #changelist-filter li a,
+[data-theme="light"] #changelist-filter li a {
+  color: #475569 !important;
+}
+
+html.light-mode #changelist-filter li a:hover,
+[data-theme="light"] #changelist-filter li a:hover {
+  color: #1d4ed8 !important;
+}
+
+html.light-mode #changelist-filter li.selected a,
+[data-theme="light"] #changelist-filter li.selected a {
+  color: #1d4ed8 !important;
+  font-weight: 700 !important;
+}
+
+/* Footer en mode clair */
+html.light-mode .soc-footer,
+[data-theme="light"] .soc-footer {
+  background: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}

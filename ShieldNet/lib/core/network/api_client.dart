@@ -13,7 +13,7 @@ class ApiClient {
   static String? _workingBaseUrl;
 
   static List<String> get candidateBaseUrls {
-    final envUrl = dotenv.env['API_BASE_URL'];
+    final envUrl = dotenv.isInitialized ? dotenv.env['API_BASE_URL'] : null;
     final urls = <String>[];
     if (envUrl != null && envUrl.isNotEmpty) {
       final formatted = envUrl.endsWith('/') ? envUrl : '$envUrl/';

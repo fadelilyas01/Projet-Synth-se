@@ -583,3 +583,233 @@ class RegionalThreatIntelligenceService:
             'total_regions_tracked': len(result_list),
             'regions': result_list,
         }
+
+
+class RegionalComplianceService:
+    """
+    Service d'arbitrage et d'application des réglementations télécoms et de protection
+    de la vie privée en fonction du pays (Canada / États-Unis) et de la province/état.
+    Garantit l'application des normes :
+      - Loi 25 du Québec (CA-QC)
+      - LPRPDE / PIPEDA & LCAP / CASL (Reste du Canada)
+      - TCPA & CCPA / CPRA (Californie US-CA)
+      - TCPA & TRACED Act FCC / FTC (Reste des États-Unis)
+    """
+
+    CANADIAN_PROVINCES = {
+        'QC': 'Québec',
+        'ON': 'Ontario',
+        'BC': 'Colombie-Britannique',
+        'AB': 'Alberta',
+        'MB': 'Manitoba',
+        'SK': 'Saskatchewan',
+        'NS': 'Nouvelle-Écosse',
+        'NB': 'Nouveau-Brunswick',
+        'NL': 'Terre-Neuve-et-Labrador',
+        'PE': 'Île-du-Prince-Édouard',
+        'NT': 'Territoires du Nord-Ouest',
+        'YT': 'Yukon',
+        'NU': 'Nunavut',
+    }
+
+    US_STATES = {
+        'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
+        'CA': 'Californie (California)', 'CO': 'Colorado', 'CT': 'Connecticut',
+        'DE': 'Delaware', 'FL': 'Floride (Florida)', 'GA': 'Géorgie (Georgia)',
+        'HI': 'Hawaï (Hawaii)', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana',
+        'IA': 'Iowa', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiane (Louisiana)',
+        'ME': 'Maine', 'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan',
+        'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri', 'MT': 'Montana',
+        'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+        'NM': 'Nouveau-Mexique', 'NY': 'New York', 'NC': 'Caroline du Nord',
+        'ND': 'Dakota du Nord', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon',
+        'PA': 'Pennsylvanie', 'RI': 'Rhode Island', 'SC': 'Caroline du Sud',
+        'SD': 'Dakota du Sud', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah',
+        'VT': 'Vermont', 'VA': 'Virginie', 'WA': 'Washington', 'WV': 'Virginie-Occidentale',
+        'WI': 'Wisconsin', 'WY': 'Wyoming', 'DC': 'District of Columbia',
+    }
+
+    @classmethod
+    def get_available_regions(cls) -> dict:
+        """Retourne l'arborescence complète des pays et provinces/états supportés."""
+        return {
+            'countries': [
+                {
+                    'code': 'CA',
+                    'name': 'Canada',
+                    'flag': '🇨🇦',
+                    'subdivision_type': 'province',
+                    'subdivision_label': 'Province ou Territoire',
+                    'provinces': [
+                        {'code': code, 'name': name}
+                        for code, name in cls.CANADIAN_PROVINCES.items()
+                    ],
+                },
+                {
+                    'code': 'US',
+                    'name': 'États-Unis',
+                    'flag': '🇺🇸',
+                    'subdivision_type': 'state',
+                    'subdivision_label': 'État américain (State)',
+                    'states': [
+                        {'code': code, 'name': name}
+                        for code, name in cls.US_STATES.items()
+                    ],
+                },
+            ]
+        }
+
+    @classmethod
+    def normalize_region(cls, country: str, province_or_state: str) -> tuple[str, str]:
+        c = (country or 'CA').strip().upper()
+        if c not in ('CA', 'US'):
+            c = 'CA'
+
+        p = (province_or_state or '').strip().upper()
+        if c == 'CA':
+            if p not in cls.CANADIAN_PROVINCES:
+                # Chercher par nom si l'utilisateur envoie "Québec"
+                for code, name in cls.CANADIAN_PROVINCES.items():
+                    if p in name.upper() or name.upper() in p:
+                        p = code
+                        break
+                else:
+                    p = 'QC'
+        else:
+            if p not in cls.US_STATES:
+                for code, name in cls.US_STATES.items():
+                    if p in name.upper() or name.upper() in p:
+                        p = code
+                        break
+                else:
+                    p = 'NY'
+
+        return c, p
+
+    @classmethod
+    def get_compliance_for_region(cls, country: str, province_or_state: str) -> dict:
+        """
+        Détermine et applique les normes juridiques et réglementaires appropriées
+        selon la combinaison Pays / Province / État.
+        """
+        c, p = cls.normalize_region(country, province_or_state)
+
+        if c == 'CA' and p == 'QC':
+            return {
+                'country': 'CA',
+                'country_name': 'Canada',
+                'country_flag': '🇨🇦',
+                'province_or_state': 'QC',
+                'province_name': cls.CANADIAN_PROVINCES.get('QC', 'Québec'),
+                'norm_key': 'LOI_25_QC',
+                'norm_name': 'Loi 25 du Québec',
+                'legal_framework': "Loi sur la protection des renseignements personnels dans le secteur privé (Loi 25 du Québec)",
+                'regulator': "Commission d'accès à l'information du Québec (CAI) & CRTC",
+                'description': "Protection stricte sous la Loi 25 québécoise : chiffrement HMAC-SHA256, zéro transmission de carnet de contacts, consentement exprès et purge de rétention sous 30 jours.",
+                'data_retention_days': 30,
+                'strict_consent_required': True,
+                'telecom_standard': 'CRTC Décision 2019-403 & STIR/SHAKEN',
+                'principles': [
+                    "Confidentialité par défaut dès la conception (Privacy by Design)",
+                    "Zéro indexation ni extraction du carnet d'adresses personnel",
+                    "Empreintes cryptographiques locales HMAC-SHA256 avec sel",
+                    "Droit d'accès, d'effacement et de portabilité des données",
+                    "Purge automatisée des journaux d'audit et signalements sous 30 jours",
+                ],
+                'emergency_numbers': [
+                    {'number': '911', 'label': 'Urgences vitales (Police, Pompiers, Ambulance)', 'immune': True},
+                    {'number': '811', 'label': 'Info-Santé & Info-Social Québec', 'immune': True},
+                    {'number': '988', 'label': 'Ligne de crise de suicide canadienne', 'immune': True},
+                    {'number': '211', 'label': 'Services communautaires et sociaux', 'immune': True},
+                ],
+            }
+
+        elif c == 'CA':
+            prov_name = cls.CANADIAN_PROVINCES.get(p, p)
+            return {
+                'country': 'CA',
+                'country_name': 'Canada',
+                'country_flag': '🇨🇦',
+                'province_or_state': p,
+                'province_name': prov_name,
+                'norm_key': 'PIPEDA_CASL_CRTC',
+                'norm_name': f'LPRPDE / PIPEDA & LCAP ({prov_name})',
+                'legal_framework': "Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE / PIPEDA) & Loi canadienne anti-pourriel (LCAP)",
+                'regulator': "Commissariat à la protection de la vie privée du Canada (CPVP) & CRTC",
+                'description': f"Conformité fédérale canadienne pour {prov_name} : protection de la vie privée LPRPDE, filtrage télécom validé CRTC et signalement au Centre antifraude du Canada.",
+                'data_retention_days': 60,
+                'strict_consent_required': True,
+                'telecom_standard': 'CRTC 2019-403 / STIR-SHAKEN Canada',
+                'principles': [
+                    "Protection et traitement transparent selon la norme fédérale LPRPDE",
+                    "Filtrage télécom conforme aux directives du CRTC",
+                    "Consentement préalable pour le filtrage et l'analyse de pourriels",
+                    "Signalement d'abus coordonné avec le Centre antifraude du Canada",
+                ],
+                'emergency_numbers': [
+                    {'number': '911', 'label': 'Services d\'urgence', 'immune': True},
+                    {'number': '811', 'label': 'Ligne d\'information santé provinciale', 'immune': True},
+                    {'number': '988', 'label': 'Ligne de crise de suicide', 'immune': True},
+                    {'number': '211', 'label': 'Ressources communautaires et d\'aide sociale', 'immune': True},
+                ],
+            }
+
+        elif c == 'US' and p == 'CA':
+            return {
+                'country': 'US',
+                'country_name': 'États-Unis',
+                'country_flag': '🇺🇸',
+                'province_or_state': 'CA',
+                'province_name': 'Californie (California)',
+                'norm_key': 'TCPA_CCPA_CALIFORNIA',
+                'norm_name': 'TCPA & CCPA / CPRA (Californie)',
+                'legal_framework': "Telephone Consumer Protection Act (47 U.S.C. § 227) & California Consumer Privacy Act (CCPA / CPRA)",
+                'regulator': "California Privacy Protection Agency (CPPA), FCC & FTC",
+                'description': "Conformité de pointe en Californie : respect des droits CCPA (Do Not Sell/Share PII), filtrage vocal STIR/SHAKEN mandaté par la FCC et protection TCPA.",
+                'data_retention_days': 45,
+                'strict_consent_required': True,
+                'telecom_standard': 'FCC Robocall Mitigation Database & STIR/SHAKEN',
+                'principles': [
+                    "Garantie 'Do Not Sell or Share My Personal Information' (CCPA/CPRA)",
+                    "Filtrage préventif des robocalls selon le standard fédéral TCPA",
+                    "Vérification des niveaux d'attestation opérateur FCC STIR/SHAKEN",
+                    "Zéro profilage ni commercialisation des données d'appels",
+                ],
+                'emergency_numbers': [
+                    {'number': '911', 'label': 'Emergency Services (Police / Fire / EMS)', 'immune': True},
+                    {'number': '988', 'label': 'Suicide & Crisis Lifeline', 'immune': True},
+                    {'number': '311', 'label': 'Non-Emergency City Services', 'immune': True},
+                    {'number': '211', 'label': 'Essential Community & Health Services', 'immune': True},
+                ],
+            }
+
+        else:
+            state_name = cls.US_STATES.get(p, p)
+            return {
+                'country': 'US',
+                'country_name': 'États-Unis',
+                'country_flag': '🇺🇸',
+                'province_or_state': p,
+                'province_name': state_name,
+                'norm_key': 'TCPA_TRACED_FCC',
+                'norm_name': f'TCPA & TRACED Act ({p})',
+                'legal_framework': "Telephone Consumer Protection Act (TCPA) & Pallone-Thune TRACED Act (Public Law 116-105)",
+                'regulator': "Federal Communications Commission (FCC) & Federal Trade Commission (FTC)",
+                'description': f"Réglementation télécom américaine pour l'État de {state_name} : interception anti-robocall TCPA, respect du National DNC Registry et authentification FCC.",
+                'data_retention_days': 60,
+                'strict_consent_required': False,
+                'telecom_standard': 'FCC TRACED Act STIR/SHAKEN Mandate',
+                'principles': [
+                    "Interception des appels automatisés non sollicités (TCPA)",
+                    "Vérification cryptographique STIR/SHAKEN (Attestations A/B/C)",
+                    "Respect du registre fédéral National Do Not Call (DNC)",
+                    "Traitement local sécurisé sans transfert de numéros de contacts",
+                ],
+                'emergency_numbers': [
+                    {'number': '911', 'label': 'Emergency Services', 'immune': True},
+                    {'number': '988', 'label': 'Suicide & Crisis Lifeline', 'immune': True},
+                    {'number': '311', 'label': 'Non-Emergency Municipal Services', 'immune': True},
+                    {'number': '211', 'label': 'Community Resources & Information', 'immune': True},
+                ],
+            }
+
