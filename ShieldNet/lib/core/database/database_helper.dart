@@ -186,14 +186,14 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
 
-  // Numéros d'urgence canadiens / nord-américains protégés par défaut
+  // Numéros d'urgence nord-américains (Canada / États-Unis) protégés par défaut
   static const List<Map<String, String>> defaultEmergencyNumbers = [
     {'number': '911', 'label': 'Urgences (Police, Pompiers, Ambulance)'},
-    {'number': '811', 'label': 'Info-Santé / Info-Social Québec'},
-    {'number': '988', 'label': 'Prévention du Suicide & Crise (Canada)'},
+    {'number': '988', 'label': 'Prévention du Suicide & Crise (Canada / É-U)'},
     {'number': '211', 'label': 'Aide communautaire & Services sociaux'},
     {'number': '311', 'label': 'Services municipaux & Citoyens'},
-    {'number': '511', 'label': 'Info Transports Québec'},
+    {'number': '511', 'label': 'Info Transports & Conditions routières'},
+    {'number': '811', 'label': 'Info-Santé / Info-Social / Services non urgents'},
   ];
 
   DatabaseHelper._init();

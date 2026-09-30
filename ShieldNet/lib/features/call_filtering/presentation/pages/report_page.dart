@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/citizen_impact_service.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../controllers/blacklist_controller.dart';
 
 class ReportPage extends ConsumerStatefulWidget {
@@ -25,12 +26,13 @@ class _ReportPageState extends ConsumerState<ReportPage> {
   }
 
   Future<void> _submitReport() async {
+    final l10n = AppLocalizations.of(context);
     final rawPhone = _phoneController.text.trim();
     final digitsOnly = rawPhone.replaceAll(RegExp(r'\D'), '');
     if (digitsOnly.length < 7) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez saisir un numéro de téléphone valide (au moins 7 chiffres).'),
+        SnackBar(
+          content: Text(l10n?.reportInvalidPhone ?? 'Veuillez saisir un numéro de téléphone valide (au moins 7 chiffres).'),
           backgroundColor: AppTheme.accentOrange,
         ),
       );
@@ -65,8 +67,8 @@ class _ReportPageState extends ConsumerState<ReportPage> {
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Signalement anonymisé HMAC transmis et enregistré avec succès.'),
+              SnackBar(
+                content: Text(l10n?.reportSuccessToast ?? 'Signalement anonymisé HMAC transmis et enregistré avec succès.'),
                 backgroundColor: AppTheme.accentGreen,
               ),
             );
@@ -78,48 +80,50 @@ class _ReportPageState extends ConsumerState<ReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Signaler un Numéro', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(l10n?.reportPageTitle ?? 'Signaler un Numéro', style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Aidez la communauté',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+            Text(
+              l10n?.reportHelpCommunity ?? 'Aidez la communauté',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Signalez un numéro suspect pour le bloquer et avertir les autres utilisateurs de ShieldNet.',
-              style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
+            Text(
+              l10n?.reportHelpCommunityDesc ?? 'Signalez un numéro suspect pour le bloquer et avertir les autres utilisateurs de ShieldNet.',
+              style: const TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
             ),
             const SizedBox(height: 32),
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Numéro de téléphone suspect',
+              decoration: InputDecoration(
+                labelText: l10n?.reportPhoneLabel ?? 'Numéro de téléphone suspect',
                 hintText: '+1 819 123 4567',
-                prefixIcon: Icon(Icons.phone_rounded),
+                prefixIcon: const Icon(Icons.phone_rounded),
               ),
             ),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
-              decoration: const InputDecoration(
-                labelText: 'Nature de la nuisance',
-                prefixIcon: Icon(Icons.category_rounded),
+              decoration: InputDecoration(
+                labelText: l10n?.reportCategoryLabel ?? 'Nature de la nuisance',
+                prefixIcon: const Icon(Icons.category_rounded),
               ),
               icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              items: const [
-                DropdownMenuItem(value: 'fraud', child: Text('Fraude / Arnaque')),
-                DropdownMenuItem(value: 'telemarketing', child: Text('Démarchage Commercial')),
-                DropdownMenuItem(value: 'financial_scam', child: Text('Arnaque Financière')),
-                DropdownMenuItem(value: 'phishing', child: Text('Hameçonnage / Phishing')),
-                DropdownMenuItem(value: 'robocall', child: Text('Appel Automatisé / Robocall')),
+              items: [
+                DropdownMenuItem(value: 'fraud', child: Text(l10n?.reportCatFraud ?? 'Fraude / Arnaque')),
+                DropdownMenuItem(value: 'telemarketing', child: Text(l10n?.reportCatTelemarketing ?? 'Démarchage Commercial')),
+                DropdownMenuItem(value: 'financial_scam', child: Text(l10n?.reportCatFinancialScam ?? 'Arnaque Financière')),
+                DropdownMenuItem(value: 'phishing', child: Text(l10n?.reportCatPhishing ?? 'Hameçonnage / Phishing')),
+                DropdownMenuItem(value: 'robocall', child: Text(l10n?.reportCatRobocall ?? 'Appel Automatisé / Robocall')),
               ],
               onChanged: (val) {
                 if (val != null) setState(() => _selectedCategory = val);
@@ -129,47 +133,30 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             TextField(
               controller: _commentController,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Commentaire (Optionnel)',
-                hintText: 'Précisez le contexte de l\'appel...',
-                prefixIcon: Padding(
+              decoration: InputDecoration(
+                labelText: l10n?.reportCommentLabel ?? 'Commentaire (Optionnel)',
+                hintText: l10n?.reportCommentHint ?? 'Précisez le contexte de l\'appel...',
+                prefixIcon: const Padding(
                   padding: EdgeInsets.only(bottom: 40.0),
                   child: Icon(Icons.chat_bubble_outline_rounded),
                 ),
               ),
             ),
             const SizedBox(height: 40),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.accentRed.withValues(alpha: 0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-                gradient: const LinearGradient(
-                  colors: [AppTheme.accentRed, AppTheme.accentOrange],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
+            ElevatedButton.icon(
+              onPressed: _isSubmitting ? null : _submitReport,
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _isSubmitting
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send_rounded, size: 20),
               ),
-              child: ElevatedButton.icon(
-                onPressed: _isSubmitting ? null : _submitReport,
-                icon: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: _isSubmitting
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.send_rounded, size: 24),
-                ),
-                label: const Text('Transmettre le Signalement', style: TextStyle(fontSize: 16)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                ),
+              label: Text(l10n?.reportSubmitButton ?? 'Transmettre le Signalement', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accentRed,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],

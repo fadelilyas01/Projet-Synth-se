@@ -102,15 +102,21 @@ class AdversarialImpersonationDetector:
     tout en formulant une exigence financière ou coercitive illégitime (cartes cadeaux, virement urgent, cryptomonnaie).
     """
     AUTHORITY_KEYWORDS = {
+        # Canada
         'revenu quebec', 'arc', 'cra', 'impot', 'police', 'grc', 'rcmp', 'sq', 'opp',
         'tribunal', 'service canada', 'douane', 'cbsa', 'desjardins', 'hydro quebec',
-        'clsc', 'hopital', 'gendarmerie royale'
+        'clsc', 'hopital', 'gendarmerie royale',
+        # États-Unis
+        'irs', 'internal revenue', 'social security', 'ssa', 'fbi', 'federal bureau',
+        'medicare', 'medicaid', 'dhs', 'homeland security', 'usps', 'us postal service',
+        'sheriff', 'police department', 'ftc', 'border patrol', 'ice', 'dea'
     }
 
     EXTORTION_KEYWORDS = {
-        'carte cadeau', 'gift card', 'itunes', 'apple card', 'bitcoin', 'crypto',
-        'cryptomonnaie', 'virement interac', 'arrestation', 'arrest', 'mandat d arret',
-        'mandat', 'compte bloque', 'argent immediat', 'frais urgents', 'amende impayee'
+        'carte cadeau', 'gift card', 'itunes', 'apple card', 'target card', 'walmart card',
+        'bitcoin', 'crypto', 'cryptomonnaie', 'virement interac', 'wire transfer', 'zelle',
+        'venmo', 'cash app', 'arrestation', 'arrest', 'mandat d arret', 'mandat', 'warrant',
+        'compte bloque', 'argent immediat', 'frais urgents', 'amende impayee'
     }
 
     @classmethod
@@ -139,7 +145,7 @@ class BayesianSemanticClassifier:
     # Prior logarithmique : probabilité a priori légèrement biaisée en faveur de la conformité
     PRIOR_LOG_ODDS = -0.30
 
-    # Dictionnaire de Log-Likelihood Ratios (LLR) calibrés sur le corpus télécom québécois et canadien
+    # Dictionnaire de Log-Likelihood Ratios (LLR) calibrés sur le corpus télécom nord-américain (Canada / É-U)
     # LLR > 0 : probabilité accrue de menace / spam
     # LLR < 0 : probabilité accrue de service légitime / santé / livraison
     TOKEN_LLR = {
@@ -148,6 +154,10 @@ class BayesianSemanticClassifier:
         'arrest': 4.2, 'mandat': 4.6, 'mandat arret': 5.2, 'police': 3.5,
         'grc': 3.8, 'rcmp': 3.8, 'sq': 3.4, 'cbsa': 3.7, 'douane': 3.6,
         'tribunal': 4.0, 'warrant': 4.5, 'gendarmerie': 3.8,
+        # Autorités américaines (IRS, SSA, FBI, etc.)
+        'irs': 4.5, 'internal revenue': 4.5, 'social security': 4.3, 'ssa': 3.8,
+        'medicare': 4.0, 'medicaid': 3.6, 'fbi': 4.2, 'dhs': 3.8, 'sheriff': 3.8,
+        'federal bureau': 4.0, 'police department': 3.6,
 
         # Extorsion financière et pressions (fortement positif)
         'carte cadeau': 5.0, 'gift card': 5.0, 'itunes': 4.8, 'apple card': 4.8,
@@ -362,7 +372,7 @@ class NLPSemanticAnalyzer:
             'keywords': [
                 'livraison', 'delivery', 'livreur', 'courier', 'doordash', 'uber eats', 'ubereats',
                 'skip', 'skipthedishes', 'fedex', 'ups', 'dhl', 'purolator', 'postes canada',
-                'canada post', 'amazon', 'colis a la porte', 'chauffeur', 'suivi colis'
+                'canada post', 'usps', 'united states postal', 'amazon', 'colis a la porte', 'chauffeur', 'suivi colis'
             ]
         },
         'BANQUE_SERVICES_PUBLICS': {
@@ -370,7 +380,8 @@ class NLPSemanticAnalyzer:
             'label': 'Institution Bancaire ou Service Public Reconnu',
             'keywords': [
                 'hydro quebec', 'hydroquebec', 'hydro', 'desjardins', 'caisse populaire', 'rbc',
-                'td', 'bmo', 'scotia', 'cibc', 'banque nationale', 'assurance', 'insurance',
+                'td', 'bmo', 'scotia', 'cibc', 'banque nationale', 'chase', 'bank of america',
+                'wells fargo', 'citibank', 'capital one', 'assurance', 'insurance',
                 'ecole', 'school', 'universite', 'university', 'uqo', 'cegep', 'garderie',
                 'daycare', 'ville de gatineau', 'ville d ottawa', 'municipalite', 'employeur',
                 'coupure de service'
@@ -394,17 +405,19 @@ class NLPSemanticAnalyzer:
                 'agence du revenu', 'revenu canada', 'arc', 'cra', 'impot', 'taxes', 'police',
                 'grc', 'rcmp', 'sq', 'opp', 'arrestation', 'arrest', 'mandat d arret', 'warrant',
                 'tribunal', 'court', 'service canada', 'douane', 'frontiere', 'cbsa', 'immigration',
-                'gendarmerie royale'
+                'gendarmerie royale', 'irs', 'internal revenue', 'social security', 'ssa',
+                'fbi', 'medicare', 'medicaid', 'dhs', 'homeland security', 'sheriff', 'usps'
             ]
         },
         'EXTORSION_FINANCIERE': {
             'weight': 3.8,
             'label': 'Extorsion Financière & Vol d\'Identité',
             'keywords': [
-                'carte cadeau', 'gift card', 'itunes', 'apple card', 'bitcoin', 'crypto',
-                'cryptomonnaie', 'virement interac', 'wire transfer', 'western union', 'dette',
-                'huissier', 'compte suspendu', 'compte bloque', 'nas', 'sin', 'assurance sociale',
-                'social insurance', 'frais non payes', 'amende impayee'
+                'carte cadeau', 'gift card', 'itunes', 'apple card', 'target card', 'walmart card',
+                'bitcoin', 'crypto', 'cryptomonnaie', 'virement interac', 'wire transfer', 'zelle',
+                'venmo', 'cash app', 'western union', 'dette', 'huissier', 'compte suspendu',
+                'compte bloque', 'nas', 'sin', 'assurance sociale', 'social insurance',
+                'frais non payes', 'amende impayee'
             ]
         },
         'HAME CONNAGE_PHISHING': {

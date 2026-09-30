@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/security/device_integrity_checker.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Bandeau d'alerte informant l'utilisateur en cas de détection d'accès Root / Super-Utilisateur
 class DeviceIntegrityBanner extends StatelessWidget {
@@ -14,6 +15,7 @@ class DeviceIntegrityBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!result.isCompromised) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -39,22 +41,23 @@ class DeviceIntegrityBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Sécurité Système : Appareil Rooté',
-                  style: TextStyle(
+                  l10n?.deviceIntegrityRooted ?? 'Sécurité Système : Appareil Rooté',
+                  style: const TextStyle(
                     color: AppTheme.accentRed,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
-                  'Un accès super-utilisateur (su / Magisk) est présent. Les protections cryptographiques locales peuvent être vulnérables.',
-                  style: TextStyle(fontSize: 12, height: 1.3),
+                  l10n?.deviceIntegrityDesc ??
+                      'Un accès super-utilisateur (su / Magisk) est présent. Les protections cryptographiques locales peuvent être vulnérables.',
+                  style: const TextStyle(fontSize: 12, height: 1.3),
                 ),
               ],
             ),

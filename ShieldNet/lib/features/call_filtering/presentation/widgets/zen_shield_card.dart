@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'pulse_radar_shield.dart';
 
-/// Carte principale d'état et d'activation du filtrage d'appels.
+/// Carte principale de statut et de contrôle de la protection télécom
+/// Design épuré, sobre et fonctionnel (Standard Signal & Google Phone)
 class ZenShieldCard extends StatelessWidget {
   final bool isActive;
   final bool isContactsOnly;
@@ -24,144 +24,189 @@ class ZenShieldCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final shieldStatusText = !isActive
-        ? (l10n?.shieldSuspended ?? 'Filtrage suspendu')
-        : (isContactsOnly
-            ? (l10n?.shieldStrictBadge ?? 'Bouclier Strict (Contacts Seuls)')
-            : (l10n?.shieldRealtime ?? 'Bouclier en temps réel'));
-    final shieldTitle = isActive
+    final statusColor = isActive
+        ? (isContactsOnly ? AppTheme.accentOrange : AppTheme.accentGreen)
+        : AppTheme.accentRed;
+
+    final titleText = isActive
         ? (isContactsOnly
-            ? (l10n?.shieldStrictTitle ?? 'Protection Maximale')
-            : (l10n?.shieldProtected ?? 'Vous êtes protégé'))
-        : (l10n?.shieldInactive ?? 'Protection inactive');
-    final shieldDesc = isActive
+            ? (l10n?.shieldStrictTitle ?? 'Protection Contacts Seuls')
+            : (l10n?.shieldProtected ?? 'Protection active'))
+        : (l10n?.shieldInactive ?? 'Protection suspendue');
+
+    final descText = isActive
         ? (isContactsOnly
             ? (l10n?.shieldStrictDesc ?? 'Seuls vos contacts enregistrés sont autorisés à sonner.')
-            : (l10n?.shieldActiveDesc ?? 'ShieldNet filtre automatiquement les appels malveillants.'))
-        : (l10n?.shieldInactiveDesc ?? 'Activez le filtrage pour bloquer les appels indésirables.');
+            : (l10n?.shieldActiveDesc ?? 'Les spams et numéros malveillants sont bloqués sans sonnerie.'))
+        : (l10n?.shieldInactiveDesc ?? 'Activez le filtrage pour rejeter automatiquement les appels frauduleux.');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: isActive
-            ? AppTheme.shieldActiveGradient
-            : AppTheme.shieldInactiveGradient,
+        color: isDark ? AppTheme.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isActive
+              ? statusColor.withValues(alpha: 0.3)
+              : (isDark ? AppTheme.borderDark : AppTheme.borderLight),
+          width: isActive ? 1.5 : 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: (isActive ? AppTheme.accentGreen : AppTheme.accentRed).withValues(alpha: 0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Badge Bouclier Nocturne si actif
-          if (isNightWindow) ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.indigo.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          // Ligne principale : Statut, Libellé et Commutateur Switch
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Indicateur visuel d'état
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  isActive
+                      ? (isContactsOnly ? Icons.verified_user_rounded : Icons.shield_rounded)
+                      : Icons.shield_outlined,
+                  color: statusColor,
+                  size: 24,
+                ),
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.bedtime_rounded, size: 13, color: Colors.white),
-                  SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'Bouclier Nocturne Actif',
-                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+              const SizedBox(width: 14),
+
+              // Titre et sous-titre
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            titleText,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: statusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isActive ? 'Filtrage temps réel actif (< 2 ms)' : 'Aucun appel bloqué pour l\'instant',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
 
-          // Badge d'état subtil
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
+              // Commutateur interactif rapide
+              Transform.scale(
+                scale: 0.85,
+                child: Switch.adaptive(
+                  value: isActive,
+                  activeTrackColor: AppTheme.accentGreen,
+                  onChanged: (val) {
+                    HapticFeedback.mediumImpact();
+                    if (!isActive) {
+                      onActivateProtection();
+                    } else {
+                      onToggleProtection();
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+
+          // Description détaillée
+          Text(
+            descText,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.4,
+              color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          ),
+
+          // Badges d'options actives (Mode Nuit, Contacts Uniquement)
+          if (isNightWindow || isContactsOnly) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
               children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: !isActive
-                        ? const Color(0xFFFCA5A5)
-                        : (isContactsOnly ? AppTheme.accentOrange : AppTheme.accentCyan),
+                if (isNightWindow)
+                  _buildStatusChip(
+                    icon: Icons.bedtime_rounded,
+                    label: l10n?.nightShieldActiveBadge ?? 'Bouclier Nocturne actif',
+                    color: AppTheme.primaryColor,
+                    isDark: isDark,
                   ),
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    shieldStatusText,
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                if (isContactsOnly)
+                  _buildStatusChip(
+                    icon: Icons.contacts_rounded,
+                    label: l10n?.settingContactsOnly ?? 'Mode Contacts Uniquement',
+                    color: AppTheme.accentOrange,
+                    isDark: isDark,
                   ),
-                ),
               ],
             ),
-          ),
-          const SizedBox(height: 14),
-
-          // Bouclier animé avec radar pulsant à ondes concentriques
-          PulseRadarShield(
-            isActive: isActive,
-            isContactsOnly: isContactsOnly,
-            onTap: onToggleProtection,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            shieldTitle,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            shieldDesc,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.92), fontSize: 13),
-          ),
-          if (!isActive) ...[
-            const SizedBox(height: 18),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  onActivateProtection();
-                },
-                icon: const Icon(Icons.flash_on_rounded, size: 18),
-                label: Text(l10n?.btnActivateProtection ?? 'Activer la protection', style: const TextStyle(fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppTheme.accentRed,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 3,
-                ),
-              ),
-            ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );

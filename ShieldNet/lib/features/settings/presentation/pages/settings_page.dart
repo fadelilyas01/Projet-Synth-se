@@ -188,9 +188,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 onChanged: (val) {
                   ref.read(nightShieldProvider.notifier).setEnabled(val);
                 },
-                title: const Text('Mode Bouclier Nocturne', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                title: Text(l10n?.settingNightShield ?? 'Mode Bouclier Nocturne', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 subtitle: Text(
-                  'Filtrage silencieux de ${nightShield.startHour.toString().padLeft(2, '0')}h${nightShield.startMinute.toString().padLeft(2, '0')} à ${nightShield.endHour.toString().padLeft(2, '0')}h${nightShield.endMinute.toString().padLeft(2, '0')}',
+                  l10n?.localeName == 'en'
+                      ? 'Silent filtering from ${nightShield.startHour.toString().padLeft(2, '0')}:${nightShield.startMinute.toString().padLeft(2, '0')} to ${nightShield.endHour.toString().padLeft(2, '0')}:${nightShield.endMinute.toString().padLeft(2, '0')}'
+                      : 'Filtrage silencieux de ${nightShield.startHour.toString().padLeft(2, '0')}h${nightShield.startMinute.toString().padLeft(2, '0')} à ${nightShield.endHour.toString().padLeft(2, '0')}h${nightShield.endMinute.toString().padLeft(2, '0')}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 secondary: const Icon(Icons.bedtime_rounded, color: Colors.indigoAccent, size: 24),
@@ -198,8 +200,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               const Divider(height: 1, indent: 56),
               ListTile(
                 leading: const Icon(Icons.mark_email_read_rounded, color: AppTheme.accentCyan, size: 24),
-                title: const Text('Inspecteur de SMS & Liens', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                subtitle: const Text('Analyser un message suspect ou un lien de livraison', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                title: Text(l10n?.settingSmsInspector ?? 'Inspecteur de SMS & Liens', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                subtitle: Text(l10n?.settingSmsInspectorDesc ?? 'Analyser un message suspect ou un lien de livraison', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                 onTap: () {
                   Navigator.push(
@@ -211,8 +213,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               const Divider(height: 1, indent: 56),
               ListTile(
                 leading: const Icon(Icons.health_and_safety_rounded, color: AppTheme.accentGreen, size: 24),
-                title: const Text('Numéros d\'Urgence & Liste Blanche', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                subtitle: const Text('911, 811 et contacts autorisés prioritaires', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                title: Text(l10n?.settingEmergencyWhitelist ?? 'Numéros d\'Urgence & Liste Blanche', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                subtitle: Text(l10n?.settingEmergencyWhitelistDesc ?? '911, 811 et contacts autorisés prioritaires', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                 onTap: () {
                   Navigator.push(
@@ -245,7 +247,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const SizedBox(height: 16),
 
           // Résilience & File d'attente hors-ligne
-          _buildSectionHeader('RÉSILIENCE & HORS-LIGNE'),
+          _buildSectionHeader(l10n?.sectionOfflineResilience ?? 'RÉSILIENCE & HORS-LIGNE'),
           _buildCard(
             cardBg: cardBg,
             borderColor: borderColor,
@@ -260,21 +262,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       color: count > 0 ? AppTheme.accentOrange : AppTheme.accentGreen,
                       size: 24,
                     ),
-                    title: const Text(
-                      'File d\'attente hors-ligne',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    title: Text(
+                      l10n?.settingOfflineQueue ?? 'File d\'attente hors-ligne',
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     subtitle: Text(
                       count > 0
-                          ? '$count signalement(s) en attente de synchronisation'
-                          : 'Tous les signalements et contestations sont synchronisés',
+                          ? (l10n?.settingOfflineQueuePending(count) ?? '$count signalement(s) en attente de synchronisation')
+                          : (l10n?.settingOfflineQueueAllSynced ?? 'Tous les signalements et contestations sont synchronisés'),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     trailing: count > 0
                         ? ElevatedButton.icon(
                             onPressed: _isSyncing ? null : _flushOfflineQueue,
                             icon: const Icon(Icons.upload_rounded, size: 14),
-                            label: const Text('Envoyer', style: TextStyle(fontSize: 12)),
+                            label: Text(l10n?.localeName == 'en' ? 'Send' : 'Envoyer', style: const TextStyle(fontSize: 12)),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               backgroundColor: AppTheme.accentOrange,
@@ -297,13 +299,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               SwitchListTile(
                 value: settings.seniorMode,
                 onChanged: _toggleSeniorMode,
-                title: const Text(
-                  'Mode Interface Simplifiée (Aînés)',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                title: Text(
+                  l10n?.settingSeniorMode ?? 'Mode Interface Simplifiée (Aînés)',
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
-                subtitle: const Text(
-                  'Agrandit les textes, renforce les contrastes et simplifie l\'accueil',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                subtitle: Text(
+                  l10n?.settingSeniorModeDesc ?? 'Agrandit les textes, renforce les contrastes et simplifie l\'accueil',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 secondary: const Icon(Icons.elderly_rounded, color: AppTheme.primaryColor, size: 24),
               ),
@@ -352,7 +354,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
           // Espace modération pour les comptes administrateurs et gestionnaires
           if (user != null && user.canModerate) ...[
-            _buildSectionHeader(user.isSuperAdmin ? (l10n?.sectionAdmin ?? 'ADMINISTRATION') : 'GESTION & MODÉRATION'),
+            _buildSectionHeader(user.isSuperAdmin ? (l10n?.sectionAdmin ?? 'ADMINISTRATION') : (l10n?.sectionModeration ?? 'GESTION & MODÉRATION')),
             _buildCard(
               cardBg: cardBg,
               borderColor: borderColor,
@@ -364,7 +366,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     size: 24,
                   ),
                   title: Text(
-                    user.isSuperAdmin ? (l10n?.adminConsoleTitle ?? 'Console d\'Administration') : 'Console de Gestion & Modération',
+                    user.isSuperAdmin ? (l10n?.adminConsoleTitle ?? 'Console d\'Administration') : (l10n?.consoleModerationTitle ?? 'Console de Gestion & Modération'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
@@ -381,12 +383,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ],
 
           // Informations de version et licence
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               child: Text(
-                'ShieldNet v1.0.0 • Sécurité Télécom',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                l10n?.appVersionFooter ?? 'ShieldNet v1.0.0 • Sécurité Télécom',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ),
           ),

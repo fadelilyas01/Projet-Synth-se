@@ -187,17 +187,46 @@ class _InitialSplashScreenState extends State<InitialSplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? AppTheme.backgroundDark : AppTheme.backgroundLight,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.shield, size: 100, color: AppTheme.primaryColor),
-            SizedBox(height: 20),
-            Text('ShieldNet', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-            SizedBox(height: 40),
-            CircularProgressIndicator(color: AppTheme.primaryColor),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.shield_outlined, size: 68, color: AppTheme.primaryColor),
+            ),
+            const SizedBox(height: 22),
+            Text(
+              'ShieldNet',
+              style: TextStyle(
+                color: isDark ? Colors.white : AppTheme.textPrimaryLight,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Sécurité Télécom & Confidentialité',
+              style: TextStyle(
+                color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 36),
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.primaryColor),
+            ),
           ],
         ),
       ),

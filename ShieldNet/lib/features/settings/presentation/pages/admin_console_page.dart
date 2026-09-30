@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/app_providers.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/database/database_helper.dart';
 import '../widgets/admin_overview_tab.dart';
 import '../widgets/admin_blacklist_tab.dart';
@@ -457,6 +458,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
   Widget build(BuildContext context) {
     final user = ref.watch(authNotifierProvider);
     final isSuperAdmin = user?.isSuperAdmin ?? false;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -469,7 +471,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                isSuperAdmin ? 'Administration Totale' : 'Espace Gestionnaire & Modération',
+                isSuperAdmin ? (l10n?.adminFullAdmin ?? 'Administration Totale') : (l10n?.adminManagerSpace ?? 'Espace Gestionnaire & Modération'),
                 style: const TextStyle(fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -479,7 +481,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Tout actualiser',
+            tooltip: l10n?.adminRefreshAll ?? 'Tout actualiser',
             onPressed: _loadAllAdminData,
           ),
         ],
@@ -490,12 +492,12 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
           unselectedLabelColor: Colors.grey,
           indicatorColor: isSuperAdmin ? AppTheme.accentOrange : AppTheme.primaryColor,
           tabs: [
-            const Tab(icon: Icon(Icons.dashboard_rounded), text: 'Vue d\'ensemble'),
-            const Tab(icon: Icon(Icons.format_list_bulleted_rounded), text: 'Liste Noire'),
-            const Tab(icon: Icon(Icons.report_problem_rounded), text: 'Signalements'),
+            Tab(icon: const Icon(Icons.dashboard_rounded), text: l10n?.adminTabOverview ?? 'Vue d\'ensemble'),
+            Tab(icon: const Icon(Icons.format_list_bulleted_rounded), text: l10n?.adminTabBlacklist ?? 'Liste Noire'),
+            Tab(icon: const Icon(Icons.report_problem_rounded), text: l10n?.adminTabReports ?? 'Signalements'),
             if (isSuperAdmin)
-              const Tab(icon: Icon(Icons.people_alt_rounded), text: 'Utilisateurs'),
-            const Tab(icon: Icon(Icons.history_rounded), text: 'Audit & Traces'),
+              Tab(icon: const Icon(Icons.people_alt_rounded), text: l10n?.adminTabUsers ?? 'Utilisateurs'),
+            Tab(icon: const Icon(Icons.history_rounded), text: l10n?.adminTabAudit ?? 'Audit & Traces'),
           ],
         ),
       ),
@@ -549,7 +551,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
               backgroundColor: AppTheme.accentOrange,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add_rounded),
-              label: const Text('Ajouter un Numéro'),
+              label: Text(l10n?.adminAddNumber ?? 'Ajouter un Numéro'),
               onPressed: _showAddNumberDialog,
             )
           : null,

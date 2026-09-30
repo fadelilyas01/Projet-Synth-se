@@ -869,7 +869,7 @@ abstract class AppLocalizations {
   /// No description provided for @nationalEmergencyServicesHeader.
   ///
   /// In fr, this message translates to:
-  /// **'SERVICES D\'URGENCE NATIONAUX (CANADA/QC)'**
+  /// **'SERVICES D\'URGENCE NATIONAUX (CANADA / ÉTATS-UNIS)'**
   String get nationalEmergencyServicesHeader;
 
   /// No description provided for @inviolableBadge.
@@ -889,6 +889,888 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Protection système non supprimable'**
   String get systemProtectionTooltip;
+
+  /// No description provided for @welcomeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bienvenue sur ShieldNet'**
+  String get welcomeTitle;
+
+  /// No description provided for @welcomeSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre langue d\'utilisation :'**
+  String get welcomeSubtitle;
+
+  /// No description provided for @btnSelectLanguage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la langue'**
+  String get btnSelectLanguage;
+
+  /// No description provided for @selectLanguagePrompt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pourrez modifier la langue à tout moment dans les paramètres.'**
+  String get selectLanguagePrompt;
+
+  /// No description provided for @languageFr.
+  ///
+  /// In fr, this message translates to:
+  /// **'Français (Canada)'**
+  String get languageFr;
+
+  /// No description provided for @languageEn.
+  ///
+  /// In fr, this message translates to:
+  /// **'English (US / Canada)'**
+  String get languageEn;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingActivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer la protection'**
+  String get onboardingActivate;
+
+  /// No description provided for @onboardingSlide1Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection Anti-Spam'**
+  String get onboardingSlide1Title;
+
+  /// No description provided for @onboardingSlide1Sub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tranquillité absolue au quotidien'**
+  String get onboardingSlide1Sub;
+
+  /// No description provided for @onboardingSlide1Text.
+  ///
+  /// In fr, this message translates to:
+  /// **'ShieldNet filtre les appels malveillants et le démarchage agressif en temps réel sans jamais perturber votre ligne.'**
+  String get onboardingSlide1Text;
+
+  /// No description provided for @onboardingSlide1Feat1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Blocage automatique des spams connus'**
+  String get onboardingSlide1Feat1;
+
+  /// No description provided for @onboardingSlide1Feat2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Filtrage en arrière-plan sans sonnerie'**
+  String get onboardingSlide1Feat2;
+
+  /// No description provided for @onboardingSlide1Feat3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification instantanée des numéros suspects'**
+  String get onboardingSlide1Feat3;
+
+  /// No description provided for @onboardingSlide2Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confidentialité Totale'**
+  String get onboardingSlide2Title;
+
+  /// No description provided for @onboardingSlide2Sub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos données ne quittent jamais votre appareil'**
+  String get onboardingSlide2Sub;
+
+  /// No description provided for @onboardingSlide2Text.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque numéro est chiffré et haché localement (SHA-256 avec sel cryptographique). Aucun répertoire n\'est transmis à nos serveurs.'**
+  String get onboardingSlide2Text;
+
+  /// No description provided for @onboardingSlide2Feat1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Anonymisation cryptographique locale'**
+  String get onboardingSlide2Feat1;
+
+  /// No description provided for @onboardingSlide2Feat2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zéro partage de vos contacts personnels'**
+  String get onboardingSlide2Feat2;
+
+  /// No description provided for @onboardingSlide2Feat3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conforme aux normes de sécurité strictes'**
+  String get onboardingSlide2Feat3;
+
+  /// No description provided for @onboardingSlide3Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêt en 1 Geste'**
+  String get onboardingSlide3Title;
+
+  /// No description provided for @onboardingSlide3Sub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez le bouclier intelligent'**
+  String get onboardingSlide3Sub;
+
+  /// No description provided for @onboardingSlide3Text.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accordez les autorisations nécessaires pour permettre à ShieldNet d\'intercepter les spams avant qu\'ils ne sonnent.'**
+  String get onboardingSlide3Text;
+
+  /// No description provided for @onboardingSlide3Feat1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rôle de filtrage d\'appels natif'**
+  String get onboardingSlide3Feat1;
+
+  /// No description provided for @onboardingSlide3Feat2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détection préventive des SMS frauduleux'**
+  String get onboardingSlide3Feat2;
+
+  /// No description provided for @onboardingSlide3Feat3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection active 24h/24 en toute discrétion'**
+  String get onboardingSlide3Feat3;
+
+  /// No description provided for @seniorModeActiveTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode Simplifié Actif'**
+  String get seniorModeActiveTitle;
+
+  /// No description provided for @seniorModeActiveDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Textes et boutons agrandis. Votre téléphone est protégé contre toute fraude.'**
+  String get seniorModeActiveDesc;
+
+  /// No description provided for @actionCheckNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier Numéro'**
+  String get actionCheckNumber;
+
+  /// No description provided for @actionCheckNumberSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuaire anti-spam'**
+  String get actionCheckNumberSub;
+
+  /// No description provided for @actionSmsInspector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inspecteur SMS'**
+  String get actionSmsInspector;
+
+  /// No description provided for @actionSmsInspectorSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détection phishing'**
+  String get actionSmsInspectorSub;
+
+  /// No description provided for @nightShieldActiveBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bouclier Nocturne Actif'**
+  String get nightShieldActiveBadge;
+
+  /// No description provided for @copiedNumberDetected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro copié détecté'**
+  String get copiedNumberDetected;
+
+  /// No description provided for @serenityOptimal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection Optimale'**
+  String get serenityOptimal;
+
+  /// No description provided for @serenityHigh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection Élevée'**
+  String get serenityHigh;
+
+  /// No description provided for @serenityPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection Partielle'**
+  String get serenityPartial;
+
+  /// No description provided for @serenityVulnerable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appareil Vulnérable'**
+  String get serenityVulnerable;
+
+  /// No description provided for @serenityAllBarriers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les barrières de protection sont activées.'**
+  String get serenityAllBarriers;
+
+  /// No description provided for @serenityActionsNeeded.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} action(s) recommandée(s) pour 100% de protection.'**
+  String serenityActionsNeeded(Object count);
+
+  /// No description provided for @serenityTipPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conseil :'**
+  String get serenityTipPrefix;
+
+  /// No description provided for @serenityImproveScore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Améliorer mon score'**
+  String get serenityImproveScore;
+
+  /// No description provided for @recNativeFilterTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez le filtrage d\'appels natif'**
+  String get recNativeFilterTitle;
+
+  /// No description provided for @recNativeFilterDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloque automatiquement les numéros malveillants avant que le téléphone ne sonne.'**
+  String get recNativeFilterDesc;
+
+  /// No description provided for @recUpdateDbTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettez à jour la base anti-spam'**
+  String get recUpdateDbTitle;
+
+  /// No description provided for @recUpdateDbDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargez les derniers signalements pour rester protégé même sans réseau.'**
+  String get recUpdateDbDesc;
+
+  /// No description provided for @recAutoBlockTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez le blocage automatique'**
+  String get recAutoBlockTitle;
+
+  /// No description provided for @recAutoBlockDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rejette directement les arnaques avérées sans vous déranger.'**
+  String get recAutoBlockDesc;
+
+  /// No description provided for @recBiometricTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurisez l\'accès par biométrie'**
+  String get recBiometricTitle;
+
+  /// No description provided for @recBiometricDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protégez vos listes blanches et données personnelles par empreinte ou visage.'**
+  String get recBiometricDesc;
+
+  /// No description provided for @recContactsOnlyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez le mode Contacts Uniquement'**
+  String get recContactsOnlyTitle;
+
+  /// No description provided for @recContactsOnlyDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour une protection complète, seuls vos contacts enregistrés peuvent faire sonner l\'appareil.'**
+  String get recContactsOnlyDesc;
+
+  /// No description provided for @citizenImpactTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalements communautaires'**
+  String get citizenImpactTitle;
+
+  /// No description provided for @citizenImpactSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partage de signalements'**
+  String get citizenImpactSub;
+
+  /// No description provided for @citizenProtectedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'~{count} concitoyens protégés'**
+  String citizenProtectedCount(Object count);
+
+  /// No description provided for @citizenReportToProtect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalez un spam pour protéger les autres utilisateurs.'**
+  String get citizenReportToProtect;
+
+  /// No description provided for @citizenThanksReports.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grâce à vos {count} signalement(s) validé(s).'**
+  String citizenThanksReports(Object count);
+
+  /// No description provided for @rankInitial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Niveau 1 : Signalement initial'**
+  String get rankInitial;
+
+  /// No description provided for @rankSentinel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sentinelle Vigilante'**
+  String get rankSentinel;
+
+  /// No description provided for @rankGuardian.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protecteur Citoyen'**
+  String get rankGuardian;
+
+  /// No description provided for @rankPillar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pilier de la Communauté'**
+  String get rankPillar;
+
+  /// No description provided for @regionalRadarTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Radar Régional des Arnaques'**
+  String get regionalRadarTitle;
+
+  /// No description provided for @regionalRadarDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse en temps réel des vagues d\'usurpation d\'identité (Spoofing) ciblées par indicatif régional (Canada / États-Unis).'**
+  String get regionalRadarDesc;
+
+  /// No description provided for @regionalAlertPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte Indicatif'**
+  String get regionalAlertPrefix;
+
+  /// No description provided for @regionalWaveDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vague active d\'appels frauduleux ciblant la région : {region}.'**
+  String regionalWaveDesc(Object region);
+
+  /// No description provided for @regionalReportsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'signalements • Type :'**
+  String get regionalReportsCount;
+
+  /// No description provided for @reportPageTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler un Numéro'**
+  String get reportPageTitle;
+
+  /// No description provided for @reportHelpCommunity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aidez la communauté'**
+  String get reportHelpCommunity;
+
+  /// No description provided for @reportHelpCommunityDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalez un numéro suspect pour le bloquer et avertir les autres utilisateurs de ShieldNet.'**
+  String get reportHelpCommunityDesc;
+
+  /// No description provided for @reportPhoneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone suspect'**
+  String get reportPhoneLabel;
+
+  /// No description provided for @reportCategoryLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nature de la nuisance'**
+  String get reportCategoryLabel;
+
+  /// No description provided for @reportCatFraud.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fraude / Arnaque'**
+  String get reportCatFraud;
+
+  /// No description provided for @reportCatTelemarketing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Démarchage Commercial'**
+  String get reportCatTelemarketing;
+
+  /// No description provided for @reportCatFinancialScam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arnaque Financière'**
+  String get reportCatFinancialScam;
+
+  /// No description provided for @reportCatPhishing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hameçonnage / Phishing'**
+  String get reportCatPhishing;
+
+  /// No description provided for @reportCatRobocall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel Automatisé / Robocall'**
+  String get reportCatRobocall;
+
+  /// No description provided for @reportCommentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commentaire (Optionnel)'**
+  String get reportCommentLabel;
+
+  /// No description provided for @reportCommentHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisez le contexte de l\'appel...'**
+  String get reportCommentHint;
+
+  /// No description provided for @reportSubmitButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transmettre le Signalement'**
+  String get reportSubmitButton;
+
+  /// No description provided for @reportInvalidPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez saisir un numéro de téléphone valide (au moins 7 chiffres).'**
+  String get reportInvalidPhone;
+
+  /// No description provided for @reportSuccessToast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement anonymisé HMAC transmis et enregistré avec succès.'**
+  String get reportSuccessToast;
+
+  /// No description provided for @smsInspectorTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inspecteur de SMS & Liens'**
+  String get smsInspectorTitle;
+
+  /// No description provided for @smsInspectorOfflineTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse 100% Hors-Ligne & Confidentielle'**
+  String get smsInspectorOfflineTitle;
+
+  /// No description provided for @smsInspectorOfflineDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le texte de vos SMS n\'est jamais transmis à un serveur distant.'**
+  String get smsInspectorOfflineDesc;
+
+  /// No description provided for @smsInspectorInputHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collez ici le texte du SMS suspect ou le message reçu...'**
+  String get smsInspectorInputHint;
+
+  /// No description provided for @smsInspectorBtnPaste.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coller le SMS'**
+  String get smsInspectorBtnPaste;
+
+  /// No description provided for @smsInspectorBtnInspect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inspecter'**
+  String get smsInspectorBtnInspect;
+
+  /// No description provided for @smsInspectorClipboardEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le presse-papier est vide.'**
+  String get smsInspectorClipboardEmpty;
+
+  /// No description provided for @smsInspectorReset.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser'**
+  String get smsInspectorReset;
+
+  /// No description provided for @smsRiskAnalysisTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse du Risque :'**
+  String get smsRiskAnalysisTitle;
+
+  /// No description provided for @smsThreatDetected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Menace Détectée'**
+  String get smsThreatDetected;
+
+  /// No description provided for @smsSuspicious.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message Suspect'**
+  String get smsSuspicious;
+
+  /// No description provided for @smsSafe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message Semblant Sain'**
+  String get smsSafe;
+
+  /// No description provided for @smsScoreLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Score de Risque'**
+  String get smsScoreLabel;
+
+  /// No description provided for @smsIndicatorsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicateurs détectés'**
+  String get smsIndicatorsLabel;
+
+  /// No description provided for @smsAdviceLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conseil de Sécurité'**
+  String get smsAdviceLabel;
+
+  /// No description provided for @settingNightShield.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode Bouclier Nocturne'**
+  String get settingNightShield;
+
+  /// No description provided for @settingNightShieldDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Filtrage silencieux durant vos heures de sommeil'**
+  String get settingNightShieldDesc;
+
+  /// No description provided for @settingSmsInspector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inspecteur de SMS & Liens'**
+  String get settingSmsInspector;
+
+  /// No description provided for @settingSmsInspectorDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyser un message suspect ou un lien de livraison'**
+  String get settingSmsInspectorDesc;
+
+  /// No description provided for @settingEmergencyWhitelist.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéros d\'Urgence & Liste Blanche'**
+  String get settingEmergencyWhitelist;
+
+  /// No description provided for @settingEmergencyWhitelistDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'911, 988 et contacts prioritaires garantis'**
+  String get settingEmergencyWhitelistDesc;
+
+  /// No description provided for @settingSeniorMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode Interface Simplifiée (Aînés)'**
+  String get settingSeniorMode;
+
+  /// No description provided for @settingSeniorModeDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Agrandit les textes, renforce les contrastes et simplifie l\'accueil'**
+  String get settingSeniorModeDesc;
+
+  /// No description provided for @sectionOfflineResilience.
+  ///
+  /// In fr, this message translates to:
+  /// **'RÉSILIENCE & HORS-LIGNE'**
+  String get sectionOfflineResilience;
+
+  /// No description provided for @settingOfflineQueue.
+  ///
+  /// In fr, this message translates to:
+  /// **'File d\'attente hors-ligne'**
+  String get settingOfflineQueue;
+
+  /// No description provided for @settingOfflineQueueAllSynced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les signalements sont synchronisés'**
+  String get settingOfflineQueueAllSynced;
+
+  /// No description provided for @settingOfflineQueuePending.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} signalement(s) en attente de synchronisation'**
+  String settingOfflineQueuePending(Object count);
+
+  /// No description provided for @sectionModeration.
+  ///
+  /// In fr, this message translates to:
+  /// **'GESTION & MODÉRATION'**
+  String get sectionModeration;
+
+  /// No description provided for @consoleModerationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Console de Gestion & Modération'**
+  String get consoleModerationTitle;
+
+  /// No description provided for @appVersionFooter.
+  ///
+  /// In fr, this message translates to:
+  /// **'ShieldNet v1.0.0 • Sécurité Télécom'**
+  String get appVersionFooter;
+
+  /// No description provided for @auditCompletedSpam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audit terminé : {count} numéro(s) suspect(s) identifié(s) dans votre journal.'**
+  String auditCompletedSpam(Object count);
+
+  /// No description provided for @auditCompletedClean.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audit terminé : Vos {count} appels récents sont sains.'**
+  String auditCompletedClean(Object count);
+
+  /// No description provided for @auditNetworkError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'effectuer l\'audit réseau.'**
+  String get auditNetworkError;
+
+  /// No description provided for @auditNoVerifiableNumbers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun numéro vérifiable dans le journal récent.'**
+  String get auditNoVerifiableNumbers;
+
+  /// No description provided for @disputeModalTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contestation de Faux-Positif'**
+  String get disputeModalTitle;
+
+  /// No description provided for @disputeCallNature.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nature de l\'appel légitime :'**
+  String get disputeCallNature;
+
+  /// No description provided for @disputeReasonService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service / Entreprise'**
+  String get disputeReasonService;
+
+  /// No description provided for @disputeReasonPersonal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnel / Proche'**
+  String get disputeReasonPersonal;
+
+  /// No description provided for @disputeReasonDelivery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison / Colis'**
+  String get disputeReasonDelivery;
+
+  /// No description provided for @disputeReasonMedical.
+  ///
+  /// In fr, this message translates to:
+  /// **'Santé / Médical'**
+  String get disputeReasonMedical;
+
+  /// No description provided for @disputeReasonMistake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de signalement'**
+  String get disputeReasonMistake;
+
+  /// No description provided for @disputeCommentHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisions utiles (ex: cabinet de mon médecin traitant)'**
+  String get disputeCommentHint;
+
+  /// No description provided for @disputeProtectedNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro protégé'**
+  String get disputeProtectedNumber;
+
+  /// No description provided for @disputeRiskScore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Score de risque : {score}% ({count} signalement(s))'**
+  String disputeRiskScore(Object count, Object score);
+
+  /// No description provided for @disputeFilteredNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro est actuellement filtré par ShieldNet. S\'il s\'agit d\'un médecin, d\'un livreur ou d\'un proche légitime, vous pouvez contester ce blocage pour accélérer sa réhabilitation.'**
+  String get disputeFilteredNotice;
+
+  /// No description provided for @disputeBtnContest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contester (Faux positif)'**
+  String get disputeBtnContest;
+
+  /// No description provided for @serenitySecurityLevel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Niveau de sécurité'**
+  String get serenitySecurityLevel;
+
+  /// No description provided for @serenityRecommendation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommandation'**
+  String get serenityRecommendation;
+
+  /// No description provided for @deviceIntegrityRooted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurité Système : Appareil Rooté'**
+  String get deviceIntegrityRooted;
+
+  /// No description provided for @deviceIntegrityDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un accès super-utilisateur (su / Magisk) est présent. Les protections cryptographiques locales peuvent être vulnérables.'**
+  String get deviceIntegrityDesc;
+
+  /// No description provided for @disputeSuccessToast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis légitime transmis ! Le consensus communautaire évalue la réhabilitation.'**
+  String get disputeSuccessToast;
+
+  /// No description provided for @disputeErrorToast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer votre contestation.'**
+  String get disputeErrorToast;
+
+  /// No description provided for @disputeSubmitBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transmettre la contestation'**
+  String get disputeSubmitBtn;
+
+  /// No description provided for @auditHeaderTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audit de sécurité du journal'**
+  String get auditHeaderTitle;
+
+  /// No description provided for @auditHeaderDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifie vos 50 derniers appels via le Cloud'**
+  String get auditHeaderDesc;
+
+  /// No description provided for @auditHeaderBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lancer'**
+  String get auditHeaderBtn;
+
+  /// No description provided for @adminFullAdmin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Administration Totale'**
+  String get adminFullAdmin;
+
+  /// No description provided for @adminManagerSpace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espace Gestionnaire & Modération'**
+  String get adminManagerSpace;
+
+  /// No description provided for @adminTabOverview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vue d\'ensemble'**
+  String get adminTabOverview;
+
+  /// No description provided for @adminTabBlacklist.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste Noire'**
+  String get adminTabBlacklist;
+
+  /// No description provided for @adminTabReports.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalements'**
+  String get adminTabReports;
+
+  /// No description provided for @adminTabUsers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisateurs'**
+  String get adminTabUsers;
+
+  /// No description provided for @adminTabAudit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Audit & Traces'**
+  String get adminTabAudit;
+
+  /// No description provided for @adminAddNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un Numéro'**
+  String get adminAddNumber;
+
+  /// No description provided for @adminRefreshAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout actualiser'**
+  String get adminRefreshAll;
 }
 
 class _AppLocalizationsDelegate

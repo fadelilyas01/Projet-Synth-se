@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../sms_inspector/presentation/pages/sms_inspector_page.dart';
 
 /// Hub d'actions rapides : Vérifier un numéro + Inspecteur SMS
@@ -17,6 +18,7 @@ class ActionHubRow extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
+    final l10n = AppLocalizations.of(context);
 
     return Row(
       children: [
@@ -29,8 +31,8 @@ class ActionHubRow extends StatelessWidget {
             isDark: isDark,
             icon: Icons.search_rounded,
             iconColor: AppTheme.primaryColor,
-            title: 'Vérifier Numéro',
-            subtitle: 'Annuaire anti-spam',
+            title: l10n?.actionCheckNumber ?? 'Vérifier Numéro',
+            subtitle: l10n?.actionCheckNumberSub ?? 'Annuaire anti-spam',
             onTap: () {
               HapticFeedback.selectionClick();
               onVerifyNumber();
@@ -48,8 +50,8 @@ class ActionHubRow extends StatelessWidget {
             isDark: isDark,
             icon: Icons.mark_email_read_rounded,
             iconColor: AppTheme.accentCyan,
-            title: 'Inspecteur SMS',
-            subtitle: 'Détection phishing',
+            title: l10n?.actionSmsInspector ?? 'Inspecteur SMS',
+            subtitle: l10n?.actionSmsInspectorSub ?? 'Détection phishing',
             onTap: () {
               HapticFeedback.selectionClick();
               Navigator.push(

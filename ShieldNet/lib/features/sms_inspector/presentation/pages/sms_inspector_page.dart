@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/sms_phishing_detector.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../controllers/sms_inspector_controller.dart';
 
 class SmsInspectorPage extends ConsumerStatefulWidget {
@@ -43,8 +44,12 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
       ref.read(smsInspectorProvider.notifier).analyze(text);
     } else {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Le presse-papier est vide.'), backgroundColor: AppTheme.accentOrange),
+          SnackBar(
+            content: Text(l10n?.smsInspectorClipboardEmpty ?? 'Le presse-papier est vide.'),
+            backgroundColor: AppTheme.accentOrange,
+          ),
         );
       }
     }
@@ -66,6 +71,7 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final inspectorState = ref.watch(smsInspectorProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
@@ -73,18 +79,18 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.mark_email_read_rounded, color: AppTheme.accentCyan),
-            SizedBox(width: 8),
-            Text('Inspecteur de SMS & Liens', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Icon(Icons.mark_email_read_rounded, color: AppTheme.accentCyan),
+            const SizedBox(width: 8),
+            Text(l10n?.smsInspectorTitle ?? 'Inspecteur de SMS & Liens', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           ],
         ),
         actions: [
           if (_textController.text.isNotEmpty || inspectorState.result != null)
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
-              tooltip: 'Réinitialiser',
+              tooltip: l10n?.smsInspectorReset ?? 'Réinitialiser',
               onPressed: _clearAll,
             ),
         ],
@@ -92,39 +98,50 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // Carte d'introduction
+          // Carte d'introduction & confidentialité
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-                    : [const Color(0xFFE0F2FE), const Color(0xFFBAE6FD)],
-              ),
+              color: cardBg,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Row(
               children: [
-                const Icon(Icons.security_rounded, color: AppTheme.accentCyan, size: 30),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.accentCyan.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.security_rounded, color: AppTheme.accentCyan, size: 24),
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Analyse 100% Hors-Ligne & Confidentielle',
+                        l10n?.smsInspectorOfflineTitle ?? 'Analyse 100% Hors-Ligne & Confidentielle',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: isDark ? Colors.white : const Color(0xFF0369A1),
+                          color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Le texte de vos SMS n\'est jamais transmis à un serveur distant.',
+                        l10n?.smsInspectorOfflineDesc ?? 'Le texte de vos SMS n\'est jamais transmis à un serveur distant.',
                         style: TextStyle(
-                          fontSize: 11,
-                          color: isDark ? Colors.grey.shade400 : const Color(0xFF0284C7),
+                          fontSize: 12,
+                          color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
                         ),
                       ),
                     ],
@@ -148,9 +165,9 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
                   controller: _textController,
                   maxLines: 5,
                   minLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: 'Collez ici le texte du SMS suspect ou le message reçu...',
-                    contentPadding: EdgeInsets.all(16),
+                  decoration: InputDecoration(
+                    hintText: l10n?.smsInspectorInputHint ?? 'Collez ici le texte du SMS suspect ou le message reçu...',
+                    contentPadding: const EdgeInsets.all(16),
                     border: InputBorder.none,
                   ),
                 ),
@@ -161,14 +178,14 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
                     children: [
                       OutlinedButton.icon(
                         icon: const Icon(Icons.content_paste_rounded, size: 16),
-                        label: const Text('Coller le SMS', style: TextStyle(fontSize: 12)),
+                        label: Text(l10n?.smsInspectorBtnPaste ?? 'Coller le SMS', style: const TextStyle(fontSize: 12)),
                         onPressed: _pasteFromClipboard,
                       ),
                       ElevatedButton.icon(
                         icon: inspectorState.isAnalyzing
                             ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                             : const Icon(Icons.shield_outlined, size: 16),
-                        label: const Text('Inspecter', style: TextStyle(fontSize: 12)),
+                        label: Text(l10n?.smsInspectorBtnInspect ?? 'Inspecter', style: const TextStyle(fontSize: 12)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.accentCyan,
                           foregroundColor: Colors.white,
@@ -185,29 +202,33 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
 
           // Résultats de l'analyse
           if (inspectorState.result != null) ...[
-            _buildResultCard(inspectorState.result!, cardBg, borderColor),
+            _buildResultCard(inspectorState.result!, cardBg, borderColor, l10n),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildResultCard(PhishingAnalysisResult res, Color cardBg, Color borderColor) {
+  Widget _buildResultCard(PhishingAnalysisResult res, Color cardBg, Color borderColor, AppLocalizations? l10n) {
     Color verdictColor;
     IconData verdictIcon;
+    String verdictTitle = res.verdictTitle;
 
     switch (res.level) {
       case PhishingRiskLevel.dangerous:
         verdictColor = AppTheme.accentRed;
         verdictIcon = Icons.dangerous_rounded;
+        verdictTitle = l10n?.smsThreatDetected ?? res.verdictTitle;
         break;
       case PhishingRiskLevel.suspicious:
         verdictColor = AppTheme.accentOrange;
         verdictIcon = Icons.warning_amber_rounded;
+        verdictTitle = l10n?.smsSuspicious ?? res.verdictTitle;
         break;
       case PhishingRiskLevel.safe:
         verdictColor = AppTheme.accentGreen;
         verdictIcon = Icons.check_circle_outline_rounded;
+        verdictTitle = l10n?.smsSafe ?? res.verdictTitle;
         break;
     }
 
@@ -245,7 +266,7 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      res.verdictTitle,
+                      verdictTitle,
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -254,7 +275,7 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Score de risque : ${res.riskScore}/100',
+                      '${l10n?.smsScoreLabel ?? "Score de risque"} : ${res.riskScore}/100',
                       style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -268,7 +289,10 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
           // Liens extraits
           if (res.extractedUrls.isNotEmpty) ...[
             const SizedBox(height: 16),
-            const Text('LIENS DÉTECTÉS DANS LE MESSAGE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0)),
+            Text(
+              l10n?.localeName == 'en' ? 'LINKS DETECTED IN MESSAGE' : 'LIENS DÉTECTÉS DANS LE MESSAGE',
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0),
+            ),
             const SizedBox(height: 6),
             ...res.extractedUrls.map((u) => Container(
               margin: const EdgeInsets.only(bottom: 6),
@@ -298,7 +322,10 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
           // Signaux d'alerte détectés
           if (res.detectedRedFlags.isNotEmpty) ...[
             const SizedBox(height: 14),
-            const Text('INDICATEURS DE SUSPICION', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0)),
+            Text(
+              l10n?.smsIndicatorsLabel ?? 'INDICATEURS DE SUSPICION',
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0),
+            ),
             const SizedBox(height: 6),
             ...res.detectedRedFlags.map((flag) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
@@ -318,7 +345,10 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
           // Recommandations
           if (res.recommendations.isNotEmpty) ...[
             const SizedBox(height: 14),
-            const Text('CONSEILS DE SÉCURITÉ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0)),
+            Text(
+              l10n?.smsAdviceLabel ?? 'CONSEILS DE SÉCURITÉ',
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0),
+            ),
             const SizedBox(height: 6),
             ...res.recommendations.map((rec) => Padding(
               padding: const EdgeInsets.only(bottom: 4),

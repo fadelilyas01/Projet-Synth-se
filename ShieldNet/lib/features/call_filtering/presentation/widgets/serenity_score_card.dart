@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/services/serenity_score_calculator.dart';
 
-/// Carte récapitulative du niveau de protection de l'appareil
+/// Carte de diagnostic et de niveau de sécurité de l'appareil
+/// Design épuré inspiré des audits de sécurité Google Pixel / Apple Privacy Report
 class SerenityScoreCard extends StatelessWidget {
   final SerenityScoreResult result;
   final VoidCallback? onRefresh;
@@ -17,21 +19,39 @@ class SerenityScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
 
+    String localizedStatusTitle(String title) {
+      if (title.contains('Optimale') || title.contains('Optimal')) return l10n?.serenityOptimal ?? title;
+      if (title.contains('Élevée') || title.contains('High')) return l10n?.serenityHigh ?? title;
+      if (title.contains('Partielle') || title.contains('Partial')) return l10n?.serenityPartial ?? title;
+      if (title.contains('Vulnérable') || title.contains('Vulnerable')) return l10n?.serenityVulnerable ?? title;
+      return title;
+    }
+
+    String localizedRecTitle(String title) {
+      if (title.contains("filtrage d'appels") || title.contains('call screening')) return l10n?.recNativeFilterTitle ?? title;
+      if (title.contains('base anti-spam') || title.contains('anti-spam database')) return l10n?.recUpdateDbTitle ?? title;
+      if (title.contains('blocage automatique') || title.contains('auto-block')) return l10n?.recAutoBlockTitle ?? title;
+      if (title.contains('biométrie') || title.contains('biometrics')) return l10n?.recBiometricTitle ?? title;
+      if (title.contains('Contacts Uniquement') || title.contains('Contacts Only')) return l10n?.recContactsOnlyTitle ?? title;
+      return title;
+    }
+
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -40,113 +60,93 @@ class SerenityScoreCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              // Jauge circulaire stylisée avec pourcentage
-              SizedBox(
-                width: 56,
-                height: 56,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CircularProgressIndicator(
-                      value: result.score / 100.0,
-                      strokeWidth: 6,
-                      backgroundColor: result.statusColor.withValues(alpha: 0.15),
-                      valueColor: AlwaysStoppedAnimation<Color>(result.statusColor),
-                      strokeCap: StrokeCap.round,
-                    ),
-                    Center(
-                      child: Text(
-                        '${result.score}%',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: result.statusColor,
-                        ),
-                      ),
-                    ),
-                  ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: result.statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  result.score >= 80 ? Icons.verified_user_outlined : Icons.security_update_warning_outlined,
+                  color: result.statusColor,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: result.statusColor,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            result.statusTitle,
+                            '${l10n?.serenitySecurityLevel ?? "Niveau de sécurité"} : ${localizedStatusTitle(result.statusTitle)}',
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: result.statusColor,
+                              color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${result.score}%',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: result.statusColor,
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      result.score == 100
-                          ? 'Toutes les barrières de protection sont activées.'
-                          : '${result.recommendations.length} action(s) recommandée(s) pour 100% de protection.',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: result.score / 100.0,
+                        minHeight: 5,
+                        backgroundColor: result.statusColor.withValues(alpha: 0.15),
+                        valueColor: AlwaysStoppedAnimation<Color>(result.statusColor),
+                      ),
                     ),
                   ],
                 ),
               ),
-              if (result.score < 100)
-                IconButton(
-                  icon: const Icon(Icons.tune_rounded, size: 20),
-                  tooltip: 'Améliorer mon score',
-                  onPressed: onOpenSettings,
-                ),
             ],
           ),
 
           if (result.recommendations.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 10),
-            // Première recommandation prioritaire
             InkWell(
               onTap: onOpenSettings,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 decoration: BoxDecoration(
-                  color: result.statusColor.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
+                  color: result.statusColor.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    Icon(result.recommendations.first.icon, size: 18, color: result.statusColor),
-                    const SizedBox(width: 10),
+                    Icon(result.recommendations.first.icon, size: 16, color: result.statusColor),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Conseil : ${result.recommendations.first.title} (+${result.recommendations.first.scoreBonus}%)',
+                        '${l10n?.serenityRecommendation ?? "Recommandation"} : ${localizedRecTitle(result.recommendations.first.title)}',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: result.statusColor,
+                          color: isDark ? AppTheme.textPrimaryDark : const Color(0xFF1E293B),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Icon(Icons.arrow_forward_ios_rounded, size: 12, color: result.statusColor),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 11, color: result.statusColor),
                   ],
                 ),
               ),

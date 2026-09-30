@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/models/regional_threat.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Carte d'alerte et de veille sur les menaces téléphoniques régionales ciblées (Spoofing)
 class RegionalThreatCard extends StatelessWidget {
@@ -12,6 +13,7 @@ class RegionalThreatCard extends StatelessWidget {
   });
 
   void _showDetailsBottomSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -39,21 +41,22 @@ class RegionalThreatCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.radar_rounded, color: AppTheme.accentOrange, size: 24),
-                  SizedBox(width: 10),
+                  const Icon(Icons.radar_rounded, color: AppTheme.accentOrange, size: 24),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Radar Régional des Arnaques',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      l10n?.regionalRadarTitle ?? 'Radar Régional des Arnaques',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
-                'Analyse en temps réel des vagues d\'usurpation d\'identité (Spoofing) ciblées par indicatif québécois et canadien.',
+                l10n?.regionalRadarDesc ??
+                    'Analyse en temps réel des vagues d\'usurpation d\'identité (Spoofing) ciblées par indicatif québécois et canadien.',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
@@ -95,7 +98,7 @@ class RegionalThreatCard extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       ),
                       subtitle: Text(
-                        '${item.totalSpams} signalements • Type: ${item.topCategory}',
+                        '${item.totalSpams} ${l10n?.regionalReportsCount ?? "signalements • Type :"} ${item.topCategory}',
                         style: const TextStyle(fontSize: 12),
                       ),
                       trailing: Container(
@@ -129,7 +132,7 @@ class RegionalThreatCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Compris', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(l10n?.btnUnderstood ?? 'Compris', style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -141,6 +144,7 @@ class RegionalThreatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final highest = summary.highestAlert;
     if (highest == null) return const SizedBox.shrink();
 
@@ -184,7 +188,7 @@ class RegionalThreatCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Alerte Indicatif (${highest.areaCode})',
+                        '${l10n?.regionalAlertPrefix ?? "Alerte Indicatif"} (${highest.areaCode})',
                         style: TextStyle(
                           color: alertColor,
                           fontWeight: FontWeight.w800,
@@ -211,7 +215,7 @@ class RegionalThreatCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Vague active d\'appels frauduleux ciblant la région : ${highest.regionName}.',
+                    l10n?.regionalWaveDesc(highest.regionName) ?? 'Vague active d\'appels frauduleux ciblant la région : ${highest.regionName}.',
                     style: const TextStyle(fontSize: 12, height: 1.3),
                   ),
                 ],

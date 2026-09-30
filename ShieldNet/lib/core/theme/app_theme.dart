@@ -1,50 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Système de design officiel ShieldNet : Identité Cyber Indigo & Émeraude (Style Linear / Proton)
+/// Système de design officiel ShieldNet : Identité Télécom & Cybersécurité (Standard Pro / WireGuard & Signal)
 class AppTheme {
-  // Brand Identity : Indigo Électrique & Cyber Indigo
-  static const Color primaryColor = Color(0xFF6366F1); // Indigo Électrique
-  static const Color primaryDarkColor = Color(0xFF4F46E5); // Indigo Profond
-  static const Color primaryLightColor = Color(0xFF818CF8); // Indigo Lumineux
+  // Brand Identity : Bleu Télécom Cobalt & Ardoise Institutionnelle
+  static const Color primaryColor = Color(0xFF1D4ED8); // Bleu Cobalt Sécurité
+  static const Color primaryDarkColor = Color(0xFF1E3A8A); // Bleu Marine Profond
+  static const Color primaryLightColor = Color(0xFF3B82F6); // Bleu Ciel Professionnel
 
-  // Sécurité & Protection Active (Émeraude & Mint Néon)
-  static const Color accentGreen = Color(0xFF10B981); // Émeraude Cyber
-  static const Color accentCyan = Color(0xFF00F5D4); // Cyan / Néon Mint
+  // Sécurité & Protection Active (Émeraude Posée & Bleu Ardoise)
+  static const Color accentGreen = Color(0xFF059669); // Vert de Confiance (WCAG AAA)
+  static const Color accentCyan = Color(0xFF0284C7); // Bleu Acier Télécom
 
-  // Alertes & Menaces (Crimson & Sunset Coral)
-  static const Color accentRed = Color(0xFFF43F5E); // Rose-Crimson Moderne
-  static const Color accentOrange = Color(0xFFFB923C); // Ambre / Coral Vif
+  // Alertes & Menaces (Rouge Alerte & Ambre Sobre)
+  static const Color accentRed = Color(0xFFDC2626); // Rouge Sécurité Réglementaire
+  static const Color accentOrange = Color(0xFFD97706); // Ambre Avertissement
 
-  // Mode Sombre : Obsidienne OLED Profonde (Non gris terne)
-  static const Color backgroundDark = Color(0xFF0A0E1A); // Noir Obsidienne Espace Profond
-  static const Color surfaceDark = Color(0xFF141B2D); // Surface Bleu-Nuit Saphir
-  static const Color borderDark = Color(0xFF222F4C); // Bordure Subtile Électrique
-  static const Color textPrimaryDark = Color(0xFFF1F5F9);
+  // Mode Sombre : Ardoise Neutre & Mat (Style Bitwarden / Proton)
+  static const Color backgroundDark = Color(0xFF0F172A); // Ardoise 900 Neutre
+  static const Color surfaceDark = Color(0xFF1E293B); // Ardoise 800 Structurée
+  static const Color borderDark = Color(0xFF334155); // Bordure Subtile Ardoise 700
+  static const Color textPrimaryDark = Color(0xFFF8FAFC);
   static const Color textSecondaryDark = Color(0xFF94A3B8);
 
-  // Mode Clair : Perle & Snow Moderne
+  // Mode Clair : Fond Neutre & Surfaces Blanc Pur
   static const Color backgroundLight = Color(0xFFF8FAFC);
   static const Color surfaceLight = Colors.white;
   static const Color borderLight = Color(0xFFE2E8F0);
-  static const Color textPrimaryLight = Color(0xFF0B132B); // Bleu Nuit Encre Profond
-  static const Color textSecondaryLight = Color(0xFF64748B);
+  static const Color textPrimaryLight = Color(0xFF0F172A); // Bleu Nuit Encre Profond
+  static const Color textSecondaryLight = Color(0xFF475569);
 
-  // Dégradés Cyber Signature
+  // Dégradés Professionnels Sobres (Ton sur Ton)
   static const LinearGradient shieldActiveGradient = LinearGradient(
-    colors: [Color(0xFF0D9488), Color(0xFF10B981), Color(0xFF00F5D4)],
+    colors: [Color(0xFF047857), Color(0xFF059669)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient shieldInactiveGradient = LinearGradient(
-    colors: [Color(0xFF9F1239), Color(0xFFE11D48), Color(0xFFFB7185)],
+    colors: [Color(0xFFB91C1C), Color(0xFFDC2626)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient brandGradient = LinearGradient(
-    colors: [Color(0xFF4F46E5), Color(0xFF6366F1), Color(0xFF818CF8)],
+    colors: [Color(0xFF1E3A8A), Color(0xFF1D4ED8), Color(0xFF2563EB)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

@@ -107,16 +107,16 @@ class SerenityScoreCalculator {
 
     if (total >= 90) {
       title = 'Protection Optimale';
-      color = const Color(0xFF10B981); // Emerald Green
+      color = const Color(0xFF059669); // Vert Émeraude Sécurisé
     } else if (total >= 70) {
       title = 'Protection Élevée';
-      color = const Color(0xFF06B6D4); // Cyan
+      color = const Color(0xFF0284C7); // Bleu Acier Télécom
     } else if (total >= 40) {
       title = 'Protection Partielle';
-      color = const Color(0xFFF59E0B); // Amber
+      color = const Color(0xFFD97706); // Ambre Avertissement
     } else {
       title = 'Appareil Vulnérable';
-      color = const Color(0xFFEF4444); // Red
+      color = const Color(0xFFDC2626); // Rouge Sécurité
     }
 
     return SerenityScoreResult(

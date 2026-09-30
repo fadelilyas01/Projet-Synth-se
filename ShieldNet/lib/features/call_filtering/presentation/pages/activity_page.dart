@@ -201,6 +201,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
     if (_isAuditingCalls) return;
     setState(() => _isAuditingCalls = true);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
 
     try {
       final numbersToAudit = _recentCalls
@@ -212,8 +213,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
       if (numbersToAudit.isEmpty) {
         if (mounted) setState(() => _isAuditingCalls = false);
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Aucun numéro vérifiable dans le journal récent.'),
+          SnackBar(
+            content: Text(l10n?.auditNoVerifiableNumbers ?? 'Aucun numéro vérifiable dans le journal récent.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -234,7 +235,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
         if (spamCount > 0) {
           messenger.showSnackBar(
             SnackBar(
-              content: Text('Audit terminé : $spamCount numéro(s) suspect(s) identifié(s) dans votre journal.'),
+              content: Text(l10n?.auditCompletedSpam(spamCount) ?? 'Audit terminé : $spamCount numéro(s) suspect(s) identifié(s) dans votre journal.'),
               backgroundColor: AppTheme.accentRed,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 4),
@@ -243,7 +244,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
         } else {
           messenger.showSnackBar(
             SnackBar(
-              content: Text('Audit terminé : Vos ${numbersToAudit.length} appels récents sont sains.'),
+              content: Text(l10n?.auditCompletedClean(numbersToAudit.length) ?? 'Audit terminé : Vos ${numbersToAudit.length} appels récents sont sains.'),
               backgroundColor: AppTheme.accentGreen,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 4),
@@ -252,8 +253,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
         }
       } else {
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Impossible d\'effectuer l\'audit réseau.'),
+          SnackBar(
+            content: Text(l10n?.auditNetworkError ?? 'Impossible d\'effectuer l\'audit réseau.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -272,6 +273,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
+        final l10n = AppLocalizations.of(context);
         final catColor = _getCategoryColor(item.category);
         return Padding(
           padding: const EdgeInsets.all(24.0),
@@ -301,7 +303,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
               ),
               const SizedBox(height: 12),
               Text(
-                item.maskedNumber.isNotEmpty ? item.maskedNumber : 'Numéro protégé',
+                item.maskedNumber.isNotEmpty ? item.maskedNumber : (l10n?.disputeProtectedNumber ?? 'Numéro protégé'),
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -310,7 +312,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                   const Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.accentRed),
                   const SizedBox(width: 6),
                   Text(
-                    'Score de risque : ${item.riskScore}% (${item.reportsCount} signalement(s))',
+                    l10n?.disputeRiskScore(item.riskScore, item.reportsCount) ?? 'Score de risque : ${item.riskScore}% (${item.reportsCount} signalement(s))',
                     style: const TextStyle(fontSize: 13, color: AppTheme.accentRed, fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -322,9 +324,9 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                   color: Colors.grey.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  'Ce numéro est actuellement filtré par ShieldNet. S\'il s\'agit d\'un médecin, d\'un livreur ou d\'un proche légitime, vous pouvez contester ce blocage pour accélérer sa réhabilitation.',
-                  style: TextStyle(fontSize: 13, height: 1.4),
+                child: Text(
+                  l10n?.disputeFilteredNotice ?? 'Ce numéro est actuellement filtré par ShieldNet. S\'il s\'agit d\'un médecin, d\'un livreur ou d\'un proche légitime, vous pouvez contester ce blocage pour accélérer sa réhabilitation.',
+                  style: const TextStyle(fontSize: 13, height: 1.4),
                 ),
               ),
               const SizedBox(height: 20),
@@ -337,9 +339,9 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.verified_outlined, size: 18, color: AppTheme.accentGreen),
-                      label: const Text(
-                        'Contester (Faux positif)',
-                        style: TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                      label: Text(
+                        l10n?.disputeBtnContest ?? 'Contester (Faux positif)',
+                        style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
                       ),
                       onPressed: () {
                         Navigator.pop(ctx);
@@ -369,6 +371,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) {
+          final l10n = AppLocalizations.of(context);
           return Padding(
             padding: EdgeInsets.only(
               left: 24,
@@ -383,10 +386,10 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Contestation de Faux-Positif',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        l10n?.disputeModalTitle ?? 'Contestation de Faux-Positif',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                     IconButton(
@@ -401,20 +404,20 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Nature de l\'appel légitime :',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                Text(
+                  l10n?.disputeCallNature ?? 'Nature de l\'appel légitime :',
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildChoiceChip('Service / Entreprise', 'service', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
-                    _buildChoiceChip('Personnel / Proche', 'personal', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
-                    _buildChoiceChip('Livraison / Colis', 'delivery', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
-                    _buildChoiceChip('Santé / Médical', 'medical', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
-                    _buildChoiceChip('Erreur de signalement', 'mistake', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip(l10n?.disputeReasonService ?? 'Service / Entreprise', 'service', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip(l10n?.disputeReasonPersonal ?? 'Personnel / Proche', 'personal', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip(l10n?.disputeReasonDelivery ?? 'Livraison / Colis', 'delivery', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip(l10n?.disputeReasonMedical ?? 'Santé / Médical', 'medical', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
+                    _buildChoiceChip(l10n?.disputeReasonMistake ?? 'Erreur de signalement', 'mistake', selectedReason, (r) => setModalState(() => selectedReason = r), activeColor: AppTheme.accentGreen),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -423,7 +426,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                   maxLength: 500,
                   maxLines: 2,
                   decoration: InputDecoration(
-                    hintText: 'Précisions utiles (ex: cabinet de mon médecin traitant)',
+                    hintText: l10n?.disputeCommentHint ?? 'Précisions utiles (ex: cabinet de mon médecin traitant)',
                     hintStyle: const TextStyle(fontSize: 13),
                     isDense: true,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -456,8 +459,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                             if (res != null) {
                               await CitizenImpactService.incrementReportsCount();
                               messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Avis légitime transmis ! Le consensus communautaire évalue la réhabilitation.'),
+                                SnackBar(
+                                  content: Text(l10n?.disputeSuccessToast ?? 'Avis légitime transmis ! Le consensus communautaire évalue la réhabilitation.'),
                                   backgroundColor: AppTheme.accentGreen,
                                   behavior: SnackBarBehavior.floating,
                                 ),
@@ -465,8 +468,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                               ref.read(blacklistProvider.notifier).syncWithServer();
                             } else {
                               messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Impossible d\'enregistrer votre contestation.'),
+                                SnackBar(
+                                  content: Text(l10n?.disputeErrorToast ?? 'Impossible d\'enregistrer votre contestation.'),
                                   backgroundColor: AppTheme.accentRed,
                                   behavior: SnackBarBehavior.floating,
                                 ),
@@ -489,9 +492,9 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
-                      : const Text(
-                          'Transmettre la contestation',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      : Text(
+                          l10n?.disputeSubmitBtn ?? 'Transmettre la contestation',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                 ),
               ],
@@ -611,17 +614,17 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
             child: const Icon(Icons.security_update_good_rounded, color: AppTheme.primaryColor, size: 18),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Audit de sécurité du journal',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  l10n?.auditHeaderTitle ?? 'Audit de sécurité du journal',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
                 Text(
-                  'Vérifie vos 50 derniers appels via le Cloud',
-                  style: TextStyle(color: Colors.grey, fontSize: 11),
+                  l10n?.auditHeaderDesc ?? 'Vérifie vos 50 derniers appels via le Cloud',
+                  style: const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ],
             ),
@@ -639,9 +642,9 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                     height: 14,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text(
-                    'Lancer',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                : Text(
+                    l10n?.auditHeaderBtn ?? 'Lancer',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
           ),
         ],

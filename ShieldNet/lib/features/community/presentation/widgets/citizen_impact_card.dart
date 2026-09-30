@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/services/citizen_impact_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class CitizenImpactCard extends StatelessWidget {
   final CitizenImpactData data;
@@ -14,9 +15,18 @@ class CitizenImpactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
+
+    String localizeRank(String title) {
+      if (title.contains('Niveau 1') || title.contains('Initial')) return l10n?.rankInitial ?? title;
+      if (title.contains('Sentinelle') || title.contains('Sentinel')) return l10n?.rankSentinel ?? title;
+      if (title.contains('Protecteur') || title.contains('Guardian')) return l10n?.rankGuardian ?? title;
+      if (title.contains('Pilier') || title.contains('Pillar')) return l10n?.rankPillar ?? title;
+      return title;
+    }
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -50,19 +60,19 @@ class CitizenImpactCard extends StatelessWidget {
                       child: const Icon(Icons.people_alt_rounded, color: AppTheme.accentOrange, size: 20),
                     ),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Signalements communautaires',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            l10n?.citizenImpactTitle ?? 'Signalements communautaires',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Partage de signalements',
-                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                            l10n?.citizenImpactSub ?? 'Partage de signalements',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -88,7 +98,7 @@ class CitizenImpactCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          data.currentRank.title,
+                          localizeRank(data.currentRank.title),
                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: data.currentRank.color),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -122,14 +132,14 @@ class CitizenImpactCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '~${data.protectedCitizensEstimate} concitoyens protégés',
+                        l10n?.citizenProtectedCount(data.protectedCitizensEstimate) ?? '~${data.protectedCitizensEstimate} concitoyens protégés',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         data.reportsCount == 0
-                            ? 'Signalez un spam pour protéger les autres utilisateurs.'
-                            : 'Grâce à vos ${data.reportsCount} signalement(s) validé(s).',
+                            ? (l10n?.citizenReportToProtect ?? 'Signalez un spam pour protéger les autres utilisateurs.')
+                            : (l10n?.citizenThanksReports(data.reportsCount) ?? 'Grâce à vos ${data.reportsCount} signalement(s) validé(s).'),
                         style: const TextStyle(fontSize: 11, color: Colors.grey),
                       ),
                     ],
@@ -143,9 +153,10 @@ class CitizenImpactCard extends StatelessWidget {
           // Ligne des badges
           Row(
             children: data.allBadges.map((badge) {
+              final badgeTitle = localizeRank(badge.title);
               return Expanded(
                 child: Tooltip(
-                  message: '${badge.title} : ${badge.description}',
+                  message: '$badgeTitle : ${badge.description}',
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -167,7 +178,7 @@ class CitizenImpactCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          badge.title,
+                          badgeTitle,
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: badge.isUnlocked ? FontWeight.bold : FontWeight.normal,

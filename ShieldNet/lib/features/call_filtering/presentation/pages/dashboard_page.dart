@@ -287,7 +287,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ShieldNet', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.shield_outlined, size: 20, color: AppTheme.primaryColor),
+            ),
+            const SizedBox(width: 10),
+            const Text('ShieldNet', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search_rounded),
@@ -323,22 +337,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppTheme.primaryColor, width: 2),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.elderly_rounded, color: AppTheme.primaryColor, size: 30),
-                    SizedBox(width: 14),
+                    const Icon(Icons.elderly_rounded, color: AppTheme.primaryColor, size: 30),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Mode Simplifié Actif',
-                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppTheme.primaryColor),
+                            l10n?.seniorModeActiveTitle ?? 'Mode Simplifié Actif',
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppTheme.primaryColor),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            'Textes et boutons agrandis. Votre téléphone est protégé contre toute fraude.',
-                            style: TextStyle(fontSize: 13, height: 1.3),
+                            l10n?.seniorModeActiveDesc ?? 'Textes et boutons agrandis. Votre téléphone est protégé contre toute fraude.',
+                            style: const TextStyle(fontSize: 13, height: 1.3),
                           ),
                         ],
                       ),
@@ -409,54 +423,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             ),
             const SizedBox(height: 16),
 
-            // Diagnostic et niveau de sérénité
-            SerenityScoreCard(
-              result: serenityResult,
-              onOpenSettings: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Raccourcis d'actions immédiates
+            // Raccourcis d'actions immédiates : Vérifier un numéro & Inspecteur SMS
             ActionHubRow(onVerifyNumber: () => _showQuickVerificationDialog(context)),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Compteurs statistiques d'activité locale
             Row(
               children: [
                 Expanded(
                   child: SimpleMetricCard(
-                    icon: Icons.block_rounded,
+                    icon: Icons.call_end_rounded,
                     color: AppTheme.accentRed,
                     count: '$_interceptedCallsCount',
                     label: l10n?.statSpamIntercepted ?? 'Spams interceptés',
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: SimpleMetricCard(
-                    icon: Icons.shield_rounded,
-                    color: AppTheme.accentGreen,
+                    icon: Icons.shield_outlined,
+                    color: AppTheme.primaryColor,
                     count: '$totalBlocked',
                     label: l10n?.statNumbersBlocked ?? 'Numéros bloqués',
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-
-            // Engagement communautaire et badges
-            impactAsync.maybeWhen(
-              data: (impactData) => Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: CitizenImpactCard(
-                  data: impactData,
-                  onReportSpam: () => _showQuickVerificationDialog(context),
-                ),
-              ),
-              orElse: () => const SizedBox(),
-            ),
+            const SizedBox(height: 24),
 
             // Historique des derniers spams interceptés
             Row(
@@ -572,6 +565,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                   ),
                 );
               },
+            ),
+            const SizedBox(height: 24),
+
+            // Diagnostic et niveau de sécurité de l'appareil
+            SerenityScoreCard(
+              result: serenityResult,
+              onOpenSettings: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Engagement communautaire citoyen
+            impactAsync.maybeWhen(
+              data: (impactData) => CitizenImpactCard(
+                data: impactData,
+                onReportSpam: () => _showQuickVerificationDialog(context),
+              ),
+              orElse: () => const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
           ],

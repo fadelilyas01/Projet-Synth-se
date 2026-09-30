@@ -35,8 +35,9 @@ class SmsPhishingDetector {
     'tiny.cc',
   ];
 
-  /// Domaines gouvernementaux et institutionnels canadiens / québécois officiellement vérifiés
+  /// Domaines gouvernementaux et institutionnels nord-américains (Canada / É-U) officiellement vérifiés
   static final Set<String> _verifiedOfficialDomains = {
+    // Canada & Québec
     'quebec.ca',
     'gouv.qc.ca',
     'canada.ca',
@@ -51,6 +52,14 @@ class SmsPhishingDetector {
     'rcmp-grc.gc.ca',
     'ramq.gouv.qc.ca',
     'saaq.gouv.qc.ca',
+    // États-Unis
+    'usa.gov',
+    'irs.gov',
+    'usps.com',
+    'ssa.gov',
+    'fcc.gov',
+    'ftc.gov',
+    'medicare.gov',
   };
 
   /// Marques protégées soumises à la détection de typosquatting et d'usurpation de nom d'hôte
@@ -62,6 +71,13 @@ class SmsPhishingDetector {
     'canadapost',
     'revenuquebec',
     'servicecanada',
+    'usps',
+    'irs',
+    'chase',
+    'bankofamerica',
+    'wellsfargo',
+    'citibank',
+    'capitalone',
   ];
 
   static final Map<String, int> _deliveryKeywords = {
@@ -72,6 +88,8 @@ class SmsPhishingDetector {
     'mondial relay': 25,
     'postes canada': 25,
     'canada post': 25,
+    'usps': 25,
+    'postal service': 25,
     'purolator': 25,
     'ups': 25,
     'fedex': 25,
@@ -89,6 +107,14 @@ class SmsPhishingDetector {
     'saaq': 35,
     'ramq': 35,
     'service canada': 35,
+    'irs': 35,
+    'internal revenue': 35,
+    'social security': 35,
+    'ssa': 30,
+    'medicare': 35,
+    'medicaid': 30,
+    'fbi': 35,
+    'court warrant': 35,
     'ameli': 35,
     'carte vitale': 35,
     'assurance maladie': 30,
@@ -105,6 +131,9 @@ class SmsPhishingDetector {
   static final Map<String, int> _bankingKeywords = {
     'interac': 35,
     'virement interac': 35,
+    'zelle': 35,
+    'venmo': 30,
+    'cash app': 30,
     'desjardins': 35,
     'accesd': 35,
     'rbc': 30,
@@ -112,6 +141,10 @@ class SmsPhishingDetector {
     'bmo': 25,
     'cibc': 25,
     'banque nationale': 30,
+    'chase': 30,
+    'bank of america': 30,
+    'wells fargo': 30,
+    'citibank': 30,
     'banque': 25,
     'compte bloque': 35,
     'compte suspendu': 35,

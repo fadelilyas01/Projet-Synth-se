@@ -479,15 +479,45 @@ class RegionalThreatIntelligenceService:
     Détection et analyse des vagues d'attaques téléphoniques régionales (Spoofing ciblé par indicatif).
     """
     REGION_NAMES = {
-        '819': 'Outaouais / Gatineau / Laurentides',
-        '514': 'Montréal (Centre-Ville)',
-        '438': 'Grand Montréal & Rive-Sud',
-        '418': 'Capitale-Nationale (Québec) & Est',
-        '450': 'Laval & Couronne Nord/Sud',
-        '613': 'Ottawa / Est Ontarien',
-        '416': 'Toronto (Centre)',
-        '647': 'Grand Toronto',
-        '367': 'Québec / Bas-Saint-Laurent',
+        # Canada (Québec, Ontario, Ouest, Atlantique)
+        '819': 'Outaouais / Gatineau / Laurentides (QC)',
+        '514': 'Montréal Centre-Ville (QC)',
+        '438': 'Grand Montréal & Rive-Sud (QC)',
+        '418': 'Capitale-Nationale & Est (QC)',
+        '450': 'Laval & Couronnes (QC)',
+        '367': 'Québec / Est (QC)',
+        '613': 'Ottawa / Est Ontarien (ON)',
+        '416': 'Toronto Centre (ON)',
+        '647': 'Grand Toronto (ON)',
+        '905': 'GTA / Hamilton / Niagara (ON)',
+        '604': 'Grand Vancouver (BC)',
+        '778': 'Colombie-Britannique (BC)',
+        '403': 'Calgary & Sud (AB)',
+        '780': 'Edmonton & Nord (AB)',
+        '204': 'Winnipeg / Manitoba (MB)',
+        '902': 'Nouvelle-Écosse / Atlantique (NS/PE)',
+
+        # États-Unis (Principaux pôles et indicatifs métropolitains)
+        '212': 'New York City / Manhattan (NY)',
+        '718': 'New York City / Brooklyn / Queens (NY)',
+        '917': 'New York Métropole (NY)',
+        '213': 'Los Angeles Centre (CA)',
+        '310': 'Los Angeles Ouest / Beverly Hills (CA)',
+        '415': 'San Francisco / Bay Area (CA)',
+        '619': 'San Diego (CA)',
+        '312': 'Chicago Centre (IL)',
+        '773': 'Chicago Métropole (IL)',
+        '713': 'Houston (TX)',
+        '214': 'Dallas / Fort Worth (TX)',
+        '512': 'Austin (TX)',
+        '305': 'Miami / Florida Keys (FL)',
+        '407': 'Orlando / Floride Centrale (FL)',
+        '202': 'Washington D.C. (District fédéral)',
+        '206': 'Seattle / Washington (WA)',
+        '617': 'Boston / Massachusetts (MA)',
+        '404': 'Atlanta / Géorgie (GA)',
+        '215': 'Philadelphie (PA)',
+        '602': 'Phoenix / Arizona (AZ)',
     }
 
     @classmethod
@@ -499,16 +529,26 @@ class RegionalThreatIntelligenceService:
         regional_stats = {}
         for num in numbers:
             masked = num.masked_number or ''
-            match = re.search(r'\b(819|514|438|418|450|613|416|647|367)\b', masked)
-            if match:
-                code = match.group(1)
-            else:
-                code = 'AUTRE'
+            clean_digits = re.sub(r'\D', '', masked)
+            code = None
+            if len(clean_digits) >= 4 and clean_digits.startswith('1'):
+                candidate = clean_digits[1:4]
+                if candidate in cls.REGION_NAMES:
+                    code = candidate
+            elif len(clean_digits) >= 3:
+                candidate = clean_digits[:3]
+                if candidate in cls.REGION_NAMES:
+                    code = candidate
+
+            if not code:
+                pattern = r'\b(' + '|'.join(cls.REGION_NAMES.keys()) + r')\b'
+                match = re.search(pattern, masked)
+                code = match.group(1) if match else 'AUTRE'
                 
             if code not in regional_stats:
                 regional_stats[code] = {
                     'area_code': code,
-                    'region_name': cls.REGION_NAMES.get(code, 'Région indéterminée'),
+                    'region_name': cls.REGION_NAMES.get(code, 'Région NANP (Canada / É-U)'),
                     'total_spams': 0,
                     'top_category': num.category,
                     'categories': {},

@@ -35,8 +35,15 @@ class PhoneNumberValidator {
       return true;
     }
 
+    // Préfixe central N11 impossible dans le plan NANP (usurpation avérée)
+    final nxx = nationalNumber.substring(3, 6);
+    const n11Codes = {'211', '311', '411', '511', '611', '711', '811', '911'};
+    if (n11Codes.contains(nxx)) {
+      return true;
+    }
+
     // Préfixe central 555 (plage réservée fiction et tests télécoms nord-américains)
-    if (nationalNumber.substring(3, 6) == '555') {
+    if (nxx == '555') {
       return true;
     }
 
