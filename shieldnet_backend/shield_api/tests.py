@@ -1127,6 +1127,106 @@ class AdvancedAIEngineTests(TestCase):
         # Usurpation détectée dans le signalement spam -> beta_nlp restreint à 0.5
         self.assertLessEqual(evaluation['beta_nlp'], 1.0)
 
+    def test_bayesian_classifier_log_odds_and_ngrams(self):
+        from .ai_engine import BayesianSemanticClassifier
+
+        # 1. Message typique de fraude fiscale avec n-grammes
+        scam_text = "Urgent Agence du Revenu du Canada mandat d'arret arrest warrant payer en bitcoin immediatement"
+        res_scam = BayesianSemanticClassifier.classify(scam_text)
+        self.assertGreater(res_scam['probability_threat'], 0.80)
+        self.assertLess(res_scam['probability_legitimate'], 0.20)
+        self.assertGreater(res_scam['log_odds'], 0.0)
+        self.assertTrue(len(res_scam['matched_tokens']) > 0)
+
+        # 2. Message de service public ou santé légitime
+        safe_text = "Confirmation de votre rendez-vous medical a la clinique avec le medecin et livraison de pharmacie"
+        res_safe = BayesianSemanticClassifier.classify(safe_text)
+        self.assertGreater(res_safe['probability_legitimate'], 0.80)
+        self.assertLess(res_safe['probability_threat'], 0.20)
+        self.assertLess(res_safe['log_odds'], 0.0)
+
+        # 3. Borne stricte des log-odds [-15.0, +15.0]
+        self.assertGreaterEqual(res_scam['log_odds'], -15.0)
+        self.assertLessEqual(res_scam['log_odds'], 15.0)
+
+    def test_poisson_burst_analyzer_z_score(self):
+        from .ai_engine import PoissonBurstAnalyzer
+        from django.utils import timezone
+        from datetime import timedelta
+
+        now = timezone.now()
+        # Vague d'appels rapprochés (5 signalements en 20 minutes)
+        burst_timestamps = [now - timedelta(minutes=i * 4) for i in range(5)]
+        eval_burst = PoissonBurstAnalyzer.evaluate_burst(burst_timestamps, window_hours=2.0)
+        self.assertTrue(eval_burst['is_burst'])
+        self.assertGreaterEqual(eval_burst['z_score'], 2.5)
+        self.assertEqual(eval_burst['recent_count'], 5)
+
+        # Événements espacés régulièrement sur plusieurs jours
+        spaced_timestamps = [now - timedelta(days=i * 2) for i in range(5)]
+        eval_spaced = PoissonBurstAnalyzer.evaluate_burst(spaced_timestamps, window_hours=2.0)
+        self.assertFalse(eval_spaced['is_burst'])
+        self.assertLess(eval_spaced['z_score'], 2.5)
+
+    def test_nanp_telephony_routing_and_n11_detection(self):
+        from .ai_engine import NANPTelephonyValidator
+
+        # 1. Numéro géopolitique NANP valide (Gatineau/Outaouais 819)
+        val_geo = NANPTelephonyValidator.validate_number("+1 819 777 3838")
+        self.assertTrue(val_geo['is_valid_nanp'])
+        self.assertFalse(val_geo['is_impossible_routing'])
+        self.assertFalse(val_geo['is_toll_free'])
+        self.assertEqual(val_geo['parsed']['npa'], '819')
+        self.assertEqual(val_geo['parsed']['nxx'], '777')
+
+        # 2. Routage impossible N11 réservé en bureau central (ex: 819-911-xxxx ou 514-411-xxxx)
+        val_n11 = NANPTelephonyValidator.validate_number("+1 819 911 0000")
+        self.assertFalse(val_n11['is_valid_nanp'])
+        self.assertTrue(val_n11['is_impossible_routing'])
+        self.assertIn("Routage impossible", val_n11['details'])
+
+        # 3. Plage fictive NANP 555-01xx
+        val_fict = NANPTelephonyValidator.validate_number("+1 819 555 0199")
+        self.assertFalse(val_fict['is_valid_nanp'])
+        self.assertTrue(val_fict['is_impossible_routing'])
+        self.assertIn("555-01xx", val_fict['details'])
+
+        # 4. Numéro sans frais (Toll-Free 800/888/877/866)
+        val_tf = NANPTelephonyValidator.validate_number("+1 800 267 8097")
+        self.assertTrue(val_tf['is_valid_nanp'])
+        self.assertTrue(val_tf['is_toll_free'])
+
+    def test_calibrated_decision_fusion_profiles(self):
+        from .ai_engine import CalibratedDecisionFusion
+
+        # Signal intermédiaire modéré
+        args = {
+            'threat_score': 50.0,
+            'legit_score': 10.0,
+            'decayed_spam': 3.0,
+            'decayed_safe': 0.0,
+            'burst_z_score': 1.5,
+            'entropy_val': 2.8,
+            'is_synthetic_entropy': False,
+            'is_impossible_routing': False,
+            'is_impersonation': False,
+            'stir_attestation': 'B',
+        }
+
+        score_balanced, _ = CalibratedDecisionFusion.fuse_signals(**args, profile_name='balanced')
+        score_senior, _ = CalibratedDecisionFusion.fuse_signals(**args, profile_name='senior_shield')
+        score_precision, _ = CalibratedDecisionFusion.fuse_signals(**args, profile_name='high_precision')
+
+        # Le profil Senior Shield amplifie la sensibilité de blocage (score plus élevé)
+        self.assertGreater(score_senior, score_balanced)
+        # Le profil High Precision applique un conservatisme strict
+        self.assertLess(score_precision, score_balanced)
+
+        # Les scores restent strictement bornés entre 0 et 100
+        for s in [score_balanced, score_senior, score_precision]:
+            self.assertGreaterEqual(s, 0)
+            self.assertLessEqual(s, 100)
+
 
 class ApplicationSecurityAuditTests(APITestCase):
     """
