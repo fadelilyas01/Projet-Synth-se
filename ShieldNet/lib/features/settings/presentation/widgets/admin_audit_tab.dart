@@ -71,7 +71,7 @@ class AdminAuditTab extends StatelessWidget {
     } else if (action.contains('UNBLOCK') || action.contains('WHITELIST')) {
       actionColor = AppTheme.accentGreen;
       actionIcon = Icons.check_circle_outline_rounded;
-      actionLabel = isEn ? 'Unblocked / Whitelisted' : 'Déblocage / Blanchiment';
+      actionLabel = isEn ? 'Unblocked / Approved' : 'Autorisation / Déblocage';
     } else if (action.contains('PURGE')) {
       actionColor = Colors.purple;
       actionIcon = Icons.auto_delete_rounded;

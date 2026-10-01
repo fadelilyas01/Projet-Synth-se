@@ -105,11 +105,11 @@ class AdminOverviewTab extends ConsumerWidget {
           childAspectRatio: 1.38,
           children: [
             _buildStatBox(isEn ? 'Blocked Numbers' : 'Numéros Bloqués', '${stats?['total_blocked'] ?? 0}', AppTheme.accentRed, Icons.block_rounded, cardBg, borderColor),
-            _buildStatBox(isEn ? 'Whitelisted Numbers' : 'Numéros Blanchis', '${stats?['total_whitelisted'] ?? 0}', AppTheme.accentGreen, Icons.verified_user_rounded, cardBg, borderColor),
-            _buildStatBox(isEn ? 'Reports' : 'Signalements', '${stats?['total_reports'] ?? 0}', AppTheme.primaryColor, Icons.report_problem_rounded, cardBg, borderColor),
-            _buildStatBox(isEn ? 'Users' : 'Utilisateurs', '${stats?['total_users'] ?? 0}', AppTheme.accentOrange, Icons.people_alt_rounded, cardBg, borderColor),
-            _buildStatBox(isEn ? 'Legitimate Reports' : 'Avis Légitimes', '${stats?['total_safe_reports'] ?? 0}', Colors.teal, Icons.thumb_up_alt_rounded, cardBg, borderColor),
-            _buildStatBox(isEn ? 'Auto-Consensus' : 'Auto-Consensus', '${stats?['total_auto_consensus'] ?? 0}', Colors.deepPurpleAccent, Icons.how_to_reg_rounded, cardBg, borderColor),
+            _buildStatBox(isEn ? 'Approved Numbers' : 'Numéros Autorisés', '${stats?['total_whitelisted'] ?? 0}', AppTheme.accentGreen, Icons.verified_user_rounded, cardBg, borderColor),
+            _buildStatBox(isEn ? 'Citizen Reports' : 'Signalements Citoyens', '${stats?['total_reports'] ?? 0}', AppTheme.primaryColor, Icons.report_problem_rounded, cardBg, borderColor),
+            _buildStatBox(isEn ? 'Active Users' : 'Utilisateurs Actifs', '${stats?['total_users'] ?? 0}', AppTheme.accentOrange, Icons.people_alt_rounded, cardBg, borderColor),
+            _buildStatBox(isEn ? 'Legitimate Disputes' : 'Avis Légitimes', '${stats?['total_safe_reports'] ?? 0}', Colors.teal, Icons.thumb_up_alt_rounded, cardBg, borderColor),
+            _buildStatBox(isEn ? 'Community Consensus' : 'Consensus Citoyen', '${stats?['total_auto_consensus'] ?? 0}', Colors.deepPurpleAccent, Icons.how_to_reg_rounded, cardBg, borderColor),
           ],
         ),
         const SizedBox(height: 24),
@@ -261,7 +261,7 @@ class AdminOverviewTab extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      isEn ? 'Automated Maintenance & Consensus' : 'Maintenance Automatisée & Consensualité',
+                      isEn ? 'Maintenance & Community Review' : 'Maintenance & Révision Citoyenne',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
@@ -270,8 +270,8 @@ class AdminOverviewTab extends ConsumerWidget {
               const SizedBox(height: 6),
               Text(
                 isEn
-                    ? 'Purges obsolete reports (>30d) or triggers consensus audit to automatically restore legitimate false positives.'
-                    : "Purge les signalements obsolètes (>30j) ou lance l'audit de consensualité pour réhabiliter automatiquement les faux positifs légitimes.",
+                    ? 'Purges expired reports (>30 days) and runs community consensus to automatically restore verified numbers.'
+                    : "Supprime les anciens signalements expirés et applique l'analyse communautaire pour réhabiliter les numéros vérifiés.",
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 12),
@@ -285,13 +285,13 @@ class AdminOverviewTab extends ConsumerWidget {
                       if (isAdmin)
                         ElevatedButton.icon(
                           icon: const Icon(Icons.auto_delete_outlined, size: 18),
-                          label: Text(isEn ? 'Database Cleanup' : 'Nettoyage BDD'),
+                          label: Text(isEn ? 'Purge Expired Data' : 'Purger les Données Expirées'),
                           style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGreen, foregroundColor: Colors.white),
                           onPressed: onPurge,
                         ),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.fact_check_rounded, size: 18),
-                        label: Text(isEn ? 'Consensus Audit' : 'Audit Consensualité'),
+                        label: Text(isEn ? 'Review False Positives' : 'Réviser les Faux Positifs'),
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
                         onPressed: onConsensusAudit,
                       ),

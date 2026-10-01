@@ -482,17 +482,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingSlide2Text =>
-      'Chaque numéro est chiffré et haché localement (SHA-256 avec sel cryptographique). Aucun répertoire n\'est transmis à nos serveurs.';
+      'Vos contacts et votre carnet d\'adresses restent strictement sur votre appareil. Seuls les numéros suspects sont vérifiés sans jamais exposer votre vie privée.';
 
   @override
-  String get onboardingSlide2Feat1 => 'Anonymisation cryptographique locale';
+  String get onboardingSlide2Feat1 => 'Vérification 100% locale et sécurisée';
 
   @override
   String get onboardingSlide2Feat2 => 'Zéro partage de vos contacts personnels';
 
   @override
-  String get onboardingSlide2Feat3 =>
-      'Conforme aux normes de sécurité strictes';
+  String get onboardingSlide2Feat3 => 'Respect absolu de votre vie privée';
 
   @override
   String get onboardingSlide3Title => 'Prêt en 1 Geste';
@@ -697,7 +696,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportSuccessToast =>
-      'Signalement anonymisé HMAC transmis et enregistré avec succès.';
+      'Merci ! Votre signalement a été enregistré pour protéger la communauté.';
 
   @override
   String get smsInspectorTitle => 'Inspecteur de SMS & Liens';

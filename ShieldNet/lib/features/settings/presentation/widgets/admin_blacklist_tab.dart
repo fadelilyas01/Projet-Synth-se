@@ -44,7 +44,7 @@ class AdminBlacklistTab extends StatelessWidget {
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
-              hintText: isEn ? 'Search number or hash...' : 'Rechercher un numéro ou empreinte...',
+              hintText: isEn ? 'Search a phone number...' : 'Rechercher un numéro...',
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.clear_rounded),
@@ -63,9 +63,9 @@ class AdminBlacklistTab extends StatelessWidget {
               const SizedBox(width: 8),
               _buildFilterChip(isEn ? 'Blocked' : 'Bloqués', 'blocked'),
               const SizedBox(width: 8),
-              _buildFilterChip(isEn ? 'Whitelisted' : 'Blanchis', 'whitelisted'),
+              _buildFilterChip(isEn ? 'Approved' : 'Autorisés', 'whitelisted'),
               const SizedBox(width: 8),
-              _buildFilterChip('Auto-Consensus', 'auto_consensus'),
+              _buildFilterChip(isEn ? 'Consensus' : 'Consensus Citoyen', 'auto_consensus'),
             ],
           ),
         ),
@@ -150,10 +150,10 @@ class AdminBlacklistTab extends StatelessWidget {
           ],
         ),
         subtitle: Text(
-          'Score: $riskScore/100 • $category$safeReportsSuffix\nHash: ${phoneHash.length >= 12 ? phoneHash.substring(0, 12) : phoneHash}...',
-          style: const TextStyle(fontSize: 11),
+          '${isEn ? 'Risk' : 'Risque'}: $riskScore% • $category$safeReportsSuffix',
+          style: const TextStyle(fontSize: 12),
         ),
-        isThreeLine: true,
+        isThreeLine: false,
         trailing: PopupMenuButton<String>(
           onSelected: (action) {
             if (action == 'delete') {
@@ -164,7 +164,7 @@ class AdminBlacklistTab extends StatelessWidget {
           },
           itemBuilder: (ctx) => [
             if (!isWhitelisted)
-              PopupMenuItem(value: 'whitelist', child: Text(isEn ? 'Whitelist' : 'Blanchir (Whitelist)')),
+              PopupMenuItem(value: 'whitelist', child: Text(isEn ? 'Approve (Authorize)' : 'Autoriser (Certifier sain)')),
             if (!isBlocked)
               PopupMenuItem(value: 'block', child: Text(isEn ? 'Block' : 'Bloquer')),
             PopupMenuItem(

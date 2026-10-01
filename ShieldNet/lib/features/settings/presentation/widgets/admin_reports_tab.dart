@@ -84,7 +84,7 @@ class AdminReportsTab extends StatelessWidget {
                 children: [
                   TextButton.icon(
                     icon: const Icon(Icons.check_circle_outline, size: 16, color: AppTheme.accentGreen),
-                    label: Text(isEn ? 'Whitelist' : 'Blanchir', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 12)),
+                    label: Text(isEn ? 'Approve' : 'Autoriser', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 12)),
                     onPressed: () => onModerate(phoneHash, 'whitelist'),
                   ),
                   const SizedBox(width: 8),

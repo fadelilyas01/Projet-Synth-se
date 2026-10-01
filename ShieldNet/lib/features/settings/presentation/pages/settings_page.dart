@@ -632,20 +632,70 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               child: Text(l10n?.btnLogout ?? 'Déconnexion', style: const TextStyle(color: AppTheme.accentRed, fontSize: 12, fontWeight: FontWeight.bold)),
             ),
           ),
+          if (!user.canModerate) ...[
+            Divider(height: 1, color: borderColor),
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.admin_panel_settings_outlined, color: AppTheme.accentOrange, size: 20),
+              title: Text(
+                ref.watch(localeProvider).languageCode == 'en'
+                    ? 'Switch to Team / Admin Account'
+                    : 'Accéder à l\'espace Administration & Modération',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.grey),
+              onTap: () => AuthBottomSheet.show(context, initialAdmin: true),
+            ),
+          ],
         ],
       );
     }
 
+    final isEn = ref.watch(localeProvider).languageCode == 'en';
     return _buildCard(
       cardBg: cardBg,
       borderColor: borderColor,
       children: [
         ListTile(
-          leading: const Icon(Icons.account_circle, color: AppTheme.primaryColor, size: 28),
-          title: Text(l10n?.userAccountTitle ?? 'Compte Utilisateur', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-          subtitle: Text(l10n?.userAccountSubtitle ?? 'Se connecter ou s\'inscrire', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.person_rounded, color: AppTheme.primaryColor, size: 22),
+          ),
+          title: Text(
+            isEn ? 'Citizen Account' : 'Espace Citoyen',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          subtitle: Text(
+            isEn ? 'Sign in or register to sync your protections' : 'Se connecter ou s\'inscrire pour synchroniser vos protections',
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
-          onTap: () => AuthBottomSheet.show(context),
+          onTap: () => AuthBottomSheet.show(context, initialAdmin: false),
+        ),
+        Divider(height: 1, color: borderColor),
+        ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.accentOrange.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.admin_panel_settings_rounded, color: AppTheme.accentOrange, size: 22),
+          ),
+          title: Text(
+            isEn ? 'Administration & Team Portal' : 'Espace Équipe & Modération',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          subtitle: Text(
+            isEn ? 'Restricted access for moderators and administrators' : 'Accès réservé aux modérateurs et administrateurs',
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+          onTap: () => AuthBottomSheet.show(context, initialAdmin: true),
         ),
       ],
     );

@@ -111,6 +111,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
 
   void _showQuickVerificationDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -123,7 +124,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    l10n?.dialogCheckNumber ?? 'Vérifier un numéro',
+                    l10n?.dialogCheckNumber ?? (isEn ? 'Verify a Number' : 'Vérifier un Numéro'),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -131,10 +132,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n?.dialogCheckPrompt ?? 'Saisissez un numéro pour vérifier s\'il est signalé comme spam :',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  l10n?.dialogCheckPrompt ??
+                      (isEn
+                          ? 'Received a call from an unfamiliar number? Check here instantly to know if it is safe to answer:'
+                          : 'Vous avez reçu un appel d\'un numéro inconnu ? Vérifiez immédiatement s\'il s\'agit d\'un correspondant fiable ou d\'un spam :'),
+                  style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -173,6 +178,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
 
   Future<void> _executeVerification(String rawPhone) async {
     final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -232,10 +238,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                   const SizedBox(height: 12),
                   Text(
                     isWhitelisted
-                        ? (l10n?.dialogVerifiedDesc ?? 'Ce numéro est vérifié et certifié par l\'administrateur.')
+                        ? (l10n?.dialogVerifiedDesc ??
+                            (isEn ? 'This caller is verified and certified safe.' : 'Ce correspondant est vérifié et certifié de confiance.'))
                         : (isSpam
-                            ? (l10n?.dialogSpamDesc ?? 'Ce numéro a été identifié comme indésirable.')
-                            : (l10n?.dialogSafeDesc ?? 'Aucun signalement malveillant pour ce numéro.')),
+                            ? (l10n?.dialogSpamDesc ??
+                                (isEn
+                                    ? 'This caller has been reported by the community. ShieldNet recommends not answering or calling back.'
+                                    : 'Ce correspondant a été signalé comme indésirable par la communauté. ShieldNet vous recommande de ne pas décrocher ni rappeler.'))
+                            : (l10n?.dialogSafeDesc ??
+                                (isEn
+                                    ? 'No malicious reports found. This number appears safe to answer.'
+                                    : 'Aucun signalement suspect. Vous pouvez communiquer en toute sérénité.'))),
                     style: const TextStyle(fontSize: 13, height: 1.4),
                   ),
                 ],
@@ -249,7 +262,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
       );
     } catch (e) {
       if (mounted) {
-        final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -327,6 +339,37 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           children: [
+            // Salutation humaine & bienveillante
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0, top: 2.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isEn ? 'Hello!' : 'Bonjour !',
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          isProtectionActive
+                              ? (isEn
+                                  ? 'Your phone is protected. Have a peaceful day!'
+                                  : 'Votre téléphone veille sur vous. Passez une excellente journée !')
+                              : (isEn
+                                  ? 'Protection is paused. Tap below to shield your calls.'
+                                  : 'Protection suspendue. Touchez le bouclier pour réactiver.'),
+                          style: const TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             // BANDEAU ALERTE INTÉGRITÉ APPAREIL (ROOT)
             integrityAsync.maybeWhen(
               data: (integrity) => DeviceIntegrityBanner(result: integrity),

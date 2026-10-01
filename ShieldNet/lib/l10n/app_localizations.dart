@@ -995,13 +995,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSlide2Text.
   ///
   /// In fr, this message translates to:
-  /// **'Chaque numéro est chiffré et haché localement (SHA-256 avec sel cryptographique). Aucun répertoire n\'est transmis à nos serveurs.'**
+  /// **'Vos contacts et votre carnet d\'adresses restent strictement sur votre appareil. Seuls les numéros suspects sont vérifiés sans jamais exposer votre vie privée.'**
   String get onboardingSlide2Text;
 
   /// No description provided for @onboardingSlide2Feat1.
   ///
   /// In fr, this message translates to:
-  /// **'Anonymisation cryptographique locale'**
+  /// **'Vérification 100% locale et sécurisée'**
   String get onboardingSlide2Feat1;
 
   /// No description provided for @onboardingSlide2Feat2.
@@ -1013,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSlide2Feat3.
   ///
   /// In fr, this message translates to:
-  /// **'Conforme aux normes de sécurité strictes'**
+  /// **'Respect absolu de votre vie privée'**
   String get onboardingSlide2Feat3;
 
   /// No description provided for @onboardingSlide3Title.
@@ -1379,7 +1379,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportSuccessToast.
   ///
   /// In fr, this message translates to:
-  /// **'Signalement anonymisé HMAC transmis et enregistré avec succès.'**
+  /// **'Merci ! Votre signalement a été enregistré pour protéger la communauté.'**
   String get reportSuccessToast;
 
   /// No description provided for @smsInspectorTitle.

@@ -68,7 +68,7 @@ class _ReportPageState extends ConsumerState<ReportPage> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(l10n?.reportSuccessToast ?? 'Signalement anonymisé HMAC transmis et enregistré avec succès.'),
+                content: Text(l10n?.reportSuccessToast ?? 'Merci ! Votre signalement a été enregistré pour protéger la communauté.'),
                 backgroundColor: AppTheme.accentGreen,
               ),
             );
@@ -158,6 +158,20 @@ class _ReportPageState extends ConsumerState<ReportPage> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.lock_outline_rounded, size: 14, color: Colors.grey),
+                const SizedBox(width: 6),
+                Text(
+                  (l10n?.localeName == 'en')
+                      ? '100% private: your personal identity is never disclosed.'
+                      : '100% confidentiel : votre identité n\'est jamais communiquée.',
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ],
             ),
           ],
         ),

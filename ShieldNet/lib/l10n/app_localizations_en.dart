@@ -478,16 +478,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSlide2Text =>
-      'Each phone number is encrypted and hashed locally (SHA-256 with cryptographic salt). No contacts are sent to our servers.';
+      'Your contacts and address book remain strictly on your device. Only suspicious callers are verified without ever exposing your private data.';
 
   @override
-  String get onboardingSlide2Feat1 => 'Local cryptographic anonymization';
+  String get onboardingSlide2Feat1 => '100% local and secure verification';
 
   @override
   String get onboardingSlide2Feat2 => 'Zero sharing of personal contacts';
 
   @override
-  String get onboardingSlide2Feat3 => 'Compliant with strict privacy standards';
+  String get onboardingSlide2Feat3 => 'Absolute respect for your privacy';
 
   @override
   String get onboardingSlide3Title => 'Ready in 1 Step';
@@ -690,7 +690,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportSuccessToast =>
-      'HMAC anonymized report submitted and recorded successfully.';
+      'Thank you! Your report was recorded to protect the community.';
 
   @override
   String get smsInspectorTitle => 'SMS & Link Inspector';
