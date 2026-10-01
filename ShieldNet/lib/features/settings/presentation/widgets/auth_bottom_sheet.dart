@@ -48,10 +48,6 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
   void initState() {
     super.initState();
     _isAdminMode = widget.initialAdmin;
-    if (_isAdminMode) {
-      _emailController.text = 'admin@shieldnet.app';
-      _passwordController.text = 'AdminPass123!';
-    }
   }
 
   @override
@@ -174,10 +170,6 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final cardBg = AppTheme.cardBg(isDark);
-        final borderColor = AppTheme.borderColor(isDark);
-
         return Padding(
           padding: EdgeInsets.only(
             left: 24,
@@ -219,57 +211,19 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
               const SizedBox(height: 8),
               Text(
                 isEn
-                    ? 'Choose an account to connect to ShieldNet and sync your protections:'
-                    : 'Sélectionnez un compte pour vous connecter à ShieldNet et synchroniser vos protections :',
+                    ? 'Enter your Google account email address to connect:'
+                    : 'Renseignez votre adresse courriel Google pour vous connecter :',
                 style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
 
-              // Compte rapide 1-clic
-              InkWell(
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  _performGoogleLogin('utilisateur.shieldnet@gmail.com', name: 'Alexandre');
-                },
-                borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: borderColor),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.15),
-                        child: const Text('A', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Alexandre', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text('utilisateur.shieldnet@gmail.com', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Saisie d'une autre adresse
               TextField(
                 controller: customEmailController,
+                autofocus: true,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: isEn ? 'Or other Gmail address' : 'Ou une autre adresse Gmail',
-                  hintText: 'votre.nom@gmail.com',
+                  labelText: isEn ? 'Google Account (Gmail)' : 'Compte Google (Gmail)',
+                  hintText: 'votre.adresse@gmail.com',
                   prefixIcon: const Icon(Icons.alternate_email_rounded),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.arrow_forward_rounded, color: AppTheme.primaryColor),
@@ -448,10 +402,6 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                           _isAdminMode = true;
                           _errorMessage = null;
                           _isLogin = true;
-                          if (_emailController.text.isEmpty || _emailController.text.contains('gmail')) {
-                            _emailController.text = 'admin@shieldnet.app';
-                            _passwordController.text = 'AdminPass123!';
-                          }
                         });
                       },
                       borderRadius: BorderRadius.circular(10),
@@ -703,72 +653,7 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
               ),
             ),
 
-            // Raccourcis de profil démo pour l'équipe / admin
-            if (_isAdminMode) ...[
-              const SizedBox(height: 16),
-              Text(
-                isEn ? 'DEMO PROFILES' : 'PROFILS DE DÉMONSTRATION',
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 0.8),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        side: BorderSide(
-                          color: _emailController.text == 'admin@shieldnet.app'
-                              ? AppTheme.accentOrange
-                              : borderColor,
-                        ),
-                      ),
-                      icon: const Icon(Icons.admin_panel_settings_rounded, size: 16, color: AppTheme.accentOrange),
-                      label: Text(
-                        isEn ? 'Super Admin' : 'Admin Général',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _emailController.text = 'admin@shieldnet.app';
-                          _passwordController.text = 'AdminPass123!';
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        side: BorderSide(
-                          color: _emailController.text == 'manager@shieldnet.app'
-                              ? AppTheme.primaryColor
-                              : borderColor,
-                        ),
-                      ),
-                      icon: const Icon(Icons.verified_user_rounded, size: 16, color: AppTheme.primaryColor),
-                      label: Text(
-                        isEn ? 'Manager' : 'Gestionnaire',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _emailController.text = 'manager@shieldnet.app';
-                          _passwordController.text = 'ManagerPass123!';
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
 
             // Bouton Principal de Soumission
             ElevatedButton(

@@ -5,293 +5,137 @@
 {{ block.super }}
 <style>
   :root {
-    --bg-page: #0b1120;
-    --card-bg: #111827;
-    --card-border: rgba(255, 255, 255, 0.08);
+    --bg-page: #0f172a;
+    --card-bg: #1e293b;
+    --card-border: #334155;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
-    --input-bg: #1e293b;
+    --input-bg: #0f172a;
     --input-border: #334155;
     --input-focus: #3b82f6;
-    --btn-bg: linear-gradient(135deg, #2563eb, #1d4ed8);
-    --btn-hover: linear-gradient(135deg, #1d4ed8, #1e40af);
-    --chip-bg: #1e293b;
-    --chip-border: #334155;
-    --chip-hover: #273549;
-    --note-bg: rgba(30, 41, 59, 0.65);
-    --note-border: rgba(59, 130, 246, 0.3);
+    --btn-bg: #2563eb;
+    --btn-hover: #1d4ed8;
   }
 
-  /* Support complet du Mode Clair pour un confort visuel optimal */
   html.light-mode,
   body.light-mode {
-    --bg-page: #f1f5f9;
+    --bg-page: #f8fafc;
     --card-bg: #ffffff;
-    --card-border: rgba(0, 0, 0, 0.08);
+    --card-border: #e2e8f0;
     --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
-    --input-bg: #f8fafc;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --input-bg: #ffffff;
     --input-border: #cbd5e1;
     --input-focus: #2563eb;
-    --btn-bg: linear-gradient(135deg, #2563eb, #1d4ed8);
-    --btn-hover: linear-gradient(135deg, #1d4ed8, #1e40af);
-    --chip-bg: #f8fafc;
-    --chip-border: #e2e8f0;
-    --chip-hover: #edf2f7;
-    --note-bg: rgba(239, 246, 255, 0.85);
-    --note-border: rgba(147, 197, 253, 0.6);
+    --btn-bg: #2563eb;
+    --btn-hover: #1d4ed8;
   }
 
   body.login {
     background-color: var(--bg-page) !important;
-    background-image: 
-      radial-gradient(at 10% 10%, rgba(37, 99, 235, 0.12) 0px, transparent 50%),
-      radial-gradient(at 90% 90%, rgba(16, 185, 129, 0.08) 0px, transparent 50%) !important;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     margin: 0;
     padding: 24px 16px;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     color: var(--text-primary);
-    transition: background-color 0.25s ease;
     box-sizing: border-box;
   }
 
   #container {
     width: 100%;
-    max-width: 480px;
+    max-width: 420px;
     margin: 0 auto;
     box-sizing: border-box;
-    position: relative;
   }
 
   #header {
     display: none !important;
   }
 
-  /* Barre d'outils supérieure (Thème clair/sombre & Lien retour) */
-  .top-utility-bar {
+  .top-links {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-    padding: 0 4px;
+    margin-bottom: 20px;
+    font-size: 13px;
   }
 
-  .back-citizen-link {
+  .back-link {
+    color: var(--text-secondary);
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 500;
     transition: color 0.15s ease;
   }
 
-  .back-citizen-link:hover {
-    color: #3b82f6;
+  .back-link:hover {
+    color: var(--btn-bg);
   }
 
-  .theme-toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  .theme-btn {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 20px;
-    padding: 6px 12px;
-    font-size: 11px;
-    font-weight: 600;
+    padding: 5px 12px;
+    font-size: 12px;
     color: var(--text-secondary);
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
   }
 
-  .theme-toggle-btn:hover {
+  .theme-btn:hover {
     color: var(--text-primary);
-    transform: translateY(-1px);
   }
 
-  /* Carte principale de connexion */
   .login-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 24px;
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    padding: 38px 34px;
+    border-radius: 16px;
+    padding: 36px 32px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
-    transition: background 0.25s ease, border-color 0.25s ease;
   }
 
   .login-header {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
 
-  .logo-wrapper {
+  .logo-box {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(16, 185, 129, 0.12));
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    margin-bottom: 14px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    width: 52px;
+    height: 52px;
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    border-radius: 14px;
+    margin-bottom: 16px;
   }
 
   .login-title {
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 22px;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 6px 0;
-    letter-spacing: -0.4px;
   }
 
   .login-subtitle {
     font-size: 13px;
     color: var(--text-secondary);
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.4;
   }
 
-  /* Message bienveillant et valorisant */
-  .human-welcome-note {
-    background: var(--note-bg);
-    border: 1px solid var(--note-border);
-    border-radius: 14px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 22px;
-  }
-
-  .human-welcome-note svg {
-    color: #3b82f6;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .welcome-note-text {
-    font-size: 12px;
-    color: var(--text-secondary);
-    line-height: 1.45;
-    margin: 0;
-  }
-
-  .welcome-note-text strong {
-    color: var(--text-primary);
-  }
-
-  /* Section profils de test 1-clic avec noms humains */
-  .demo-access-panel {
-    background: var(--chip-bg);
-    border: 1px dashed var(--card-border);
-    border-radius: 16px;
-    padding: 14px;
-    margin-bottom: 22px;
-  }
-
-  .demo-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .demo-panel-title {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .demo-badge-hint {
-    font-size: 10px;
-    color: #3b82f6;
-    font-weight: 600;
-  }
-
-  .demo-chips-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .demo-chip-btn {
-    background: var(--card-bg);
-    border: 1px solid var(--chip-border);
-    border-radius: 12px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s ease;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .demo-chip-btn:hover {
-    background: var(--chip-hover);
-    border-color: #3b82f6;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .demo-chip-btn.active {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.12);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-  }
-
-  .demo-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  .demo-avatar.admin {
-    background: rgba(59, 130, 246, 0.15);
-  }
-
-  .demo-avatar.manager {
-    background: rgba(16, 185, 129, 0.15);
-  }
-
-  .demo-info strong {
-    display: block;
-    font-size: 12px;
-    color: var(--text-primary);
-    font-weight: 700;
-  }
-
-  .demo-info span {
-    display: block;
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 1px;
-  }
-
-  /* Formulaire */
   .form-row {
     margin-bottom: 18px;
     padding: 0 !important;
@@ -300,13 +144,13 @@
 
   .form-row label {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     margin-bottom: 6px;
   }
 
-  .input-container {
+  .input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
@@ -315,26 +159,26 @@
   .form-row input[type="text"],
   .form-row input[type="password"] {
     width: 100%;
-    padding: 12px 14px;
+    padding: 11px 14px;
     background: var(--input-bg) !important;
     border: 1px solid var(--input-border) !important;
-    border-radius: 12px;
+    border-radius: 8px;
     color: var(--text-primary) !important;
     font-size: 14px;
     box-sizing: border-box;
-    transition: all 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .form-row input[type="text"]:focus,
   .form-row input[type="password"]:focus {
     border-color: var(--input-focus) !important;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
   }
 
-  .toggle-password-btn {
+  .eye-btn {
     position: absolute;
-    right: 10px;
+    right: 8px;
     background: transparent;
     border: none;
     color: var(--text-muted);
@@ -344,14 +188,12 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    transition: color 0.15s ease;
   }
 
-  .toggle-password-btn:hover {
+  .eye-btn:hover {
     color: var(--text-primary);
   }
 
-  /* Bouton de soumission chaleureux et engageant */
   .submit-row {
     margin-top: 24px;
     padding: 0 !important;
@@ -361,46 +203,38 @@
 
   .submit-row input[type="submit"] {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background: var(--btn-bg) !important;
     color: #ffffff !important;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14px;
-    border-radius: 12px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.15s ease;
   }
 
   .submit-row input[type="submit"]:hover {
     background: var(--btn-hover) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
   }
 
-  /* Alertes d'erreurs empathiques */
   .errornote {
-    background: rgba(239, 68, 68, 0.12) !important;
-    border: 1px solid rgba(239, 68, 68, 0.4) !important;
-    color: #f87171 !important;
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 20px;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #ef4444 !important;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
     font-size: 13px;
     line-height: 1.4;
   }
 
-  .footer-meta {
+  .footer-copyright {
     text-align: center;
     margin-top: 24px;
     font-size: 12px;
     color: var(--text-muted);
-    line-height: 1.6;
-  }
-
-  .footer-meta strong {
-    color: var(--text-secondary);
   }
 </style>
 {% endblock %}
@@ -408,76 +242,32 @@
 {% block content %}
 <div id="container">
 
-  <!-- Barre utilitaire supérieure -->
-  <div class="top-utility-bar">
-    <a href="/help/" class="back-citizen-link">
+  <div class="top-links">
+    <a href="/help/" class="back-link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
-      <span>Retour au Centre d'Aide</span>
+      <span>Retour au site</span>
     </a>
 
-    <button type="button" class="theme-toggle-btn" onclick="toggleLoginPageTheme()" title="Basculer entre le mode clair et le mode sombre">
-      <span id="theme-btn-icon">☀️</span>
-      <span id="theme-btn-label">Mode Clair</span>
+    <button type="button" class="theme-btn" onclick="toggleTheme()" title="Changer le thème">
+      <span id="theme-icon">☀️</span>
+      <span id="theme-label">Mode Clair</span>
     </button>
   </div>
 
-  <!-- Carte de connexion -->
   <div class="login-card">
     <div class="login-header">
-      <div class="logo-wrapper">
-        <img src="{% static 'shield_api/img/shieldnet_logo.svg' %}" alt="ShieldNet" width="36" height="36" onerror="this.onerror=null; this.src='{% static 'shield_api/img/favicon.png' %}';">
+      <div class="logo-box">
+        <img src="{% static 'shield_api/img/shieldnet_logo.svg' %}" alt="ShieldNet" width="32" height="32" onerror="this.onerror=null; this.src='{% static 'shield_api/img/favicon.png' %}';">
       </div>
-      <h1 class="login-title">Bonjour & Bienvenue !</h1>
-      <p class="login-subtitle">Espace d'Administration & Modération Télécom</p>
-    </div>
-
-    <!-- Message de réassurance chaleureux -->
-    <div class="human-welcome-note">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-        <polyline points="9 12 11 14 15 10"></polyline>
-      </svg>
-      <p class="welcome-note-text">
-        <strong>Votre travail fait la différence :</strong> Grâce à vos vérifications, vous préservez chaque jour la tranquillité des citoyens contre les fraudes téléphoniques.
-      </p>
-    </div>
-
-    <!-- Raccourcis de connexion rapide 1-clic avec vrais profils d'équipe -->
-    <div class="demo-access-panel">
-      <div class="demo-panel-header">
-        <div class="demo-panel-title">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          <span>Profils Démo (1-Clic)</span>
-        </div>
-        <span class="demo-badge-hint">Remplissage immédiat</span>
-      </div>
-
-      <div class="demo-chips-grid">
-        <button type="button" class="demo-chip-btn" onclick="applyDemoProfile('admin', 'admin123', this)">
-          <div class="demo-avatar admin">🛡️</div>
-          <div class="demo-info">
-            <strong>Alexandre</strong>
-            <span>Admin Général</span>
-          </div>
-        </button>
-
-        <button type="button" class="demo-chip-btn" onclick="applyDemoProfile('manager', 'manager123', this)">
-          <div class="demo-avatar manager">👤</div>
-          <div class="demo-info">
-            <strong>Sophie</strong>
-            <span>Gestionnaire</span>
-          </div>
-        </button>
-      </div>
+      <h1 class="login-title">Connexion Administration</h1>
+      <p class="login-subtitle">Veuillez renseigner vos accès pour gérer la plateforme ShieldNet.</p>
     </div>
 
     {% if form.errors and not form.non_field_errors %}
-      <p class="errornote">Oups ! Veuillez vérifier votre identifiant et votre mot de passe ci-dessous.</p>
+      <p class="errornote">Identifiant ou mot de passe incorrect. Veuillez vérifier votre saisie.</p>
     {% endif %}
 
     {% if form.non_field_errors %}
@@ -492,17 +282,17 @@
 
       <div class="form-row">
         <label for="id_username">Identifiant ou adresse courriel</label>
-        <div class="input-container">
-          <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="id_username" placeholder="Ex: admin ou operateur@shieldnet.app" value="{{ form.username.value|default:'' }}">
+        <div class="input-wrapper">
+          <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="id_username" placeholder="nom.utilisateur" value="{{ form.username.value|default:'' }}">
         </div>
       </div>
 
       <div class="form-row">
         <label for="id_password">Mot de passe</label>
-        <div class="input-container">
-          <input type="password" name="password" autocomplete="current-password" required id="id_password" placeholder="Votre mot de passe secret">
-          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility()" title="Afficher ou masquer le mot de passe" aria-label="Afficher ou masquer le mot de passe">
-            <svg id="eye-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="input-wrapper">
+          <input type="password" name="password" autocomplete="current-password" required id="id_password" placeholder="••••••••••••">
+          <button type="button" class="eye-btn" onclick="togglePassword()" title="Afficher ou masquer le mot de passe" aria-label="Afficher ou masquer le mot de passe">
+            <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
@@ -511,68 +301,52 @@
       </div>
 
       <div class="submit-row">
-        <input type="submit" value="Entrer dans l'espace de modération →">
+        <input type="submit" value="Se connecter">
       </div>
     </form>
   </div>
 
-  <div class="footer-meta">
-    <strong>ShieldNet</strong> • Protection Télécom & Sérénité Citoyenne<br>
-    Merci pour votre engagement au service de communications plus sûres.
+  <div class="footer-copyright">
+    ShieldNet &copy; {% now "Y" %} &bull; Espace réservé à l'équipe autorisée
   </div>
 </div>
 
 <script>
-  function applyDemoProfile(username, password, buttonElement) {
-    const userField = document.getElementById('id_username');
-    const passField = document.getElementById('id_password');
-    if (userField && passField) {
-      userField.value = username;
-      passField.value = password;
-      userField.focus();
+  function togglePassword() {
+    const field = document.getElementById('id_password');
+    const icon = document.getElementById('eye-icon');
+    if (!field || !icon) return;
 
-      document.querySelectorAll('.demo-chip-btn').forEach(btn => btn.classList.remove('active'));
-      if (buttonElement) {
-        buttonElement.classList.add('active');
-      }
-    }
-  }
-
-  function togglePasswordVisibility() {
-    const passField = document.getElementById('id_password');
-    const eyeSvg = document.getElementById('eye-svg');
-    if (!passField || !eyeSvg) return;
-
-    if (passField.type === 'password') {
-      passField.type = 'text';
-      eyeSvg.innerHTML = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" x2="22" y1="2" y2="22"></line>';
+    if (field.type === 'password') {
+      field.type = 'text';
+      icon.innerHTML = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" x2="22" y1="2" y2="22"></line>';
     } else {
-      passField.type = 'password';
-      eyeSvg.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle>';
+      field.type = 'password';
+      icon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle>';
     }
   }
 
-  function applyTheme(isLight) {
+  function setTheme(isLight) {
     document.documentElement.classList.toggle('light-mode', isLight);
     document.body.classList.toggle('light-mode', isLight);
     localStorage.setItem('shieldnet_admin_theme', isLight ? 'light' : 'dark');
 
-    const icon = document.getElementById('theme-btn-icon');
-    const label = document.getElementById('theme-btn-label');
+    const icon = document.getElementById('theme-icon');
+    const label = document.getElementById('theme-label');
     if (icon && label) {
       icon.textContent = isLight ? '🌙' : '☀️';
       label.textContent = isLight ? 'Mode Sombre' : 'Mode Clair';
     }
   }
 
-  function toggleLoginPageTheme() {
-    const isCurrentlyLight = document.body.classList.contains('light-mode');
-    applyTheme(!isCurrentlyLight);
+  function toggleTheme() {
+    const isLight = document.body.classList.contains('light-mode');
+    setTheme(!isLight);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('shieldnet_admin_theme') || 'dark';
-    applyTheme(saved === 'light');
+    setTheme(saved === 'light');
   });
 </script>
 {% endblock %}
