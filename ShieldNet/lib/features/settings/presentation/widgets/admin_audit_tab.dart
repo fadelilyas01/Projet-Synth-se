@@ -19,6 +19,7 @@ class AdminAuditTab extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -31,7 +32,10 @@ class AdminAuditTab extends StatelessWidget {
           children: [
             Icon(Icons.history_toggle_off_rounded, size: 64, color: Colors.grey.withValues(alpha: 0.5)),
             const SizedBox(height: 16),
-            const Text('Aucun événement d\'audit enregistré.', style: TextStyle(color: Colors.grey, fontSize: 16)),
+            Text(
+              isEn ? 'No audit events recorded.' : 'Aucun événement d\'audit enregistré.',
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -43,15 +47,15 @@ class AdminAuditTab extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         itemCount: auditLogs.length,
         separatorBuilder: (_, index) => const SizedBox(height: 10),
-        itemBuilder: (context, index) => _buildAuditLogCard(auditLogs[index], cardBg, borderColor),
+        itemBuilder: (context, index) => _buildAuditLogCard(auditLogs[index], cardBg, borderColor, isEn),
       ),
     );
   }
 
-  Widget _buildAuditLogCard(Map<String, dynamic> log, Color cardBg, Color borderColor) {
+  Widget _buildAuditLogCard(Map<String, dynamic> log, Color cardBg, Color borderColor, bool isEn) {
     final action = log['action'] as String? ?? '';
     final source = log['source'] as String? ?? 'web';
-    final username = log['user_username'] as String? ?? 'Système';
+    final username = log['user_username'] as String? ?? (isEn ? 'System' : 'Système');
     final targetHash = log['target_hash'] as String? ?? '';
     final createdAt = log['created_at'] as String? ?? '';
     final details = log['details'];
@@ -63,23 +67,23 @@ class AdminAuditTab extends StatelessWidget {
     if (action.contains('BLOCK') && !action.contains('UNBLOCK')) {
       actionColor = AppTheme.accentRed;
       actionIcon = Icons.block_rounded;
-      actionLabel = 'Blocage de numéro';
+      actionLabel = isEn ? 'Number Blocked' : 'Blocage de numéro';
     } else if (action.contains('UNBLOCK') || action.contains('WHITELIST')) {
       actionColor = AppTheme.accentGreen;
       actionIcon = Icons.check_circle_outline_rounded;
-      actionLabel = 'Déblocage / Blanchiment';
+      actionLabel = isEn ? 'Unblocked / Whitelisted' : 'Déblocage / Blanchiment';
     } else if (action.contains('PURGE')) {
       actionColor = Colors.purple;
       actionIcon = Icons.auto_delete_rounded;
-      actionLabel = 'Purge Maintenance BDD';
+      actionLabel = isEn ? 'Database Maintenance Purge' : 'Purge Maintenance BDD';
     } else if (action.contains('APPROVE')) {
       actionColor = AppTheme.accentOrange;
       actionIcon = Icons.verified_user_rounded;
-      actionLabel = 'Signalement Validé';
+      actionLabel = isEn ? 'Report Approved' : 'Signalement Validé';
     } else if (action.contains('REJECT')) {
       actionColor = Colors.grey;
       actionIcon = Icons.cancel_outlined;
-      actionLabel = 'Signalement Rejeté';
+      actionLabel = isEn ? 'Report Rejected' : 'Signalement Rejeté';
     }
 
     final isWeb = source.toLowerCase() == 'web';
@@ -116,7 +120,7 @@ class AdminAuditTab extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Par $username • ${createdAt.length > 19 ? createdAt.substring(0, 19).replaceAll("T", " ") : createdAt}',
+                        '${isEn ? "By" : "Par"} $username • ${createdAt.length > 19 ? createdAt.substring(0, 19).replaceAll("T", " ") : createdAt}',
                         style: const TextStyle(fontSize: 11, color: Colors.grey),
                       ),
                     ],
@@ -156,12 +160,12 @@ class AdminAuditTab extends StatelessWidget {
               const SizedBox(height: 8),
               if (targetHash.isNotEmpty)
                 Text(
-                  'Cible (Hash): ${targetHash.length >= 16 ? "${targetHash.substring(0, 16)}..." : targetHash}',
+                  '${isEn ? "Target (Hash)" : "Cible (Hash)"}: ${targetHash.length >= 16 ? "${targetHash.substring(0, 16)}..." : targetHash}',
                   style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Colors.grey),
                 ),
               if (details != null && details.toString() != '{}')
                 Text(
-                  'Détails: $details',
+                  '${isEn ? "Details" : "Détails"}: $details',
                   style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
             ],

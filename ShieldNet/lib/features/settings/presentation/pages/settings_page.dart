@@ -15,6 +15,7 @@ import 'emergency_whitelist_page.dart';
 import '../../../../core/services/regional_compliance_service.dart';
 import '../widgets/region_selection_sheet.dart';
 import 'faq_page.dart';
+import '../../../../core/widgets/app_logo.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -47,18 +48,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (status.isGranted) {
         await ref.read(contactsOnlyProvider.notifier).toggle(true);
         if (mounted) {
+          final isEn = ref.read(localeProvider).languageCode == 'en';
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Mode Bouclier Strict activé : seuls vos contacts feront sonner le téléphone.'),
+            SnackBar(
+              content: Text(isEn
+                  ? 'Strict Shield mode active: only contacts will ring.'
+                  : 'Mode Bouclier Strict activé : seuls vos contacts feront sonner le téléphone.'),
               backgroundColor: AppTheme.accentGreen,
             ),
           );
         }
       } else {
         if (mounted) {
+          final isEn = ref.read(localeProvider).languageCode == 'en';
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Permission d\'accès aux contacts requise pour ce mode.'),
+            SnackBar(
+              content: Text(isEn
+                  ? 'Contacts permission required for this mode.'
+                  : 'Permission d\'accès aux contacts requise pour ce mode.'),
               backgroundColor: AppTheme.accentOrange,
             ),
           );
@@ -84,12 +91,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ref.invalidate(offlineQueueCountProvider);
       if (mounted) {
         setState(() => _isSyncing = false);
+        final isEn = ref.read(localeProvider).languageCode == 'en';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               res.hasWorkDone
-                  ? 'File hors-ligne synchronisée : ${res.totalSynced} élément(s) transmis.'
-                  : 'Aucun élément en attente de synchronisation.',
+                  ? (isEn
+                      ? 'Offline queue synchronized: ${res.totalSynced} item(s) sent.'
+                      : 'File hors-ligne synchronisée : ${res.totalSynced} élément(s) transmis.')
+                  : (isEn
+                      ? 'No items pending synchronization.'
+                      : 'Aucun élément en attente de synchronisation.'),
             ),
             backgroundColor: AppTheme.accentGreen,
           ),
@@ -98,9 +110,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSyncing = false);
+        final isEn = ref.read(localeProvider).languageCode == 'en';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur vidage file hors-ligne: $e'),
+            content: Text(isEn ? 'Error flushing offline queue: $e' : 'Erreur vidage file hors-ligne: $e'),
             backgroundColor: AppTheme.accentRed,
           ),
         );
@@ -114,7 +127,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       final count = await BackgroundSyncService.instance.syncNow();
       if (mounted) {
         setState(() => _isSyncing = false);
-        final defaultMsg = 'Protection à jour : $count numéros synchronisés.';
+        final isEn = ref.read(localeProvider).languageCode == 'en';
+        final defaultMsg = isEn ? 'Protection up to date: $count numbers synchronized.' : 'Protection à jour : $count numéros synchronisés.';
         final detailMsg = l10n?.syncSuccessDetail;
         final msg = detailMsg != null ? detailMsg.replaceAll('numéros', '$count numéros') : defaultMsg;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,8 +141,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSyncing = false);
+        final isEn = ref.read(localeProvider).languageCode == 'en';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur réseau: $e'), backgroundColor: AppTheme.accentRed),
+          SnackBar(content: Text(isEn ? 'Network error: $e' : 'Erreur réseau: $e'), backgroundColor: AppTheme.accentRed),
         );
       }
     }
@@ -216,8 +231,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               const Divider(height: 1, indent: 56),
               ListTile(
                 leading: const Icon(Icons.health_and_safety_rounded, color: AppTheme.accentGreen, size: 24),
-                title: Text(l10n?.settingEmergencyWhitelist ?? 'Numéros d\'Urgence & Liste Blanche', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                subtitle: Text(l10n?.settingEmergencyWhitelistDesc ?? '911, 811 et contacts autorisés prioritaires', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                title: Text(l10n?.settingEmergencyWhitelist ?? (currentLocale.languageCode == 'en' ? 'Emergency Numbers & Whitelist' : 'Numéros d\'Urgence & Liste Blanche'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                subtitle: Text(
+                  l10n?.settingEmergencyWhitelistDesc ??
+                      (currentLocale.languageCode == 'en'
+                          ? '911, 988 and guaranteed priority contacts'
+                          : '911, 811 et contacts autorisés prioritaires'),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                 onTap: () {
                   Navigator.push(
@@ -364,10 +385,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               Consumer(
                 builder: (context, ref, _) {
                   final regionalState = ref.watch(regionalComplianceProvider);
-                  final norm = regionalState.complianceNorm;
-                  final normName = norm['norm_name'] as String? ?? 'Norme de protection';
+                  final isEn = currentLocale.languageCode == 'en';
+                  final norm = regionalState.getLocalizedNorm(currentLocale.languageCode);
+                  final normName = norm['norm_name'] as String? ?? (isEn ? 'Protection Standard' : 'Norme de protection');
                   final regulator = norm['regulator'] as String? ?? 'CRTC / FCC';
                   final retentionDays = norm['data_retention_days'] as int? ?? 30;
+                  final countryName = regionalState.getLocalizedCountryName(currentLocale.languageCode);
+                  final provinceName = regionalState.getLocalizedProvinceName(currentLocale.languageCode);
 
                   return Column(
                     children: [
@@ -380,7 +404,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           children: [
                             Flexible(
                               child: Text(
-                                '${regionalState.countryName} • ${regionalState.provinceName}',
+                                '$countryName • $provinceName',
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -416,7 +440,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: const Text('Modifier', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          child: Text(isEn ? 'Edit' : 'Modifier', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const Divider(height: 1, indent: 56),
@@ -429,7 +453,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Organisme de régulation', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                  Text(isEn ? 'Regulatory authority' : 'Organisme de régulation', style: const TextStyle(fontSize: 11, color: Colors.grey)),
                                   const SizedBox(height: 2),
                                   Text(
                                     regulator,
@@ -446,7 +470,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                'Rétention max: $retentionDays j',
+                                isEn ? 'Max retention: $retentionDays d' : 'Rétention max: $retentionDays j',
                                 style: const TextStyle(color: AppTheme.accentCyan, fontSize: 11, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -492,7 +516,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ],
 
           // Assistance, FAQ & Documentation Web — visible pour tous les utilisateurs
-          _buildSectionHeader('ASSISTANCE & DOCUMENTATION'),
+          _buildSectionHeader(currentLocale.languageCode == 'en' ? 'HELP & DOCUMENTATION' : 'ASSISTANCE & DOCUMENTATION'),
           _buildCard(
             cardBg: cardBg,
             borderColor: borderColor,
@@ -533,12 +557,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset(
-                    'assets/images/shieldnet_logo.png',
-                    width: 32,
-                    height: 32,
-                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                  ),
+                  const ShieldNetLogo(size: 32),
                   const SizedBox(height: 8),
                   Text(
                     l10n?.appVersionFooter ?? 'ShieldNet v1.0.0 • Sécurité Télécom',
@@ -595,7 +614,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       color: AppTheme.primaryColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Text('GESTIONNAIRE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                    child: Text(
+                      ref.watch(localeProvider).languageCode == 'en' ? 'MANAGER' : 'GESTIONNAIRE',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                    ),
                   ),
                 ],
               ],

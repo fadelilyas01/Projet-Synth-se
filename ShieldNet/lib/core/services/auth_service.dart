@@ -174,8 +174,8 @@ class AuthService {
           'email': email.trim().toLowerCase(),
           'password': password,
           'name': name ?? '',
-          if (country != null) 'country': country,
-          if (provinceOrState != null) 'province_or_state': provinceOrState,
+          'country': ?country,
+          'province_or_state': ?provinceOrState,
         },
       );
 

@@ -110,6 +110,8 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
 
   Future<void> _triggerManualSync({required bool delta}) async {
     setState(() => _isSyncingClient = true);
+    final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
     try {
       final api = ref.read(apiServiceProvider);
       final count = await api.syncBlacklistWithBackend(delta: delta);
@@ -118,8 +120,12 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(delta
-                ? 'Sync différentielle réussie: $count élément(s) synchronisés/purgés.'
-                : 'Sync complète réussie: $count numéros en cache local.'),
+                ? (isEn
+                    ? 'Differential sync successful: $count item(s) synchronized/purged.'
+                    : 'Sync différentielle réussie: $count élément(s) synchronisés/purgés.')
+                : (isEn
+                    ? 'Full sync successful: $count numbers in local cache.'
+                    : 'Sync complète réussie: $count numéros en cache local.')),
             backgroundColor: AppTheme.accentGreen,
           ),
         );
@@ -128,7 +134,10 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de la synchronisation: $e'), backgroundColor: AppTheme.accentRed),
+          SnackBar(
+            content: Text(isEn ? 'Sync failed: $e' : 'Échec de la synchronisation: $e'),
+            backgroundColor: AppTheme.accentRed,
+          ),
         );
       }
     } finally {
@@ -341,18 +350,23 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
     int riskScore = 80;
     bool isBlocked = true;
     bool isWhitelisted = false;
+    final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.add_moderator_rounded, color: AppTheme.accentOrange),
-              SizedBox(width: 8),
+              const Icon(Icons.add_moderator_rounded, color: AppTheme.accentOrange),
+              const SizedBox(width: 8),
               Expanded(
-                child: Text('Ajouter un Numéro', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                child: Text(
+                  isEn ? 'Add a Number' : 'Ajouter un Numéro',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
               ),
             ],
           ),
@@ -364,30 +378,33 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
                 TextField(
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Numéro de téléphone',
+                  decoration: InputDecoration(
+                    labelText: isEn ? 'Phone number' : 'Numéro de téléphone',
                     hintText: '+1 819 123 4567',
-                    prefixIcon: Icon(Icons.phone_rounded),
+                    prefixIcon: const Icon(Icons.phone_rounded),
                   ),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   initialValue: category,
-                  decoration: const InputDecoration(labelText: 'Catégorie'),
-                  items: const [
-                    DropdownMenuItem(value: 'fraud', child: Text('Fraude / Arnaque')),
-                    DropdownMenuItem(value: 'financial_scam', child: Text('Arnaque Financière')),
-                    DropdownMenuItem(value: 'phishing', child: Text('Hameçonnage / Phishing')),
-                    DropdownMenuItem(value: 'robocall', child: Text('Robocall Automatisé')),
-                    DropdownMenuItem(value: 'telemarketing', child: Text('Démarchage Commercial')),
-                    DropdownMenuItem(value: 'other', child: Text('Autre Nuisance')),
+                  decoration: InputDecoration(labelText: isEn ? 'Category' : 'Catégorie'),
+                  items: [
+                    DropdownMenuItem(value: 'fraud', child: Text(isEn ? 'Fraud / Scam' : 'Fraude / Arnaque')),
+                    DropdownMenuItem(value: 'financial_scam', child: Text(isEn ? 'Financial Scam' : 'Arnaque Financière')),
+                    DropdownMenuItem(value: 'phishing', child: Text(isEn ? 'Phishing' : 'Hameçonnage / Phishing')),
+                    DropdownMenuItem(value: 'robocall', child: Text(isEn ? 'Automated Robocall' : 'Robocall Automatisé')),
+                    DropdownMenuItem(value: 'telemarketing', child: Text(isEn ? 'Commercial Telemarketing' : 'Démarchage Commercial')),
+                    DropdownMenuItem(value: 'other', child: Text(isEn ? 'Other Nuisance' : 'Autre Nuisance')),
                   ],
                   onChanged: (val) {
                     if (val != null) setDialogState(() => category = val);
                   },
                 ),
                 const SizedBox(height: 16),
-                Text('Score de Risque : $riskScore/100', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text(
+                  isEn ? 'Risk Score : $riskScore/100' : 'Score de Risque : $riskScore/100',
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
                 Slider(
                   value: riskScore.toDouble(),
                   min: 0,
@@ -398,7 +415,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Bloquer immédiatement', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  title: Text(isEn ? 'Block immediately' : 'Bloquer immédiatement', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   value: isBlocked,
                   onChanged: (val) => setDialogState(() {
                     isBlocked = val;
@@ -407,7 +424,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Blanchir (Faux positif)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  title: Text(isEn ? 'Whitelist (False positive)' : 'Blanchir (Faux positif)', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   value: isWhitelisted,
                   onChanged: (val) => setDialogState(() {
                     isWhitelisted = val;
@@ -418,7 +435,10 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(isEn ? 'Cancel' : 'Annuler'),
+            ),
             ElevatedButton(
               onPressed: () async {
                 final phone = phoneController.text.trim();
@@ -435,16 +455,19 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
                     isWhitelisted: isWhitelisted,
                   );
                   messenger.showSnackBar(
-                    const SnackBar(content: Text('Numéro enregistré avec succès.'), backgroundColor: AppTheme.accentGreen),
+                    SnackBar(
+                      content: Text(isEn ? 'Number registered successfully.' : 'Numéro enregistré avec succès.'),
+                      backgroundColor: AppTheme.accentGreen,
+                    ),
                   );
                   _loadAllAdminData();
                 } catch (e) {
                   messenger.showSnackBar(
-                    SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.accentRed),
+                    SnackBar(content: Text(isEn ? 'Error: $e' : 'Erreur: $e'), backgroundColor: AppTheme.accentRed),
                   );
                 }
               },
-              child: const Text('Enregistrer'),
+              child: Text(isEn ? 'Save' : 'Enregistrer'),
             ),
           ],
         ),
@@ -459,6 +482,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
     final user = ref.watch(authNotifierProvider);
     final isSuperAdmin = user?.isSuperAdmin ?? false;
     final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
 
     return Scaffold(
       appBar: AppBar(
@@ -471,7 +495,9 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                isSuperAdmin ? (l10n?.adminFullAdmin ?? 'Administration Totale') : (l10n?.adminManagerSpace ?? 'Espace Gestionnaire & Modération'),
+                isSuperAdmin
+                    ? (l10n?.adminFullAdmin ?? (isEn ? 'Full Administration' : 'Administration Totale'))
+                    : (l10n?.adminManagerSpace ?? (isEn ? 'Manager Space & Moderation' : 'Espace Gestionnaire & Modération')),
                 style: const TextStyle(fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -481,7 +507,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: l10n?.adminRefreshAll ?? 'Tout actualiser',
+            tooltip: l10n?.adminRefreshAll ?? (isEn ? 'Refresh all' : 'Tout actualiser'),
             onPressed: _loadAllAdminData,
           ),
         ],
@@ -492,12 +518,12 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
           unselectedLabelColor: Colors.grey,
           indicatorColor: isSuperAdmin ? AppTheme.accentOrange : AppTheme.primaryColor,
           tabs: [
-            Tab(icon: const Icon(Icons.dashboard_rounded), text: l10n?.adminTabOverview ?? 'Vue d\'ensemble'),
-            Tab(icon: const Icon(Icons.format_list_bulleted_rounded), text: l10n?.adminTabBlacklist ?? 'Liste Noire'),
-            Tab(icon: const Icon(Icons.report_problem_rounded), text: l10n?.adminTabReports ?? 'Signalements'),
+            Tab(icon: const Icon(Icons.dashboard_rounded), text: l10n?.adminTabOverview ?? (isEn ? 'Overview' : 'Vue d\'ensemble')),
+            Tab(icon: const Icon(Icons.format_list_bulleted_rounded), text: l10n?.adminTabBlacklist ?? (isEn ? 'Blacklist' : 'Liste Noire')),
+            Tab(icon: const Icon(Icons.report_problem_rounded), text: l10n?.adminTabReports ?? (isEn ? 'Reports' : 'Signalements')),
             if (isSuperAdmin)
-              Tab(icon: const Icon(Icons.people_alt_rounded), text: l10n?.adminTabUsers ?? 'Utilisateurs'),
-            Tab(icon: const Icon(Icons.history_rounded), text: l10n?.adminTabAudit ?? 'Audit & Traces'),
+              Tab(icon: const Icon(Icons.people_alt_rounded), text: l10n?.adminTabUsers ?? (isEn ? 'Users' : 'Utilisateurs')),
+            Tab(icon: const Icon(Icons.history_rounded), text: l10n?.adminTabAudit ?? (isEn ? 'Audit & Logs' : 'Audit & Traces')),
           ],
         ),
       ),
@@ -551,7 +577,7 @@ class _AdminConsolePageState extends ConsumerState<AdminConsolePage> with Single
               backgroundColor: AppTheme.accentOrange,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add_rounded),
-              label: Text(l10n?.adminAddNumber ?? 'Ajouter un Numéro'),
+              label: Text(l10n?.adminAddNumber ?? (isEn ? 'Add a Number' : 'Ajouter un Numéro')),
               onPressed: _showAddNumberDialog,
             )
           : null,

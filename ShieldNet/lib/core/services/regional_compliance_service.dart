@@ -41,6 +41,29 @@ class RegionalState {
       isLoading: isLoading ?? this.isLoading,
     );
   }
+
+  String getLocalizedCountryName(String lang) {
+    if (lang == 'en') {
+      return country == 'CA' ? 'Canada' : 'United States';
+    }
+    return country == 'CA' ? 'Canada' : 'États-Unis';
+  }
+
+  String getLocalizedProvinceName(String lang) {
+    if (country == 'CA') {
+      return lang == 'en'
+          ? (RegionalComplianceManager.canadianProvincesEn[provinceOrState] ?? provinceOrState)
+          : (RegionalComplianceManager.canadianProvinces[provinceOrState] ?? provinceOrState);
+    } else {
+      return lang == 'en'
+          ? (RegionalComplianceManager.usStatesEn[provinceOrState] ?? provinceOrState)
+          : (RegionalComplianceManager.usStates[provinceOrState] ?? provinceOrState);
+    }
+  }
+
+  Map<String, dynamic> getLocalizedNorm(String lang) {
+    return RegionalComplianceManager.getLocalNorm(country, provinceOrState, lang: lang);
+  }
 }
 
 class RegionalComplianceManager {
@@ -86,78 +109,153 @@ class RegionalComplianceManager {
     'OR': 'Oregon',
   };
 
+  static const Map<String, String> canadianProvincesEn = {
+    'QC': 'Quebec',
+    'ON': 'Ontario',
+    'BC': 'British Columbia',
+    'AB': 'Alberta',
+    'MB': 'Manitoba',
+    'SK': 'Saskatchewan',
+    'NS': 'Nova Scotia',
+    'NB': 'New Brunswick',
+    'NL': 'Newfoundland and Labrador',
+    'PE': 'Prince Edward Island',
+    'NT': 'Northwest Territories',
+    'YT': 'Yukon',
+    'NU': 'Nunavut',
+  };
+
+  static const Map<String, String> usStatesEn = {
+    'CA': 'California',
+    'NY': 'New York',
+    'TX': 'Texas',
+    'FL': 'Florida',
+    'IL': 'Illinois',
+    'WA': 'Washington',
+    'MA': 'Massachusetts',
+    'PA': 'Pennsylvania',
+    'OH': 'Ohio',
+    'GA': 'Georgia',
+    'NC': 'North Carolina',
+    'MI': 'Michigan',
+    'NJ': 'New Jersey',
+    'VA': 'Virginia',
+    'AZ': 'Arizona',
+    'CO': 'Colorado',
+    'MD': 'Maryland',
+    'MN': 'Minnesota',
+    'NV': 'Nevada',
+    'OR': 'Oregon',
+  };
+
   /// Règles réglementaires locales hors-ligne pour résilience instantanée
-  static Map<String, dynamic> getLocalNorm(String country, String provinceOrState) {
+  static Map<String, dynamic> getLocalNorm(String country, String provinceOrState, {String lang = 'fr'}) {
     final c = country.toUpperCase();
     final p = provinceOrState.toUpperCase();
+    final isEn = lang == 'en';
 
     if (c == 'CA' && p == 'QC') {
       return {
         'norm_key': 'LOI_25_QC',
-        'norm_name': 'Loi 25 du Québec (Protection de la vie privée)',
-        'legal_framework': 'Loi sur la protection des renseignements personnels dans le secteur privé (Loi 25)',
-        'regulator': "Commission d'accès à l'information du Québec (CAI) & CRTC",
-        'description':
-            'Protection rigoureuse sous la Loi 25 québécoise : chiffrement cryptographique HMAC-SHA256, zéro transmission de répertoire, consentement exprès et droit absolu d\'effacement sous 30 jours.',
+        'norm_name': isEn
+            ? 'Quebec Law 25 (Privacy Protection)'
+            : 'Loi 25 du Québec (Protection de la vie privée)',
+        'legal_framework': isEn
+            ? 'Act respecting the protection of personal information in the private sector (Law 25)'
+            : 'Loi sur la protection des renseignements personnels dans le secteur privé (Loi 25)',
+        'regulator': isEn
+            ? 'Commission d\'accès à l\'information du Québec (CAI) & CRTC'
+            : 'Commission d\'accès à l\'information du Québec (CAI) & CRTC',
+        'description': isEn
+            ? 'Strict protection under Quebec Law 25: HMAC-SHA256 salted cryptographic hashing, zero contact list transmission, explicit consent, and 30-day right of erasure.'
+            : 'Protection rigoureuse sous la Loi 25 québécoise : chiffrement cryptographique HMAC-SHA256, zéro transmission de répertoire, consentement exprès et droit absolu d\'effacement sous 30 jours.',
         'data_retention_days': 30,
         'strict_consent_required': true,
         'telecom_standard': 'CRTC 2019-403 & STIR/SHAKEN',
-        'principles': [
-          'Confidentialité par défaut dès la conception (Privacy by Design)',
-          'Zéro indexation ni extraction du carnet d\'adresses personnel',
-          'Empreintes cryptographiques locales HMAC-SHA256 avec sel',
-          'Droit d\'accès, de rectification et d\'effacement des données',
-          'Purge automatique des signalements obsolètes après 30 jours',
-        ],
+        'principles': isEn
+            ? [
+                'Privacy by Design and by default',
+                'Zero extraction or indexing of personal address book',
+                'Local salted HMAC-SHA256 cryptographic hashes',
+                'Right to access, rectify, and delete personal data',
+                'Automatic purge of obsolete reports after 30 days',
+              ]
+            : [
+                'Confidentialité par défaut dès la conception (Privacy by Design)',
+                'Zéro indexation ni extraction du carnet d\'adresses personnel',
+                'Empreintes cryptographiques locales HMAC-SHA256 avec sel',
+                'Droit d\'accès, de rectification et d\'effacement des données',
+                'Purge automatique des signalements obsolètes après 30 jours',
+              ],
         'emergency_numbers': [
-          {'number': '911', 'label': 'Services d\'urgence (Police / Pompiers / Ambulance)', 'immune': true},
-          {'number': '811', 'label': 'Info-Santé & Info-Social Québec', 'immune': true},
-          {'number': '988', 'label': 'Ligne d\'aide en cas de crise de suicide', 'immune': true},
-          {'number': '211', 'label': 'Services communautaires et sociaux', 'immune': true},
+          {'number': '911', 'label': isEn ? 'Emergency Services (Police / Fire / EMS)' : 'Services d\'urgence (Police / Pompiers / Ambulance)', 'immune': true},
+          {'number': '811', 'label': isEn ? 'Info-Santé & Info-Social Quebec' : 'Info-Santé & Info-Social Québec', 'immune': true},
+          {'number': '988', 'label': isEn ? 'Suicide Crisis Helpline' : 'Ligne d\'aide en cas de crise de suicide', 'immune': true},
+          {'number': '211', 'label': isEn ? 'Community and Social Services' : 'Services communautaires et sociaux', 'immune': true},
         ],
       };
     } else if (c == 'CA') {
-      final pName = canadianProvinces[p] ?? p;
+      final pName = isEn ? (canadianProvincesEn[p] ?? p) : (canadianProvinces[p] ?? p);
       return {
         'norm_key': 'PIPEDA_CASL_CRTC',
-        'norm_name': 'LPRPDE / PIPEDA & LCAP / CASL (Canada)',
-        'legal_framework': 'Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) & LCAP',
-        'regulator': 'Commissariat à la protection de la vie privée du Canada (CPVP) & CRTC',
-        'description':
-            'Conformité fédérale canadienne pour $pName : chiffrement des flux de réputation, signalement d\'abus au Centre antifraude du Canada et filtrage conforme aux ordonnances CRTC.',
+        'norm_name': isEn ? 'PIPEDA & CASL / CRTC (Canada)' : 'LPRPDE / PIPEDA & LCAP / CASL (Canada)',
+        'legal_framework': isEn
+            ? 'Personal Information Protection and Electronic Documents Act (PIPEDA) & CASL'
+            : 'Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) & LCAP',
+        'regulator': isEn
+            ? 'Office of the Privacy Commissioner of Canada (OPC) & CRTC'
+            : 'Commissariat à la protection de la vie privée du Canada (CPVP) & CRTC',
+        'description': isEn
+            ? 'Canadian federal compliance for $pName: encrypted threat intelligence feeds, coordinated fraud reporting with the Canadian Anti-Fraud Centre, and CRTC-compliant filtering.'
+            : 'Conformité fédérale canadienne pour $pName : chiffrement des flux de réputation, signalement d\'abus au Centre antifraude du Canada et filtrage conforme aux ordonnances CRTC.',
         'data_retention_days': 60,
         'strict_consent_required': true,
         'telecom_standard': 'CRTC 2019-403 / STIR-SHAKEN Canada',
-        'principles': [
-          'Protection et conformité sous la législation fédérale LPRPDE',
-          'Filtrage télécom conforme aux directives du CRTC',
-          'Consentement exprès pour le blocage préventif des appels suspects',
-          'Signalement direct coordonné avec le Centre antifraude du Canada',
-        ],
+        'principles': isEn
+            ? [
+                'Protection and compliance under federal PIPEDA legislation',
+                'Telecom filtering compliant with CRTC directives',
+                'Explicit consent for preventive spam call interception',
+                'Direct reporting coordinated with the Canadian Anti-Fraud Centre',
+              ]
+            : [
+                'Protection et conformité sous la législation fédérale LPRPDE',
+                'Filtrage télécom conforme aux directives du CRTC',
+                'Consentement exprès pour le blocage préventif des appels suspects',
+                'Signalement direct coordonné avec le Centre antifraude du Canada',
+              ],
         'emergency_numbers': [
-          {'number': '911', 'label': 'Services d\'urgence', 'immune': true},
-          {'number': '811', 'label': 'Ligne santé provinciale', 'immune': true},
-          {'number': '988', 'label': 'Ligne de crise de suicide', 'immune': true},
-          {'number': '211', 'label': 'Ressources communautaires et sociales', 'immune': true},
+          {'number': '911', 'label': isEn ? 'Emergency Services' : 'Services d\'urgence', 'immune': true},
+          {'number': '811', 'label': isEn ? 'Provincial Healthline' : 'Ligne santé provinciale', 'immune': true},
+          {'number': '988', 'label': isEn ? 'Suicide Crisis Helpline' : 'Ligne de crise de suicide', 'immune': true},
+          {'number': '211', 'label': isEn ? 'Community and Social Resources' : 'Ressources communautaires et sociales', 'immune': true},
         ],
       };
     } else if (c == 'US' && p == 'CA') {
       return {
         'norm_key': 'TCPA_CCPA_CALIFORNIA',
-        'norm_name': 'TCPA & CCPA / CPRA (Californie)',
+        'norm_name': isEn ? 'TCPA & CCPA / CPRA (California)' : 'TCPA & CCPA / CPRA (Californie)',
         'legal_framework': 'Telephone Consumer Protection Act (47 U.S.C. § 227) & California Consumer Privacy Act (CCPA/CPRA)',
         'regulator': 'California Privacy Protection Agency (CPPA) & FCC / FTC',
-        'description':
-            'Protection de haut niveau en Californie : clause stricte "Do Not Sell/Share My Personal Information", vérification des attestations STIR/SHAKEN mandatée par la FCC et bouclier anti-robocall.',
+        'description': isEn
+            ? 'High-level privacy standards in California: strict "Do Not Sell/Share My Personal Information" compliance, FCC-mandated STIR/SHAKEN caller verification, and anti-robocall shield.'
+            : 'Protection de haut niveau en Californie : clause stricte "Do Not Sell/Share My Personal Information", vérification des attestations STIR/SHAKEN mandatée par la FCC et bouclier anti-robocall.',
         'data_retention_days': 45,
         'strict_consent_required': true,
         'telecom_standard': 'FCC Robocall Mitigation Database & STIR/SHAKEN',
-        'principles': [
-          'Garantie "Do Not Sell or Share My Personal Information" (CCPA/CPRA)',
-          'Filtrage des robocalls selon la norme fédérale TCPA',
-          'Attestations d\'opérateurs STIR/SHAKEN vérifiées (Niveaux A/B/C)',
-          'Protection locale étanche sans commercialisation des métadonnées',
-        ],
+        'principles': isEn
+            ? [
+                'Strict "Do Not Sell or Share My Personal Information" guarantee (CCPA/CPRA)',
+                'Robocall interception compliant with federal TCPA mandate',
+                'STIR/SHAKEN verified carrier attestations (Levels A/B/C)',
+                'On-device privacy without metadata monetization',
+              ]
+            : [
+                'Garantie "Do Not Sell or Share My Personal Information" (CCPA/CPRA)',
+                'Filtrage des robocalls selon la norme fédérale TCPA',
+                'Attestations d\'opérateurs STIR/SHAKEN vérifiées (Niveaux A/B/C)',
+                'Protection locale étanche sans commercialisation des métadonnées',
+              ],
         'emergency_numbers': [
           {'number': '911', 'label': 'Emergency Services (Police / Fire / EMS)', 'immune': true},
           {'number': '988', 'label': 'Suicide & Crisis Lifeline', 'immune': true},
@@ -166,23 +264,31 @@ class RegionalComplianceManager {
         ],
       };
     } else {
-      final sName = usStates[p] ?? p;
+      final sName = isEn ? (usStatesEn[p] ?? p) : (usStates[p] ?? p);
       return {
         'norm_key': 'TCPA_TRACED_FCC',
         'norm_name': 'TCPA & Pallone-Thune TRACED Act (FCC / FTC)',
         'legal_framework': 'Telephone Consumer Protection Act (TCPA) & Pallone-Thune TRACED Act',
         'regulator': 'Federal Communications Commission (FCC) & Federal Trade Commission (FTC)',
-        'description':
-            'Cadre réglementaire américain pour $sName : atténuation fédérale des appels automatisés non sollicités, conformité National DNC Registry et authentification d\'appels FCC.',
+        'description': isEn
+            ? 'United States federal regulatory framework for $sName: aggressive robocall mitigation, National DNC Registry compliance, and FCC caller ID authentication.'
+            : 'Cadre réglementaire américain pour $sName : atténuation fédérale des appels automatisés non sollicités, conformité National DNC Registry et authentification d\'appels FCC.',
         'data_retention_days': 60,
         'strict_consent_required': false,
         'telecom_standard': 'FCC TRACED Act STIR/SHAKEN Mandate',
-        'principles': [
-          'Interception des robocalls non sollicités (TCPA)',
-          'Validation cryptographique STIR/SHAKEN de l\'appelant',
-          'Respect strict du registre fédéral National Do Not Call (DNC)',
-          'Calcul d\'empreintes local sécurisé sans téléversement de contacts',
-        ],
+        'principles': isEn
+            ? [
+                'Interception of unsolicited robocalls (TCPA)',
+                'Cryptographic caller ID verification via STIR/SHAKEN',
+                'Strict adherence to National Do Not Call (DNC) registry',
+                'Secure local hash matching without uploading contacts',
+              ]
+            : [
+                'Interception des robocalls non sollicités (TCPA)',
+                'Validation cryptographique STIR/SHAKEN de l\'appelant',
+                'Respect strict du registre fédéral National Do Not Call (DNC)',
+                'Calcul d\'empreintes local sécurisé sans téléversement de contacts',
+              ],
         'emergency_numbers': [
           {'number': '911', 'label': 'Emergency Services', 'immune': true},
           {'number': '988', 'label': 'Suicide & Crisis Lifeline', 'immune': true},

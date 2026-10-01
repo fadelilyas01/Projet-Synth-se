@@ -22,6 +22,7 @@ import '../widgets/regional_threat_card.dart';
 import '../widgets/device_integrity_banner.dart';
 import '../../../community/presentation/widgets/citizen_impact_card.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
+import '../../../../core/widgets/app_logo.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -248,14 +249,32 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
       );
     } catch (e) {
       if (mounted) {
+        final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la vérification du numéro: $e'),
+            content: Text(isEn ? 'Error during phone number verification: $e' : 'Erreur lors de la vérification du numéro: $e'),
             backgroundColor: AppTheme.accentRed,
           ),
         );
       }
+    }
+  }
+
+  String _formatCategory(String category, bool isEn) {
+    final cat = category.toLowerCase().trim();
+    if (isEn) {
+      if (cat.contains('fraud') || cat.contains('arnaque')) return 'FRAUD / SCAM';
+      if (cat.contains('telemarketing') || cat.contains('démarchage') || cat.contains('demarchage')) return 'TELEMARKETING';
+      if (cat.contains('phishing') || cat.contains('hameçonnage')) return 'PHISHING';
+      if (cat.contains('robocall') || cat.contains('automate') || cat.contains('silence')) return 'ROBOCALL';
+      return category.toUpperCase();
+    } else {
+      if (cat.contains('fraud') || cat.contains('arnaque')) return 'ARNAQUE';
+      if (cat.contains('telemarketing') || cat.contains('démarchage') || cat.contains('demarchage')) return 'DÉMARCHAGE';
+      if (cat.contains('phishing') || cat.contains('hameçonnage')) return 'HAMEÇONNAGE';
+      if (cat.contains('robocall') || cat.contains('automate') || cat.contains('silence')) return 'AUTOMATE';
+      return category.toUpperCase();
     }
   }
 
@@ -272,6 +291,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
 
     final totalBlocked = blacklistAsync.value?.length ?? 0;
     final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
     final isProtectionActive = protectionState.value ?? false;
     final isSeniorMode = ref.watch(seniorModeProvider);
     final integrityAsync = ref.watch(deviceIntegrityProvider);
@@ -287,31 +307,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.asset(
-                  'assets/images/shieldnet_logo.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.shield, size: 20, color: AppTheme.primaryColor),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Text('ShieldNet', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-          ],
-        ),
+        title: const ShieldNetLogo.withText(size: 26, fontSize: 18),
         actions: [
           IconButton(
             icon: const Icon(Icons.search_rounded),
@@ -429,7 +425,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                 },
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Text('Erreur: $err'),
+              error: (err, _) => Text(isEn ? 'Error: $err' : 'Erreur: $err'),
             ),
             const SizedBox(height: 16),
 
@@ -554,7 +550,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: Text(
-                          item.category.toUpperCase(),
+                          _formatCategory(item.category, isEn),
                           style: const TextStyle(fontSize: 11, color: Colors.grey),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

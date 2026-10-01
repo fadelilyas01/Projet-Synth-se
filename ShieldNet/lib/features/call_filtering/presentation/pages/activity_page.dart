@@ -281,6 +281,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
       ),
       builder: (ctx) {
         final l10n = AppLocalizations.of(context);
+        final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
         final catColor = _getCategoryColor(item.category);
         return Padding(
           padding: const EdgeInsets.all(24.0),
@@ -299,7 +300,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        item.category.toUpperCase(),
+                        _formatCategory(item.category, isEn),
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: catColor),
                       ),
                     ),
@@ -567,6 +568,23 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
     }
   }
 
+  String _formatCategory(String category, bool isEn) {
+    final cat = category.toLowerCase().trim();
+    if (isEn) {
+      if (cat.contains('fraud') || cat.contains('arnaque')) return 'FRAUD / SCAM';
+      if (cat.contains('telemarketing') || cat.contains('démarchage') || cat.contains('demarchage')) return 'TELEMARKETING';
+      if (cat.contains('phishing') || cat.contains('hameçonnage')) return 'PHISHING';
+      if (cat.contains('robocall') || cat.contains('automate') || cat.contains('silence')) return 'ROBOCALL';
+      return category.toUpperCase();
+    } else {
+      if (cat.contains('fraud') || cat.contains('arnaque')) return 'ARNAQUE';
+      if (cat.contains('telemarketing') || cat.contains('démarchage') || cat.contains('demarchage')) return 'DÉMARCHAGE';
+      if (cat.contains('phishing') || cat.contains('hameçonnage')) return 'HAMEÇONNAGE';
+      if (cat.contains('robocall') || cat.contains('automate') || cat.contains('silence')) return 'AUTOMATE';
+      return category.toUpperCase();
+    }
+  }
+
   Widget _buildCallsTab(List<BlacklistedEntry> blockedList, Color cardBg, Color borderColor, AppLocalizations? l10n) {
     if (_isLoadingCalls) {
       return const Center(child: CircularProgressIndicator());
@@ -771,9 +789,10 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
   }
 
   Widget _buildBlockedListTab(AsyncValue<List<BlacklistedEntry>> blacklistAsync, Color cardBg, Color borderColor, bool isDark, AppLocalizations? l10n) {
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
     return blacklistAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text('Erreur: $err')),
+      error: (err, _) => Center(child: Text(isEn ? 'Error: $err' : 'Erreur: $err')),
       data: (entries) {
         final filtered = entries.where((e) {
           if (_searchFilter.isEmpty) return true;
@@ -870,7 +889,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> with SingleTickerPr
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    item.category.toUpperCase(),
+                                    _formatCategory(item.category, isEn),
                                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: catColor),
                                   ),
                                 ),

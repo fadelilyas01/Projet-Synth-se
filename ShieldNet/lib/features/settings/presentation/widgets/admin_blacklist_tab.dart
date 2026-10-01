@@ -35,6 +35,7 @@ class AdminBlacklistTab extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     return Column(
       children: [
@@ -43,7 +44,7 @@ class AdminBlacklistTab extends StatelessWidget {
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
-              hintText: 'Rechercher un numéro ou empreinte...',
+              hintText: isEn ? 'Search number or hash...' : 'Rechercher un numéro ou empreinte...',
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.clear_rounded),
@@ -58,11 +59,11 @@ class AdminBlacklistTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              _buildFilterChip('Tous', 'all'),
+              _buildFilterChip(isEn ? 'All' : 'Tous', 'all'),
               const SizedBox(width: 8),
-              _buildFilterChip('Bloqués', 'blocked'),
+              _buildFilterChip(isEn ? 'Blocked' : 'Bloqués', 'blocked'),
               const SizedBox(width: 8),
-              _buildFilterChip('Blanchis', 'whitelisted'),
+              _buildFilterChip(isEn ? 'Whitelisted' : 'Blanchis', 'whitelisted'),
               const SizedBox(width: 8),
               _buildFilterChip('Auto-Consensus', 'auto_consensus'),
             ],
@@ -73,7 +74,7 @@ class AdminBlacklistTab extends StatelessWidget {
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : blacklist.isEmpty
-                  ? const Center(child: Text('Aucun numéro trouvé.', style: TextStyle(color: Colors.grey)))
+                  ? Center(child: Text(isEn ? 'No numbers found.' : 'Aucun numéro trouvé.', style: const TextStyle(color: Colors.grey)))
                   : ListView.separated(
                       controller: scrollController,
                       padding: const EdgeInsets.all(16),
@@ -86,7 +87,7 @@ class AdminBlacklistTab extends StatelessWidget {
                             child: Center(child: CircularProgressIndicator()),
                           );
                         }
-                        return _buildBlacklistItem(blacklist[index], cardBg, borderColor);
+                        return _buildBlacklistItem(blacklist[index], cardBg, borderColor, isEn);
                       },
                     ),
         ),
@@ -102,8 +103,8 @@ class AdminBlacklistTab extends StatelessWidget {
     );
   }
 
-  Widget _buildBlacklistItem(Map<String, dynamic> item, Color cardBg, Color borderColor) {
-    final masked = item['masked_number'] as String? ?? 'Numéro masqué';
+  Widget _buildBlacklistItem(Map<String, dynamic> item, Color cardBg, Color borderColor, bool isEn) {
+    final masked = item['masked_number'] as String? ?? (isEn ? 'Masked number' : 'Numéro masqué');
     final phoneHash = item['phone_hash'] as String? ?? '';
     final category = item['category'] as String? ?? 'fraud';
     final riskScore = item['risk_score'] as int? ?? 0;
@@ -112,6 +113,10 @@ class AdminBlacklistTab extends StatelessWidget {
     final whitelistReason = item['whitelist_reason'] as String? ?? '';
     final isAutoConsensus = whitelistReason == 'auto_consensus';
     final safeCount = item['safe_reports_count'] as int? ?? 0;
+
+    final safeReportsSuffix = safeCount > 0
+        ? (isEn ? ' • $safeCount safe report(s)' : ' • $safeCount avis légitime(s)')
+        : '';
 
     return Container(
       decoration: BoxDecoration(color: cardBg, border: Border.all(color: borderColor)),
@@ -145,7 +150,7 @@ class AdminBlacklistTab extends StatelessWidget {
           ],
         ),
         subtitle: Text(
-          'Score: $riskScore/100 • $category${safeCount > 0 ? ' • $safeCount avis légitime(s)' : ''}\nHash: ${phoneHash.length >= 12 ? phoneHash.substring(0, 12) : phoneHash}...',
+          'Score: $riskScore/100 • $category$safeReportsSuffix\nHash: ${phoneHash.length >= 12 ? phoneHash.substring(0, 12) : phoneHash}...',
           style: const TextStyle(fontSize: 11),
         ),
         isThreeLine: true,
@@ -159,12 +164,12 @@ class AdminBlacklistTab extends StatelessWidget {
           },
           itemBuilder: (ctx) => [
             if (!isWhitelisted)
-              const PopupMenuItem(value: 'whitelist', child: Text('Blanchir (Whitelist)')),
+              PopupMenuItem(value: 'whitelist', child: Text(isEn ? 'Whitelist' : 'Blanchir (Whitelist)')),
             if (!isBlocked)
-              const PopupMenuItem(value: 'block', child: Text('Bloquer')),
-            const PopupMenuItem(
+              PopupMenuItem(value: 'block', child: Text(isEn ? 'Block' : 'Bloquer')),
+            PopupMenuItem(
               value: 'delete',
-              child: Text('Supprimer de la base', style: TextStyle(color: AppTheme.accentRed)),
+              child: Text(isEn ? 'Delete from database' : 'Supprimer de la base', style: const TextStyle(color: AppTheme.accentRed)),
             ),
           ],
         ),

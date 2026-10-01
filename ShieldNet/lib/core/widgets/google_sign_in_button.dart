@@ -6,20 +6,23 @@ import 'google_logo.dart';
 class GoogleSignInButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
-  final String text;
+  final String? text;
   final double height;
 
   const GoogleSignInButton({
     super.key,
     required this.onPressed,
     this.isLoading = false,
-    this.text = 'Continuer avec Google',
+    this.text,
     this.height = 50,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
+    final buttonText = text ?? (isEn ? 'Continue with Google' : 'Continuer avec Google');
 
     final bgColor = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
@@ -65,7 +68,7 @@ class GoogleSignInButton extends StatelessWidget {
                       const SizedBox(width: 12),
                       Flexible(
                         child: Text(
-                          text,
+                          buttonText,
                           style: TextStyle(
                             color: textColor,
                             fontSize: 15,

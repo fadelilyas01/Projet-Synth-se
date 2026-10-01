@@ -214,7 +214,9 @@ class _InitialSplashScreenState extends State<InitialSplashScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Sécurité Télécom & Confidentialité',
+              Localizations.maybeLocaleOf(context)?.languageCode == 'en'
+                  ? 'Telecom Security & Privacy'
+                  : 'Sécurité Télécom & Confidentialité',
               style: TextStyle(
                 color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
                 fontSize: 13,
@@ -234,14 +236,14 @@ class _InitialSplashScreenState extends State<InitialSplashScreen> {
   }
 }
 
-class MainTabNavigationScreen extends StatefulWidget {
+class MainTabNavigationScreen extends ConsumerStatefulWidget {
   const MainTabNavigationScreen({super.key});
 
   @override
-  State<MainTabNavigationScreen> createState() => _MainTabNavigationScreenState();
+  ConsumerState<MainTabNavigationScreen> createState() => _MainTabNavigationScreenState();
 }
 
-class _MainTabNavigationScreenState extends State<MainTabNavigationScreen> {
+class _MainTabNavigationScreenState extends ConsumerState<MainTabNavigationScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
@@ -252,10 +254,12 @@ class _MainTabNavigationScreenState extends State<MainTabNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider);
     final l10n = AppLocalizations.of(context);
-    final protectionLabel = l10n?.tabProtection ?? 'Protection';
-    final activityLabel = l10n?.tabActivity ?? 'Activité';
-    final settingsLabel = l10n?.tabSettings ?? 'Paramètres';
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
+    final protectionLabel = l10n?.tabProtection ?? (isEn ? 'Protection' : 'Protection');
+    final activityLabel = l10n?.tabActivity ?? (isEn ? 'Activity' : 'Activité');
+    final settingsLabel = l10n?.tabSettings ?? (isEn ? 'Settings' : 'Paramètres');
 
     return Scaffold(
       body: IndexedStack(

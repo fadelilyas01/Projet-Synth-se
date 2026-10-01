@@ -64,10 +64,11 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
     final user = ref.watch(authNotifierProvider);
-    final isEn = Localizations.localeOf(context).languageCode == 'en';
+    final currentLocale = ref.watch(localeProvider);
+    final isEn = currentLocale.languageCode == 'en';
 
-    final normPreview = RegionalComplianceManager.getLocalNorm(_selectedCountry, _selectedProvince);
-    final normName = normPreview['norm_name'] as String? ?? 'Norme de protection';
+    final normPreview = RegionalComplianceManager.getLocalNorm(_selectedCountry, _selectedProvince, lang: isEn ? 'en' : 'fr');
+    final normName = normPreview['norm_name'] as String? ?? (isEn ? 'Protection Standard' : 'Norme de protection');
     final normDesc = normPreview['description'] as String? ?? '';
     final retentionDays = normPreview['data_retention_days'] as int? ?? 30;
 
@@ -195,11 +196,11 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                   isExpanded: true,
                   icon: const Icon(Icons.keyboard_arrow_down_rounded),
                   items: _selectedCountry == 'CA'
-                      ? RegionalComplianceManager.canadianProvinces.entries.map((e) {
+                      ? (isEn ? RegionalComplianceManager.canadianProvincesEn : RegionalComplianceManager.canadianProvinces).entries.map((e) {
                           return DropdownMenuItem<String>(
                             value: e.key,
                             child: Text(
-                              e.key == 'QC' ? '🇨🇦 ${e.value} (Loi 25)' : '🇨🇦 ${e.value}',
+                              e.key == 'QC' ? (isEn ? '🇨🇦 ${e.value} (Law 25)' : '🇨🇦 ${e.value} (Loi 25)') : '🇨🇦 ${e.value}',
                               style: TextStyle(
                                 fontWeight: e.key == 'QC' ? FontWeight.bold : FontWeight.w500,
                                 color: e.key == 'QC' ? AppTheme.primaryColor : null,
@@ -208,7 +209,7 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                             ),
                           );
                         }).toList()
-                      : RegionalComplianceManager.usStates.entries.map((e) {
+                      : (isEn ? RegionalComplianceManager.usStatesEn : RegionalComplianceManager.usStates).entries.map((e) {
                           return DropdownMenuItem<String>(
                             value: e.key,
                             child: Text(

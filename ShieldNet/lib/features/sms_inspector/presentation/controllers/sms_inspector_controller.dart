@@ -46,13 +46,13 @@ class SmsInspectorNotifier extends StateNotifier<SmsInspectorState> {
     state = const SmsInspectorState();
   }
 
-  Future<void> analyze(String text) async {
+  Future<void> analyze(String text, {String languageCode = 'fr'}) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
 
     state = state.copyWith(text: text, isAnalyzing: true);
     await Future.delayed(const Duration(milliseconds: 300));
-    final analysis = _analyzeUseCase(trimmed);
+    final analysis = _analyzeUseCase(trimmed, languageCode: languageCode);
     state = state.copyWith(
       isAnalyzing: false,
       result: () => analysis,

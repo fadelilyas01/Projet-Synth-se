@@ -8,6 +8,7 @@ import 'package:shieldnet/core/theme/app_theme.dart';
 import 'package:shieldnet/core/services/regional_compliance_service.dart';
 import 'package:shieldnet/l10n/app_localizations.dart';
 import 'package:shieldnet/main.dart';
+import 'package:shieldnet/core/widgets/app_logo.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -230,42 +231,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Logo — Expanded pour éviter l'overflow
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.asset(
-                              'assets/images/shieldnet_logo.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.shield, color: AppTheme.primaryColor, size: 20),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            'ShieldNet',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18,
-                              letterSpacing: -0.5,
-                              color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                  const Expanded(
+                    child: ShieldNetLogo.withText(size: 26, fontSize: 18),
                   ),
 
                   // Sélecteur de langue interactif FR / EN
@@ -513,10 +480,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
+                    const Flexible(
                       child: Text(
                         '+1 (800) 555-0199',
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -890,7 +857,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Rétention : $retentionDays jours',
+                              isEn ? 'Retention: $retentionDays days' : 'Rétention : $retentionDays jours',
                               style: const TextStyle(color: AppTheme.accentCyan, fontSize: 10, fontWeight: FontWeight.bold),
                             ),
                           ),

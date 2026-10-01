@@ -24,7 +24,9 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
     _textController = TextEditingController(text: widget.initialText ?? '');
     if (widget.initialText != null && widget.initialText!.trim().isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(smsInspectorProvider.notifier).analyze(widget.initialText!);
+        if (!mounted) return;
+        final lang = Localizations.localeOf(context).languageCode;
+        ref.read(smsInspectorProvider.notifier).analyze(widget.initialText!, languageCode: lang);
       });
     }
   }
@@ -41,7 +43,9 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
     final text = data?.text?.trim();
     if (text != null && text.isNotEmpty) {
       _textController.text = text;
-      ref.read(smsInspectorProvider.notifier).analyze(text);
+      if (!mounted) return;
+      final lang = Localizations.localeOf(context).languageCode;
+      ref.read(smsInspectorProvider.notifier).analyze(text, languageCode: lang);
     } else {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
@@ -60,7 +64,8 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
     if (text.isEmpty) return;
 
     HapticFeedback.mediumImpact();
-    ref.read(smsInspectorProvider.notifier).analyze(text);
+    final lang = Localizations.localeOf(context).languageCode;
+    ref.read(smsInspectorProvider.notifier).analyze(text, languageCode: lang);
   }
 
   void _clearAll() {
@@ -214,6 +219,9 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
     IconData verdictIcon;
     String verdictTitle = res.verdictTitle;
 
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
+    final scoreLabel = l10n?.smsScoreLabel ?? (isEn ? 'Risk score' : 'Score de risque');
+
     switch (res.level) {
       case PhishingRiskLevel.dangerous:
         verdictColor = AppTheme.accentRed;
@@ -275,7 +283,7 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${l10n?.smsScoreLabel ?? "Score de risque"} : ${res.riskScore}/100',
+                      '$scoreLabel : ${res.riskScore}/100',
                       style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -290,7 +298,7 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
           if (res.extractedUrls.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(
-              l10n?.localeName == 'en' ? 'LINKS DETECTED IN MESSAGE' : 'LIENS DÉTECTÉS DANS LE MESSAGE',
+              isEn ? 'LINKS DETECTED IN MESSAGE' : 'LIENS DÉTECTÉS DANS LE MESSAGE',
               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0),
             ),
             const SizedBox(height: 6),
@@ -323,7 +331,7 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
           if (res.detectedRedFlags.isNotEmpty) ...[
             const SizedBox(height: 14),
             Text(
-              l10n?.smsIndicatorsLabel ?? 'INDICATEURS DE SUSPICION',
+              l10n?.smsIndicatorsLabel ?? (isEn ? 'SUSPICION INDICATORS' : 'INDICATEURS DE SUSPICION'),
               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0),
             ),
             const SizedBox(height: 6),
@@ -346,7 +354,7 @@ class _SmsInspectorPageState extends ConsumerState<SmsInspectorPage> {
           if (res.recommendations.isNotEmpty) ...[
             const SizedBox(height: 14),
             Text(
-              l10n?.smsAdviceLabel ?? 'CONSEILS DE SÉCURITÉ',
+              l10n?.smsAdviceLabel ?? (isEn ? 'SECURITY ADVICE' : 'CONSEILS DE SÉCURITÉ'),
               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.grey, letterSpacing: 1.0),
             ),
             const SizedBox(height: 6),

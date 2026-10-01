@@ -224,7 +224,7 @@ class SmsPhishingDetector {
   }
 
   /// Détecte le typosquatting ou l'usurpation de marque dans un nom d'hôte
-  static String? _detectTyposquatting(String host) {
+  static String? _detectTyposquatting(String host, {bool isEn = false}) {
     if (_isVerifiedDomain(host)) {
       return null;
     }
@@ -235,7 +235,9 @@ class SmsPhishingDetector {
     for (final brand in _protectedBrandKeywords) {
       // 1. Usurpation directe par sous-domaine ou nom composé frauduleux
       if (hostClean.contains(brand)) {
-        return 'Domaine usurpant la marque officielle "$brand" hors de son infrastructure certifiée.';
+        return isEn
+            ? 'Domain impersonating official brand "$brand" outside verified infrastructure.'
+            : 'Domaine usurpant la marque officielle "$brand" hors de son infrastructure certifiée.';
       }
 
       // 2. Typosquatting par substitution typographique (Levenshtein distance 1 ou 2)
@@ -243,7 +245,9 @@ class SmsPhishingDetector {
         if (token.length >= 5 && (token.length - brand.length).abs() <= 2) {
           final dist = _levenshtein(token, brand);
           if (dist > 0 && dist <= 2) {
-            return 'Domaine trompeur ressemblant à "$brand" par mutation typographique (Typosquatting : "$token").';
+            return isEn
+                ? 'Deceptive domain resembling "$brand" via typographical mutation (Typosquatting: "$token").'
+                : 'Domaine trompeur ressemblant à "$brand" par mutation typographique (Typosquatting : "$token").';
           }
         }
       }
@@ -252,16 +256,19 @@ class SmsPhishingDetector {
   }
 
   /// Analyse le contenu d'un SMS ou message
-  static PhishingAnalysisResult analyze(String message) {
+  static PhishingAnalysisResult analyze(String message, {String languageCode = 'fr'}) {
+    final isEn = languageCode == 'en';
     if (message.trim().isEmpty) {
-      return const PhishingAnalysisResult(
+      return PhishingAnalysisResult(
         riskScore: 0,
         level: PhishingRiskLevel.safe,
-        verdictTitle: 'Texte vide',
-        verdictDescription: 'Veuillez saisir ou coller un message à analyser.',
-        extractedUrls: [],
-        detectedRedFlags: [],
-        recommendations: [],
+        verdictTitle: isEn ? 'Empty Message' : 'Texte vide',
+        verdictDescription: isEn
+            ? 'Please enter or paste a message to analyze.'
+            : 'Veuillez saisir ou coller un message à analyser.',
+        extractedUrls: const [],
+        detectedRedFlags: const [],
+        recommendations: const [],
       );
     }
 
@@ -295,17 +302,26 @@ class SmsPhishingDetector {
         normalized.contains('bloque');
 
     if (urls.isEmpty && isOtpPattern && !hasExtortionOrThreat) {
-      return const PhishingAnalysisResult(
+      return PhishingAnalysisResult(
         riskScore: 0,
         level: PhishingRiskLevel.safe,
-        verdictTitle: "Code d'Authentification Légitime (2FA/OTP)",
-        verdictDescription: 'Ce message correspond à un code temporaire à usage unique sans lien suspect.',
-        extractedUrls: [],
-        detectedRedFlags: [],
-        recommendations: [
-          'Ne communiquez jamais ce code de sécurité à un tiers.',
-          'Si vous n\'êtes pas à l\'origine de cette demande, sécurisez vos accès.',
-        ],
+        verdictTitle: isEn
+            ? "Legitimate Authentication Code (2FA/OTP)"
+            : "Code d'Authentification Légitime (2FA/OTP)",
+        verdictDescription: isEn
+            ? 'This message is a temporary one-time security code without suspicious links.'
+            : 'Ce message correspond à un code temporaire à usage unique sans lien suspect.',
+        extractedUrls: const [],
+        detectedRedFlags: const [],
+        recommendations: isEn
+            ? const [
+                'Never disclose this security code to any third party.',
+                'If you did not initiate this request, secure your accounts immediately.',
+              ]
+            : const [
+                'Ne communiquez jamais ce code de sécurité à un tiers.',
+                'Si vous n\'êtes pas à l\'origine de cette demande, sécurisez vos accès.',
+              ],
       );
     }
 
@@ -330,7 +346,7 @@ class SmsPhishingDetector {
 
       // Détection de Typosquatting / Usurpation de marque
       if (host != null) {
-        final typosquatDesc = _detectTyposquatting(host);
+        final typosquatDesc = _detectTyposquatting(host, isEn: isEn);
         if (typosquatDesc != null) {
           hasTyposquatting = true;
           totalRisk += 55;
@@ -343,7 +359,9 @@ class SmsPhishingDetector {
         if (lowUrl.contains(shortener)) {
           hasShortener = true;
           totalRisk += 35;
-          redFlags.add('Lien masqué via un raccourcisseur d\'URL ($shortener).');
+          redFlags.add(isEn
+              ? 'Masked link via URL shortener service ($shortener).'
+              : 'Lien masqué via un raccourcisseur d\'URL ($shortener).');
           break;
         }
       }
@@ -352,7 +370,9 @@ class SmsPhishingDetector {
       if (RegExp(r'https?:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}').hasMatch(lowUrl)) {
         hasIpUrl = true;
         totalRisk += 45;
-        redFlags.add('Lien pointant directement vers une adresse IP numérique brute.');
+        redFlags.add(isEn
+            ? 'Link pointing directly to a raw numeric IP address.'
+            : 'Lien pointant directement vers une adresse IP numérique brute.');
       }
 
       // Extensions de complaisance fréquemment abusées
@@ -361,7 +381,9 @@ class SmsPhishingDetector {
         if (lowUrl.contains(ext)) {
           hasSuspiciousTld = true;
           totalRisk += 30;
-          redFlags.add('Extension de domaine suspecte souvent utilisée pour les escroqueries ($ext).');
+          redFlags.add(isEn
+              ? 'Suspicious domain extension frequently abused for scams ($ext).'
+              : 'Extension de domaine suspecte souvent utilisée pour les escroqueries ($ext).');
           break;
         }
       }
@@ -371,7 +393,9 @@ class SmsPhishingDetector {
     for (final entry in _deliveryKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
-        redFlags.add('Mention d\'arnaque au colis / livraison : "${entry.key}".');
+        redFlags.add(isEn
+            ? 'Package / delivery scam pattern: "${entry.key}".'
+            : 'Mention d\'arnaque au colis / livraison : "${entry.key}".');
       }
     }
 
@@ -379,7 +403,9 @@ class SmsPhishingDetector {
     for (final entry in _administrativeKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
-        redFlags.add('Usurpation d\'organisme officiel : "${entry.key}".');
+        redFlags.add(isEn
+            ? 'Official agency impersonation: "${entry.key}".'
+            : 'Usurpation d\'organisme officiel : "${entry.key}".');
       }
     }
 
@@ -387,7 +413,9 @@ class SmsPhishingDetector {
     for (final entry in _bankingKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
-        redFlags.add('Demande sensible de sécurité ou bancaire : "${entry.key}".');
+        redFlags.add(isEn
+            ? 'Sensitive banking or security request: "${entry.key}".'
+            : 'Demande sensible de sécurité ou bancaire : "${entry.key}".');
       }
     }
 
@@ -395,7 +423,9 @@ class SmsPhishingDetector {
     for (final entry in _urgencyKeywords.entries) {
       if (normalized.contains(entry.key)) {
         totalRisk += entry.value;
-        redFlags.add('Incitation pressante à l\'action rapide : "${entry.key}".');
+        redFlags.add(isEn
+            ? 'High-urgency pressure tactic: "${entry.key}".'
+            : 'Incitation pressante à l\'action rapide : "${entry.key}".');
       }
     }
 
@@ -408,7 +438,9 @@ class SmsPhishingDetector {
     // Atténuation si les seuls liens sont des domaines officiels vérifiés
     if (urls.isNotEmpty && !hasUnverifiedUrls && !hasTyposquatting) {
       totalRisk = (totalRisk * 0.25).round();
-      redFlags.removeWhere((flag) => flag.contains('Usurpation d\'organisme officiel'));
+      redFlags.removeWhere((flag) =>
+          flag.contains('Usurpation d\'organisme officiel') ||
+          flag.contains('Official agency impersonation'));
     }
 
     // Calcul du score plafonné
@@ -426,24 +458,47 @@ class SmsPhishingDetector {
 
     if (hasCriticalRisk) {
       level = PhishingRiskLevel.dangerous;
-      verdictTitle = 'Hameçonnage Très Probable';
-      verdictDesc = 'Ce message présente tous les indicateurs d\'une tentative d\'escroquerie ou de vol d\'identifiants.';
-      recommendations.add('Ne cliquez surtout sur aucun lien présent dans ce message.');
-      recommendations.add('Ne communiquez jamais vos coordonnées bancaires ou mots de passe par SMS.');
-      recommendations.add('Bloquez l\'expéditeur et supprimez le message.');
+      verdictTitle = isEn ? 'High-Risk Phishing Detected' : 'Hameçonnage Très Probable';
+      verdictDesc = isEn
+          ? 'This message shows clear indicators of an active scam or credential theft attempt.'
+          : 'Ce message présente tous les indicateurs d\'une tentative d\'escroquerie ou de vol d\'identifiants.';
+      if (isEn) {
+        recommendations.add('Do not click any link in this message under any circumstances.');
+        recommendations.add('Never disclose your banking details or passwords via text message.');
+        recommendations.add('Block the sender immediately and delete the message.');
+      } else {
+        recommendations.add('Ne cliquez surtout sur aucun lien présent dans ce message.');
+        recommendations.add('Ne communiquez jamais vos coordonnées bancaires ou mots de passe par SMS.');
+        recommendations.add('Bloquez l\'expéditeur et supprimez le message.');
+      }
     } else if (finalScore >= 30 || hasUnverifiedUrls) {
       level = PhishingRiskLevel.suspicious;
-      verdictTitle = 'Message Suspect';
-      verdictDesc = 'Ce message contient des formulations ou des liens inhabituels justifiant une vigilance accrue.';
-      recommendations.add('Vérifiez directement sur le site ou l\'application officielle de l\'organisme sans utiliser le lien reçu.');
-      recommendations.add('Prenez garde aux demandes de paiement ou de mise à jour d\'adresse.');
+      verdictTitle = isEn ? 'Suspicious Message' : 'Message Suspect';
+      verdictDesc = isEn
+          ? 'This message contains unusual wording or unverified links warranting heightened vigilance.'
+          : 'Ce message contient des formulations ou des liens inhabituels justifiant une vigilance accrue.';
+      if (isEn) {
+        recommendations.add('Verify directly via the official agency app or website without opening the received link.');
+        recommendations.add('Beware of unexpected requests for payment or address verification.');
+      } else {
+        recommendations.add('Vérifiez directement sur le site ou l\'application officielle de l\'organisme sans utiliser le lien reçu.');
+        recommendations.add('Prenez garde aux demandes de paiement ou de mise à jour d\'adresse.');
+      }
     } else {
       level = PhishingRiskLevel.safe;
-      verdictTitle = verifiedUrlCount > 0 ? 'Message Officiel Vérifié' : 'Message Sécuritaire';
-      verdictDesc = verifiedUrlCount > 0
-          ? 'Ce message provient d\'un domaine officiel reconnu et ne présente aucun indicateur de fraude.'
-          : 'Aucun indicateur majeur d\'escroquerie ou de hameçonnage n\'a été détecté dans ce message.';
-      recommendations.add('Restez vigilant si un correspondant inconnu vous demande de l\'argent ou des informations privées.');
+      if (isEn) {
+        verdictTitle = verifiedUrlCount > 0 ? 'Verified Official Message' : 'Safe Message';
+        verdictDesc = verifiedUrlCount > 0
+            ? 'This message originates from a recognized official domain with no indicators of fraud.'
+            : 'No major scam or phishing indicators were detected in this message.';
+        recommendations.add('Stay cautious if an unknown contact asks for money or sensitive information.');
+      } else {
+        verdictTitle = verifiedUrlCount > 0 ? 'Message Officiel Vérifié' : 'Message Sécuritaire';
+        verdictDesc = verifiedUrlCount > 0
+            ? 'Ce message provient d\'un domaine officiel reconnu et ne présente aucun indicateur de fraude.'
+            : 'Aucun indicateur majeur d\'escroquerie ou de hameçonnage n\'a été détecté dans ce message.';
+        recommendations.add('Restez vigilant si un correspondant inconnu vous demande de l\'argent ou des informations privées.');
+      }
     }
 
     return PhishingAnalysisResult(

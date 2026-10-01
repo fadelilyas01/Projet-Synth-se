@@ -21,13 +21,19 @@ class AdminReportsTab extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (reports.isEmpty) {
-      return const Center(child: Text('Aucun signalement utilisateur.', style: TextStyle(color: Colors.grey)));
+      return Center(
+        child: Text(
+          isEn ? 'No user reports.' : 'Aucun signalement utilisateur.',
+          style: const TextStyle(color: Colors.grey),
+        ),
+      );
     }
 
     return ListView.separated(
@@ -37,11 +43,11 @@ class AdminReportsTab extends StatelessWidget {
       itemBuilder: (context, index) {
         final r = reports[index];
         final id = r['id'] as String? ?? '';
-        final masked = r['masked_number'] as String? ?? 'Numéro';
+        final masked = r['masked_number'] as String? ?? (isEn ? 'Number' : 'Numéro');
         final phoneHash = r['phone_hash'] as String? ?? '';
         final category = r['category'] as String? ?? '';
         final comment = r['comment'] as String? ?? '';
-        final reporter = r['reporter_email'] as String? ?? 'Anonyme';
+        final reporter = r['reporter_email'] as String? ?? (isEn ? 'Anonymous' : 'Anonyme');
 
         return Container(
           padding: const EdgeInsets.all(14),
@@ -68,26 +74,29 @@ class AdminReportsTab extends StatelessWidget {
                 Text('"$comment"', style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12)),
                 const SizedBox(height: 6),
               ],
-              Text('Par : $reporter', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+              Text(
+                isEn ? 'By: $reporter' : 'Par : $reporter',
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
+              ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton.icon(
                     icon: const Icon(Icons.check_circle_outline, size: 16, color: AppTheme.accentGreen),
-                    label: const Text('Blanchir', style: TextStyle(color: AppTheme.accentGreen, fontSize: 12)),
+                    label: Text(isEn ? 'Whitelist' : 'Blanchir', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 12)),
                     onPressed: () => onModerate(phoneHash, 'whitelist'),
                   ),
                   const SizedBox(width: 8),
                   TextButton.icon(
                     icon: const Icon(Icons.block, size: 16, color: AppTheme.accentRed),
-                    label: const Text('Bloquer', style: TextStyle(color: AppTheme.accentRed, fontSize: 12)),
+                    label: Text(isEn ? 'Block' : 'Bloquer', style: const TextStyle(color: AppTheme.accentRed, fontSize: 12)),
                     onPressed: () => onModerate(phoneHash, 'block'),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, size: 18, color: Colors.grey),
-                    tooltip: 'Supprimer ce signalement',
+                    tooltip: isEn ? 'Delete this report' : 'Supprimer ce signalement',
                     onPressed: () => onDeleteReport(id),
                   ),
                 ],

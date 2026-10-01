@@ -29,6 +29,7 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
     final googleController = TextEditingController();
     String? localError;
     bool isSubmitting = false;
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     showDialog(
       context: context,
@@ -36,12 +37,15 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
         builder: (ctx, setDialogState) {
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Row(
+            title: Row(
               children: [
-                GoogleLogo(size: 26),
-                SizedBox(width: 12),
+                const GoogleLogo(size: 26),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Text('Compte Google', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  child: Text(
+                    isEn ? 'Google Account' : 'Compte Google',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
                 ),
               ],
             ),
@@ -50,9 +54,11 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                const Text(
-                  'Saisissez votre adresse Google / Gmail pour vous connecter instantanément sans mot de passe :',
-                  style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
+                Text(
+                  isEn
+                      ? 'Enter your Google / Gmail address to sign in instantly without a password:'
+                      : 'Saisissez votre adresse Google / Gmail pour vous connecter instantanément sans mot de passe :',
+                  style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
                 ),
                 const SizedBox(height: 14),
                 if (localError != null) ...[
@@ -74,7 +80,7 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
                   keyboardType: TextInputType.emailAddress,
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: 'Adresse Google / Gmail',
+                    labelText: isEn ? 'Google / Gmail Address' : 'Adresse Google / Gmail',
                     hintText: 'votre.compte@gmail.com',
                     prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -86,7 +92,7 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
           actions: [
               TextButton(
                 onPressed: isSubmitting ? null : () => Navigator.pop(ctx),
-                child: const Text('Annuler'),
+                child: Text(isEn ? 'Cancel' : 'Annuler'),
               ),
               ElevatedButton(
                 onPressed: isSubmitting
@@ -94,7 +100,9 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
                     : () async {
                         final email = googleController.text.trim();
                         if (email.isEmpty || !email.contains('@')) {
-                          setDialogState(() => localError = "Veuillez saisir une adresse email valide.");
+                          setDialogState(() => localError = isEn
+                              ? 'Please enter a valid email address.'
+                              : "Veuillez saisir une adresse email valide.");
                           return;
                         }
                         setDialogState(() {
@@ -108,7 +116,9 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Bienvenue ! Connecté avec $email'),
+                                content: Text(
+                                  isEn ? 'Welcome! Signed in with $email' : 'Bienvenue ! Connecté avec $email',
+                                ),
                                 backgroundColor: AppTheme.accentGreen,
                               ),
                             );
@@ -122,7 +132,7 @@ class AuthBottomSheet extends ConsumerStatefulWidget {
                       },
                 child: isSubmitting
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Se connecter'),
+                    : Text(isEn ? 'Sign in' : 'Se connecter'),
               ),
             ],
           );
@@ -155,9 +165,12 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
   Future<void> _submit() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     if (email.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = "Veuillez renseigner l'email et le mot de passe.");
+      setState(() => _errorMessage = isEn
+          ? 'Please enter both email and password.'
+          : "Veuillez renseigner l'email et le mot de passe.");
       return;
     }
 
@@ -183,7 +196,11 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isLogin ? 'Bienvenue ! Connexion réussie.' : 'Compte créé avec succès !'),
+            content: Text(
+              _isLogin
+                  ? (isEn ? 'Welcome back! Signed in successfully.' : 'Bienvenue ! Connexion réussie.')
+                  : (isEn ? 'Account created successfully!' : 'Compte créé avec succès !'),
+            ),
             backgroundColor: AppTheme.accentGreen,
           ),
         );
@@ -200,6 +217,7 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
 
   Future<void> _handleGoogleSignIn() async {
     final rawEmail = _emailController.text.trim();
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
     if (rawEmail.isNotEmpty && rawEmail.contains('@')) {
       setState(() {
         _loading = true;
@@ -211,7 +229,9 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Bienvenue ! Connecté avec $rawEmail'),
+              content: Text(
+                isEn ? 'Welcome! Signed in with $rawEmail' : 'Bienvenue ! Connecté avec $rawEmail',
+              ),
               backgroundColor: AppTheme.accentGreen,
             ),
           );
@@ -235,6 +255,7 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderColor = AppTheme.borderColor(isDark);
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     return Padding(
       padding: EdgeInsets.only(
@@ -253,7 +274,9 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
               children: [
                 Expanded(
                   child: Text(
-                    _isLogin ? 'Connexion' : 'Créer un compte',
+                    _isLogin
+                        ? (isEn ? 'Sign In' : 'Connexion')
+                        : (isEn ? 'Create Account' : 'Créer un compte'),
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -296,7 +319,7 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
-                    'OU PAR EMAIL',
+                    isEn ? 'OR WITH EMAIL' : 'OU PAR EMAIL',
                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 0.5),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -310,9 +333,9 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
             if (!_isLogin) ...[
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Votre Nom ou Pseudo',
-                  prefixIcon: Icon(Icons.badge_outlined),
+                decoration: InputDecoration(
+                  labelText: isEn ? 'Your Name or Nickname' : 'Votre Nom ou Pseudo',
+                  prefixIcon: const Icon(Icons.badge_outlined),
                 ),
               ),
               const SizedBox(height: 12),
@@ -321,8 +344,12 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                labelText: _isLogin ? 'Email ou Identifiant (Admin)' : 'Adresse Email',
-                hintText: _isLogin ? 'exemple@domaine.com ou admin' : 'exemple@domaine.com',
+                labelText: _isLogin
+                    ? (isEn ? 'Email or Username (Admin)' : 'Email ou Identifiant (Admin)')
+                    : (isEn ? 'Email Address' : 'Adresse Email'),
+                hintText: _isLogin
+                    ? (isEn ? 'example@domain.com or admin' : 'exemple@domaine.com ou admin')
+                    : (isEn ? 'example@domain.com' : 'exemple@domaine.com'),
                 prefixIcon: const Icon(Icons.mail_outline_rounded),
               ),
             ),
@@ -331,7 +358,7 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
-                labelText: 'Mot de passe',
+                labelText: isEn ? 'Password' : 'Mot de passe',
                 prefixIcon: const Icon(Icons.lock_outline_rounded),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -341,8 +368,8 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                     size: 20,
                   ),
                   tooltip: _obscurePassword
-                      ? 'Afficher le mot de passe'
-                      : 'Masquer le mot de passe',
+                      ? (isEn ? 'Show password' : 'Afficher le mot de passe')
+                      : (isEn ? 'Hide password' : 'Masquer le mot de passe'),
                   onPressed: () {
                     setState(() {
                       _obscurePassword = !_obscurePassword;
@@ -364,16 +391,18 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                         });
                       },
                       borderRadius: BorderRadius.circular(8),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
                         child: Row(
                           children: [
-                            Icon(Icons.vpn_key_rounded, size: 14, color: AppTheme.accentOrange),
-                            SizedBox(width: 6),
+                            const Icon(Icons.vpn_key_rounded, size: 14, color: AppTheme.accentOrange),
+                            const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Pré-remplir Admin (admin@shieldnet.app)',
-                                style: TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
+                                isEn
+                                    ? 'Pre-fill Admin (admin@shieldnet.app)'
+                                    : 'Pré-remplir Admin (admin@shieldnet.app)',
+                                style: const TextStyle(fontSize: 11, color: AppTheme.accentOrange, fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -389,16 +418,18 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                         });
                       },
                       borderRadius: BorderRadius.circular(8),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
                         child: Row(
                           children: [
-                            Icon(Icons.verified_user_rounded, size: 14, color: AppTheme.primaryColor),
-                            SizedBox(width: 6),
+                            const Icon(Icons.verified_user_rounded, size: 14, color: AppTheme.primaryColor),
+                            const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Pré-remplir Gestionnaire (manager@shieldnet.app)',
-                                style: TextStyle(fontSize: 11, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
+                                isEn
+                                    ? 'Pre-fill Manager (manager@shieldnet.app)'
+                                    : 'Pré-remplir Gestionnaire (manager@shieldnet.app)',
+                                style: const TextStyle(fontSize: 11, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -421,7 +452,12 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
               ),
               child: _loading
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text(_isLogin ? 'Se connecter' : 'Créer mon compte', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  : Text(
+                      _isLogin
+                          ? (isEn ? 'Sign In' : 'Se connecter')
+                          : (isEn ? 'Create My Account' : 'Créer mon compte'),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
             ),
             const SizedBox(height: 12),
             TextButton(
@@ -430,7 +466,9 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
                 _errorMessage = null;
               }),
               child: Text(
-                _isLogin ? "Pas encore de compte ? S'inscrire" : 'Déjà un compte ? Se connecter',
+                _isLogin
+                    ? (isEn ? "Don't have an account? Sign Up" : "Pas encore de compte ? S'inscrire")
+                    : (isEn ? 'Already have an account? Sign In' : 'Déjà un compte ? Se connecter'),
               ),
             ),
           ],

@@ -25,6 +25,7 @@ class ZenShieldCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     final statusColor = isActive
         ? (isContactsOnly ? AppTheme.accentOrange : AppTheme.accentGreen)
@@ -32,15 +33,15 @@ class ZenShieldCard extends StatelessWidget {
 
     final titleText = isActive
         ? (isContactsOnly
-            ? (l10n?.shieldStrictTitle ?? 'Protection Contacts Seuls')
-            : (l10n?.shieldProtected ?? 'Protection active'))
-        : (l10n?.shieldInactive ?? 'Protection suspendue');
+            ? (l10n?.shieldStrictTitle ?? (isEn ? 'Strict Protection' : 'Protection Contacts Seuls'))
+            : (l10n?.shieldProtected ?? (isEn ? 'You are protected' : 'Protection active')))
+        : (l10n?.shieldInactive ?? (isEn ? 'Protection inactive' : 'Protection suspendue'));
 
     final descText = isActive
         ? (isContactsOnly
-            ? (l10n?.shieldStrictDesc ?? 'Seuls vos contacts enregistrés sont autorisés à sonner.')
-            : (l10n?.shieldActiveDesc ?? 'Les spams et numéros malveillants sont bloqués sans sonnerie.'))
-        : (l10n?.shieldInactiveDesc ?? 'Activez le filtrage pour rejeter automatiquement les appels frauduleux.');
+            ? (l10n?.shieldStrictDesc ?? (isEn ? 'Only your saved contacts are allowed to ring.' : 'Seuls vos contacts enregistrés sont autorisés à sonner.'))
+            : (l10n?.shieldActiveDesc ?? (isEn ? 'ShieldNet automatically filters malicious calls.' : 'Les spams et numéros malveillants sont bloqués sans sonnerie.')))
+        : (l10n?.shieldInactiveDesc ?? (isEn ? 'Enable filtering to block unwanted calls.' : 'Activez le filtrage pour rejeter automatiquement les appels frauduleux.'));
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -114,7 +115,9 @@ class ZenShieldCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      isActive ? 'Filtrage temps réel actif (< 2 ms)' : 'Aucun appel bloqué pour l\'instant',
+                      isActive
+                          ? (isEn ? 'Real-time filtering active (< 2 ms)' : 'Filtrage temps réel actif (< 2 ms)')
+                          : (isEn ? 'No calls blocked yet' : 'Aucun appel bloqué pour l\'instant'),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

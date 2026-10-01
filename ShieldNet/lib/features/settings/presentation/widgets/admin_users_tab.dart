@@ -33,14 +33,18 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = AppTheme.cardBg(isDark);
     final borderColor = AppTheme.borderColor(isDark);
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
 
     if (widget.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (widget.users.isEmpty) {
-      return const Center(
-        child: Text('Aucun utilisateur enregistré.', style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text(
+          isEn ? 'No registered users.' : 'Aucun utilisateur enregistré.',
+          style: const TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -82,7 +86,9 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Rechercher par nom, email, province (QC, ON, NY...)...',
+                  hintText: isEn
+                      ? 'Search by name, email, province (QC, ON, NY...)...'
+                      : 'Rechercher par nom, email, province (QC, ON, NY...)...',
                   hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
                   prefixIcon: const Icon(Icons.search_rounded, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
@@ -115,7 +121,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                 child: Row(
                   children: [
                     _buildFilterChip(
-                      label: 'Tous (${widget.users.length})',
+                      label: isEn ? 'All (${widget.users.length})' : 'Tous (${widget.users.length})',
                       isSelected: _countryFilter == 'ALL',
                       onTap: () => setState(() => _countryFilter = 'ALL'),
                       isDark: isDark,
@@ -130,7 +136,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                     ),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                      label: '🇺🇸 États-Unis ($usCount)',
+                      label: isEn ? '🇺🇸 United States ($usCount)' : '🇺🇸 États-Unis ($usCount)',
                       isSelected: _countryFilter == 'US',
                       onTap: () => setState(() => _countryFilter = 'US'),
                       isDark: isDark,
@@ -154,10 +160,17 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                       children: [
                         const Icon(Icons.person_search_rounded, size: 48, color: Colors.grey),
                         const SizedBox(height: 12),
-                        const Text('Aucun utilisateur ne correspond à ces critères.', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          isEn
+                              ? 'No users match these criteria.'
+                              : 'Aucun utilisateur ne correspond à ces critères.',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         const SizedBox(height: 4),
                         Text(
-                          'Filtre actif : $_countryFilter${_searchQuery.isNotEmpty ? " • '$_searchQuery'" : ""}',
+                          isEn
+                              ? 'Active filter: $_countryFilter${_searchQuery.isNotEmpty ? " • '$_searchQuery'" : ""}'
+                              : 'Filtre actif : $_countryFilter${_searchQuery.isNotEmpty ? " • '$_searchQuery'" : ""}',
                           style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
@@ -170,7 +183,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                   separatorBuilder: (context, index) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final u = filteredUsers[index];
-                    final email = u['email'] as String? ?? 'Sans email';
+                    final email = u['email'] as String? ?? (isEn ? 'No email' : 'Sans email');
                     final name = u['name'] as String? ?? '';
                     final isStaff = u['is_staff'] as bool? ?? false;
                     final isSuperuser = u['is_superuser'] as bool? ?? false;
@@ -179,7 +192,8 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                     final country = (u['country'] as String? ?? 'CA').toUpperCase();
                     final prov = (u['province_or_state'] as String? ?? 'QC').toUpperCase();
                     final flag = country == 'CA' ? '🇨🇦' : '🇺🇸';
-                    final countryName = u['country_name'] as String? ?? (country == 'CA' ? 'Canada' : 'États-Unis');
+                    final countryName = u['country_name'] as String? ??
+                        (country == 'CA' ? 'Canada' : (isEn ? 'United States' : 'États-Unis'));
                     final provName = u['province_name'] as String? ??
                         (country == 'CA'
                             ? (RegionalComplianceManager.canadianProvinces[prov] ?? prov)
@@ -188,7 +202,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                     final normMap = u['compliance_norm'] as Map<String, dynamic>? ??
                         RegionalComplianceManager.getLocalNorm(country, prov);
                     final normKey = normMap['norm_key'] as String? ?? (prov == 'QC' ? 'LOI_25_QC' : 'PIPEDA');
-                    final normName = normMap['norm_name'] as String? ?? 'Norme régionale';
+                    final normName = normMap['norm_name'] as String? ?? (isEn ? 'Regional norm' : 'Norme régionale');
 
                     return Container(
                       decoration: BoxDecoration(
@@ -251,7 +265,11 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      isSuperuser ? 'ADMIN' : (isStaff ? 'GESTIONNAIRE' : 'CITOYEN'),
+                                      isSuperuser
+                                          ? 'ADMIN'
+                                          : (isStaff
+                                              ? (isEn ? 'MANAGER' : 'GESTIONNAIRE')
+                                              : (isEn ? 'CITIZEN' : 'CITOYEN')),
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -317,7 +335,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                                         border: Border.all(color: Colors.deepPurple.withValues(alpha: 0.3)),
                                       ),
                                       child: Text(
-                                        normKey == 'LOI_25_QC' ? 'Loi 25 (QC)' : normName,
+                                        normKey == 'LOI_25_QC' ? (isEn ? 'Law 25 (QC)' : 'Loi 25 (QC)') : normName,
                                         style: const TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
@@ -329,7 +347,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '$reportsCount sig.',
+                                    '$reportsCount ${isEn ? "rep." : "sig."}',
                                     style: const TextStyle(fontSize: 11, color: Colors.grey),
                                   ),
                                 ],
@@ -400,6 +418,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final isEn = Localizations.localeOf(ctx).languageCode == 'en';
         return Container(
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1E293B) : Colors.white,
@@ -445,18 +464,31 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                       color: AppTheme.accentOrange.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Text(role, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentOrange)),
+                    child: Text(
+                      role == 'ADMIN'
+                          ? 'ADMIN'
+                          : (role == 'MANAGER'
+                              ? (isEn ? 'MANAGER' : 'GESTIONNAIRE')
+                              : (isEn ? 'CITIZEN' : 'CITOYEN')),
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentOrange),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 18),
               const Divider(height: 1),
               const SizedBox(height: 14),
-              const Text('LOCALISATION & JURIDICTION RÉGIONALE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text(
+                isEn ? 'LOCATION & REGIONAL JURISDICTION' : 'LOCALISATION & JURIDICTION RÉGIONALE',
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+              ),
               const SizedBox(height: 8),
               Text('$flag $countryName — $provName ($provCode)', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               const SizedBox(height: 14),
-              const Text('CADRE LÉGAL & PROTECTION APPLIQUÉE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text(
+                isEn ? 'LEGAL FRAMEWORK & APPLIED PROTECTION' : 'CADRE LÉGAL & PROTECTION APPLIQUÉE',
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+              ),
               const SizedBox(height: 6),
               Text(normName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
               if (legalFramework.isNotEmpty) ...[
@@ -465,16 +497,24 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
               ],
               if (regulator.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text('Organisme de contrôle : $regulator', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                Text(
+                  isEn ? 'Regulatory authority: $regulator' : 'Organisme de contrôle : $regulator',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
               ],
               const SizedBox(height: 8),
-              Text('Durée de conservation maximale : $retentionDays jours (purge automatisée)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(
+                isEn
+                    ? 'Maximum data retention: $retentionDays days (automated purge)'
+                    : 'Durée de conservation maximale : $retentionDays jours (purge automatisée)',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Fermer'),
+                  child: Text(isEn ? 'Close' : 'Fermer'),
                 ),
               ),
             ],

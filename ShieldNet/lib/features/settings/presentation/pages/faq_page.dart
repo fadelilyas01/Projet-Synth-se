@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_logo.dart';
 
 class FaqCategoryInfo {
   final String id;
@@ -774,20 +775,7 @@ class _HelpFaqPageState extends State<HelpFaqPage> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Image.asset(
-                        'assets/images/shieldnet_logo.png',
-                        width: 24,
-                        height: 24,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.shield_rounded, color: AppTheme.primaryColor, size: 24),
-                      ),
-                    ),
+                    const ShieldNetLogo.badge(size: 24),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

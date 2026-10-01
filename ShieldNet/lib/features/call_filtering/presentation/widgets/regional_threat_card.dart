@@ -12,8 +12,34 @@ class RegionalThreatCard extends StatelessWidget {
     required this.summary,
   });
 
+  String _formatAlertLevel(String level, bool isEn) {
+    final upper = level.toUpperCase();
+    if (upper.contains('CRITIQUE') || upper.contains('CRITICAL')) {
+      return isEn ? 'CRITICAL' : 'CRITIQUE';
+    } else if (upper.contains('ÉLEVÉ') || upper.contains('ELEVE') || upper.contains('HIGH')) {
+      return isEn ? 'HIGH' : 'ÉLEVÉ';
+    } else {
+      return isEn ? 'MODERATE' : 'MODÉRÉ';
+    }
+  }
+
+  String _formatCategory(String cat, bool isEn) {
+    final lower = cat.toLowerCase();
+    if (lower.contains('fraud') || lower.contains('arnaque')) {
+      return isEn ? 'Fraud' : 'Arnaque';
+    } else if (lower.contains('telemarketing') || lower.contains('démarchage') || lower.contains('demarchage')) {
+      return isEn ? 'Telemarketing' : 'Démarchage';
+    } else if (lower.contains('phishing') || lower.contains('hameçonnage')) {
+      return isEn ? 'Phishing' : 'Hameçonnage';
+    } else if (lower.contains('robocall') || lower.contains('automate')) {
+      return isEn ? 'Robocall' : 'Automate';
+    }
+    return cat;
+  }
+
   void _showDetailsBottomSheet(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isEn = Localizations.localeOf(context).languageCode == 'en';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -47,7 +73,7 @@ class RegionalThreatCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      l10n?.regionalRadarTitle ?? 'Radar Régional des Arnaques',
+                      l10n?.regionalRadarTitle ?? (isEn ? 'Regional Scam Radar' : 'Radar Régional des Arnaques'),
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -56,7 +82,9 @@ class RegionalThreatCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 l10n?.regionalRadarDesc ??
-                    'Analyse en temps réel des vagues d\'usurpation d\'identité (Spoofing) ciblées par indicatif québécois et canadien.',
+                    (isEn
+                        ? 'Real-time analysis of targeted spoofing waves by North American area codes (Canada / US).'
+                        : 'Analyse en temps réel des vagues d\'usurpation d\'identité (Spoofing) ciblées par indicatif québécois et canadien.'),
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
@@ -98,7 +126,7 @@ class RegionalThreatCard extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       ),
                       subtitle: Text(
-                        '${item.totalSpams} ${l10n?.regionalReportsCount ?? "signalements • Type :"} ${item.topCategory}',
+                        '${item.totalSpams} ${l10n?.regionalReportsCount ?? (isEn ? "reports • Type:" : "signalements • Type :")} ${_formatCategory(item.topCategory, isEn)}',
                         style: const TextStyle(fontSize: 12),
                       ),
                       trailing: Container(
@@ -109,7 +137,7 @@ class RegionalThreatCard extends StatelessWidget {
                           border: Border.all(color: badgeColor, width: 1),
                         ),
                         child: Text(
-                          item.alertLevel,
+                          _formatAlertLevel(item.alertLevel, isEn),
                           style: TextStyle(
                             color: badgeColor,
                             fontWeight: FontWeight.bold,

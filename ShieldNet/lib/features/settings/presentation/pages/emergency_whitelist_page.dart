@@ -195,19 +195,23 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
 
   void _confirmDelete(EmergencyContact contact) {
     final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(l10n?.confirmRemoveTitle ?? 'Retirer de la Liste Blanche ?'),
+        title: Text(l10n?.confirmRemoveTitle ?? (isEn ? 'Remove from Whitelist?' : 'Retirer de la Liste Blanche ?')),
         content: Text(
           l10n?.confirmRemoveDesc ??
-              'Voulez-vous retirer ce contact de la liste blanche d\'urgence ? Il sera à nouveau soumis aux filtres standards.',
+              (isEn
+                  ? 'Do you want to remove this contact from the emergency whitelist? It will be subject to normal spam filtering again.'
+                  : 'Voulez-vous retirer ce contact de la liste blanche d\'urgence ? Il sera à nouveau soumis aux filtres standards.'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n?.btnCancel ?? 'Annuler'),
+            child: Text(l10n?.btnCancel ?? (isEn ? 'Cancel' : 'Annuler')),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -218,7 +222,8 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
               if (mounted && ok) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(l10n?.removeSuccess ?? 'Contact retiré de la liste blanche.'),
+                    content: Text(l10n?.removeSuccess ??
+                        (isEn ? 'Contact removed from whitelist.' : 'Contact retiré de la liste blanche.')),
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     backgroundColor: AppTheme.accentOrange,
@@ -231,11 +236,31 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text(l10n?.btnRemove ?? 'Retirer'),
+            child: Text(l10n?.btnRemove ?? (isEn ? 'Remove' : 'Retirer')),
           ),
         ],
       ),
     );
+  }
+
+  String _getSystemContactLabel(EmergencyContact item, bool isEn) {
+    if (!isEn) return item.label;
+    switch (item.rawNumber.trim()) {
+      case '911':
+        return 'Emergency Services (Police, Fire, Ambulance)';
+      case '988':
+        return 'Suicide Crisis & Mental Health Helpline';
+      case '211':
+        return 'Community & Social Services';
+      case '311':
+        return 'Non-Emergency Municipal Services';
+      case '511':
+        return 'Traffic & Road Conditions Info';
+      case '811':
+        return 'Health & Social Info Line';
+      default:
+        return item.label;
+    }
   }
 
   @override
@@ -243,6 +268,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
     final state = ref.watch(emergencyWhitelistProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
+    final isEn = (l10n?.localeName == 'en') || (Localizations.localeOf(context).languageCode == 'en');
 
     final systemContacts = state.contacts.where((c) => c.isSystemCritical).toList();
     final customContacts = state.contacts.where((c) => !c.isSystemCritical).toList();
@@ -250,7 +276,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          l10n?.emergencyWhitelistTitle ?? 'Numéros d\'Urgence & Immunité',
+          l10n?.emergencyWhitelistTitle ?? (isEn ? 'Emergency Numbers & Immunity' : 'Numéros d\'Urgence & Immunité'),
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           overflow: TextOverflow.ellipsis,
         ),
@@ -261,7 +287,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
         backgroundColor: AppTheme.accentGreen,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: Text(
-          l10n?.addEmergencyContact ?? 'Ajouter un Contact',
+          l10n?.addEmergencyContact ?? (isEn ? 'Add a Contact' : 'Ajouter un Contact'),
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           overflow: TextOverflow.ellipsis,
         ),
@@ -291,7 +317,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n?.zeroFalsePositiveTitle ?? 'Garantie Zéro Faux-Positif',
+                              l10n?.zeroFalsePositiveTitle ?? (isEn ? 'Zero False-Positive Guarantee' : 'Garantie Zéro Faux-Positif'),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
@@ -301,7 +327,9 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                             const SizedBox(height: 4),
                             Text(
                               l10n?.zeroFalsePositiveDesc ??
-                                  'Ces numéros prioritaires ne sont jamais bloqués ni filtrés, même si le mode Bouclier Strict (Contacts uniquement) ou Nocturne est actif.',
+                                  (isEn
+                                      ? 'These priority numbers are never blocked or filtered, even if Strict Shield mode (Contacts Only) or Do Not Disturb is active.'
+                                      : 'Ces numéros prioritaires ne sont jamais bloqués ni filtrés, même si le mode Bouclier Strict (Contacts uniquement) ou Nocturne est actif.'),
                               style: TextStyle(
                                 fontSize: 13,
                                 height: 1.35,
@@ -322,7 +350,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                   children: [
                     Expanded(
                       child: Text(
-                        l10n?.customEmergencyContactsHeader ?? 'CONTACTS PRIORITAIRES UTILISATEUR',
+                        l10n?.customEmergencyContactsHeader ?? (isEn ? 'USER PRIORITY CONTACTS' : 'CONTACTS PRIORITAIRES UTILISATEUR'),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -353,9 +381,11 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                     child: EmptyStateWidget(
                       icon: Icons.contact_emergency_rounded,
                       iconColor: AppTheme.accentGreen,
-                      title: l10n?.emptyCustomContactsTitle ?? 'Aucun contact prioritaire ajouté',
+                      title: l10n?.emptyCustomContactsTitle ?? (isEn ? 'No priority contacts added' : 'Aucun contact prioritaire ajouté'),
                       message: l10n?.emptyCustomContactsDesc ??
-                          'Ajoutez votre médecin, l\'hôpital ou une clinique pour garantir que leurs appels passent toujours.',
+                          (isEn
+                              ? 'Add your doctor, hospital, or clinic to ensure their calls always ring through.'
+                              : 'Ajoutez votre médecin, l\'hôpital ou une clinique pour garantir que leurs appels passent toujours.'),
                     ),
                   )
                 else
@@ -404,7 +434,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                   children: [
                     Expanded(
                       child: Text(
-                        l10n?.nationalEmergencyServicesHeader ?? 'SERVICES D\'URGENCE NATIONAUX (CANADA/QC)',
+                        l10n?.nationalEmergencyServicesHeader ?? (isEn ? 'NATIONAL EMERGENCY SERVICES (CANADA / US)' : 'SERVICES D\'URGENCE NATIONAUX (CANADA/QC)'),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -422,7 +452,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        l10n?.inviolableBadge ?? 'Inviolable',
+                        l10n?.inviolableBadge ?? (isEn ? 'Inviolable' : 'Inviolable'),
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -447,7 +477,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                     separatorBuilder: (context, index) => const Divider(height: 1, indent: 56),
                     itemBuilder: (ctx, index) {
                       final item = systemContacts[index];
-                      final shortcutLabel = l10n?.officialShortcut ?? 'Raccourci officiel';
+                      final shortcutLabel = l10n?.officialShortcut ?? (isEn ? 'Official emergency shortcode' : 'Raccourci officiel');
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: AppTheme.accentRed.withValues(alpha: 0.12),
@@ -457,7 +487,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                           ),
                         ),
                         title: Text(
-                          item.label,
+                          _getSystemContactLabel(item, isEn),
                           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -467,7 +497,7 @@ class _EmergencyWhitelistPageState extends ConsumerState<EmergencyWhitelistPage>
                           overflow: TextOverflow.ellipsis,
                         ),
                         trailing: Tooltip(
-                          message: l10n?.systemProtectionTooltip ?? 'Protection système non supprimable',
+                          message: l10n?.systemProtectionTooltip ?? (isEn ? 'System-protected service cannot be removed' : 'Protection système non supprimable'),
                           child: const Icon(Icons.lock_outline_rounded, size: 16, color: Colors.grey),
                         ),
                       );
