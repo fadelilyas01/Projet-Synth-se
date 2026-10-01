@@ -158,34 +158,32 @@ class RegionalComplianceManager {
       return {
         'norm_key': 'LOI_25_QC',
         'norm_name': isEn
-            ? 'Quebec Law 25 (Privacy Protection)'
-            : 'Loi 25 du Québec (Protection de la vie privée)',
+            ? 'Quebec Regional Protection'
+            : 'Protection régionale Québec',
         'legal_framework': isEn
-            ? 'Act respecting the protection of personal information in the private sector (Law 25)'
-            : 'Loi sur la protection des renseignements personnels dans le secteur privé (Loi 25)',
+            ? 'Protected by design (Quebec standard)'
+            : 'Protection intégrée par défaut (Standard Québec)',
         'regulator': isEn
-            ? 'Commission d\'accès à l\'information du Québec (CAI) & CRTC'
-            : 'Commission d\'accès à l\'information du Québec (CAI) & CRTC',
+            ? 'Strict privacy & telecom standards'
+            : 'Protection de la vie privée & normes télécom',
         'description': isEn
-            ? 'Strict protection under Quebec Law 25: HMAC-SHA256 salted cryptographic hashing, zero contact list transmission, explicit consent, and 30-day right of erasure.'
-            : 'Protection rigoureuse sous la Loi 25 québécoise : chiffrement cryptographique HMAC-SHA256, zéro transmission de répertoire, consentement exprès et droit absolu d\'effacement sous 30 jours.',
+            ? 'Protection tailored for Quebec: your contact list stays strictly on your phone, spoofed local calls are blocked, and reports are automatically purged after 30 days.'
+            : 'Protection adaptée au Québec : votre carnet d\'adresses ne quitte jamais votre appareil, les faux numéros locaux sont bloqués et les données sont purgées après 30 jours.',
         'data_retention_days': 30,
         'strict_consent_required': true,
-        'telecom_standard': 'CRTC 2019-403 & STIR/SHAKEN',
+        'telecom_standard': 'STIR/SHAKEN Canada',
         'principles': isEn
             ? [
-                'Privacy by Design and by default',
-                'Zero extraction or indexing of personal address book',
-                'Local salted HMAC-SHA256 cryptographic hashes',
-                'Right to access, rectify, and delete personal data',
-                'Automatic purge of obsolete reports after 30 days',
+                'Zero contact list extraction or sharing',
+                'Protection against local neighborhood spoofing',
+                'Automatic history purge after 30 days',
+                'Emergency calls (911, 811, 988) always ring through',
               ]
             : [
-                'Confidentialité par défaut dès la conception (Privacy by Design)',
-                'Zéro indexation ni extraction du carnet d\'adresses personnel',
-                'Empreintes cryptographiques locales HMAC-SHA256 avec sel',
-                'Droit d\'accès, de rectification et d\'effacement des données',
-                'Purge automatique des signalements obsolètes après 30 jours',
+                'Zéro transfert de votre carnet d\'adresses personnel',
+                'Blocage ciblé des faux numéros et arnaques locales',
+                'Purge automatique de l\'historique après 30 jours',
+                'Numéros d\'urgence (911, 811, 988) toujours garantis',
               ],
         'emergency_numbers': [
           {'number': '911', 'label': isEn ? 'Emergency Services (Police / Fire / EMS)' : 'Services d\'urgence (Police / Pompiers / Ambulance)', 'immune': true},
@@ -198,31 +196,31 @@ class RegionalComplianceManager {
       final pName = isEn ? (canadianProvincesEn[p] ?? p) : (canadianProvinces[p] ?? p);
       return {
         'norm_key': 'PIPEDA_CASL_CRTC',
-        'norm_name': isEn ? 'PIPEDA & CASL / CRTC (Canada)' : 'LPRPDE / PIPEDA & LCAP / CASL (Canada)',
+        'norm_name': isEn ? 'Canada Regional Protection' : 'Protection régionale Canada',
         'legal_framework': isEn
-            ? 'Personal Information Protection and Electronic Documents Act (PIPEDA) & CASL'
-            : 'Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) & LCAP',
+            ? 'Canadian telecom & privacy standards'
+            : 'Normes canadiennes de protection et télécom',
         'regulator': isEn
-            ? 'Office of the Privacy Commissioner of Canada (OPC) & CRTC'
-            : 'Commissariat à la protection de la vie privée du Canada (CPVP) & CRTC',
+            ? 'Canadian telecom & privacy standards'
+            : 'Normes canadiennes de protection et télécom',
         'description': isEn
-            ? 'Canadian federal compliance for $pName: encrypted threat intelligence feeds, coordinated fraud reporting with the Canadian Anti-Fraud Centre, and CRTC-compliant filtering.'
-            : 'Conformité fédérale canadienne pour $pName : chiffrement des flux de réputation, signalement d\'abus au Centre antifraude du Canada et filtrage conforme aux ordonnances CRTC.',
+            ? 'Optimized protection for $pName: blocks telemarketing spam and fraudulent callers while ensuring verified callers and emergency lines ring through.'
+            : 'Protection optimisée pour $pName : bloque les appels indésirables et frauduleux tout en garantissant le passage immédiat de vos urgences.',
         'data_retention_days': 60,
         'strict_consent_required': true,
-        'telecom_standard': 'CRTC 2019-403 / STIR-SHAKEN Canada',
+        'telecom_standard': 'STIR/SHAKEN Canada',
         'principles': isEn
             ? [
-                'Protection and compliance under federal PIPEDA legislation',
-                'Telecom filtering compliant with CRTC directives',
-                'Explicit consent for preventive spam call interception',
-                'Direct reporting coordinated with the Canadian Anti-Fraud Centre',
+                'Protection tailored to Canadian area codes',
+                'Verified caller identification',
+                'Emergency numbers (911, 811, 988) always ring through',
+                '100% private: contacts stay on your phone',
               ]
             : [
-                'Protection et conformité sous la législation fédérale LPRPDE',
-                'Filtrage télécom conforme aux directives du CRTC',
-                'Consentement exprès pour le blocage préventif des appels suspects',
-                'Signalement direct coordonné avec le Centre antifraude du Canada',
+                'Protection ciblée sur les indicatifs canadiens',
+                'Identification des appels légitimes et vérifiés',
+                'Numéros d\'urgence (911, 811, 988) toujours garantis',
+                '100% confidentiel : vos contacts restent sur votre téléphone',
               ],
         'emergency_numbers': [
           {'number': '911', 'label': isEn ? 'Emergency Services' : 'Services d\'urgence', 'immune': true},
@@ -234,27 +232,31 @@ class RegionalComplianceManager {
     } else if (c == 'US' && p == 'CA') {
       return {
         'norm_key': 'TCPA_CCPA_CALIFORNIA',
-        'norm_name': isEn ? 'TCPA & CCPA / CPRA (California)' : 'TCPA & CCPA / CPRA (Californie)',
-        'legal_framework': 'Telephone Consumer Protection Act (47 U.S.C. § 227) & California Consumer Privacy Act (CCPA/CPRA)',
-        'regulator': 'California Privacy Protection Agency (CPPA) & FCC / FTC',
+        'norm_name': isEn ? 'California Regional Protection' : 'Protection régionale Californie',
+        'legal_framework': isEn
+            ? 'California privacy & anti-robocall standards'
+            : 'Normes californiennes de protection et anti-robocall',
+        'regulator': isEn
+            ? 'Privacy & telecom protection'
+            : 'Protection de la vie privée et télécom',
         'description': isEn
-            ? 'High-level privacy standards in California: strict "Do Not Sell/Share My Personal Information" compliance, FCC-mandated STIR/SHAKEN caller verification, and anti-robocall shield.'
-            : 'Protection de haut niveau en Californie : clause stricte "Do Not Sell/Share My Personal Information", vérification des attestations STIR/SHAKEN mandatée par la FCC et bouclier anti-robocall.',
+            ? 'Advanced anti-robocall protection for California: zero personal data selling or sharing, instant spoofing detection, and guaranteed emergency line access.'
+            : 'Protection anti-robocall avancée pour la Californie : aucune vente de données personnelles, détection des faux numéros et urgences garanties.',
         'data_retention_days': 45,
         'strict_consent_required': true,
-        'telecom_standard': 'FCC Robocall Mitigation Database & STIR/SHAKEN',
+        'telecom_standard': 'FCC STIR/SHAKEN',
         'principles': isEn
             ? [
-                'Strict "Do Not Sell or Share My Personal Information" guarantee (CCPA/CPRA)',
-                'Robocall interception compliant with federal TCPA mandate',
-                'STIR/SHAKEN verified carrier attestations (Levels A/B/C)',
-                'On-device privacy without metadata monetization',
+                'Zero selling or sharing of personal data',
+                'Automated robocall blocking',
+                'Emergency lines (911, 988) fully protected',
+                'Private on-device spam detection',
               ]
             : [
-                'Garantie "Do Not Sell or Share My Personal Information" (CCPA/CPRA)',
-                'Filtrage des robocalls selon la norme fédérale TCPA',
-                'Attestations d\'opérateurs STIR/SHAKEN vérifiées (Niveaux A/B/C)',
-                'Protection locale étanche sans commercialisation des métadonnées',
+                'Zéro vente ou partage de vos données personnelles',
+                'Blocage automatique des appels robotisés (robocalls)',
+                'Lignes d\'urgence (911, 988) toujours protégées',
+                'Détection du spam directement sur votre appareil',
               ],
         'emergency_numbers': [
           {'number': '911', 'label': 'Emergency Services (Police / Fire / EMS)', 'immune': true},
@@ -267,27 +269,31 @@ class RegionalComplianceManager {
       final sName = isEn ? (usStatesEn[p] ?? p) : (usStates[p] ?? p);
       return {
         'norm_key': 'TCPA_TRACED_FCC',
-        'norm_name': 'TCPA & Pallone-Thune TRACED Act (FCC / FTC)',
-        'legal_framework': 'Telephone Consumer Protection Act (TCPA) & Pallone-Thune TRACED Act',
-        'regulator': 'Federal Communications Commission (FCC) & Federal Trade Commission (FTC)',
+        'norm_name': isEn ? 'United States Regional Protection' : 'Protection régionale États-Unis',
+        'legal_framework': isEn
+            ? 'US telecom & anti-robocall standards'
+            : 'Normes américaines anti-robocall et télécom',
+        'regulator': isEn
+            ? 'Telecom & consumer protection standards'
+            : 'Protection des télécommunications et consommateurs',
         'description': isEn
-            ? 'United States federal regulatory framework for $sName: aggressive robocall mitigation, National DNC Registry compliance, and FCC caller ID authentication.'
-            : 'Cadre réglementaire américain pour $sName : atténuation fédérale des appels automatisés non sollicités, conformité National DNC Registry et authentification d\'appels FCC.',
+            ? 'Protection tailored for $sName: intercepts aggressive robocalls and fraudulent phone scams while keeping your personal contacts private.'
+            : 'Protection adaptée pour $sName : bloque les robocalls et arnaques téléphoniques tout en gardant vos contacts strictement privés.',
         'data_retention_days': 60,
         'strict_consent_required': false,
-        'telecom_standard': 'FCC TRACED Act STIR/SHAKEN Mandate',
+        'telecom_standard': 'FCC STIR/SHAKEN Mandate',
         'principles': isEn
             ? [
-                'Interception of unsolicited robocalls (TCPA)',
-                'Cryptographic caller ID verification via STIR/SHAKEN',
-                'Strict adherence to National Do Not Call (DNC) registry',
-                'Secure local hash matching without uploading contacts',
+                'Robocall and telephone spam interception',
+                'Protection against spoofed numbers',
+                'Emergency numbers (911, 988) always protected',
+                'Contacts never leave your phone',
               ]
             : [
-                'Interception des robocalls non sollicités (TCPA)',
-                'Validation cryptographique STIR/SHAKEN de l\'appelant',
-                'Respect strict du registre fédéral National Do Not Call (DNC)',
-                'Calcul d\'empreintes local sécurisé sans téléversement de contacts',
+                'Interception des robocalls et du spam téléphonique',
+                'Protection contre les faux numéros usurpés',
+                'Numéros d\'urgence (911, 988) toujours protégés',
+                'Vos contacts ne quittent jamais votre téléphone',
               ],
         'emergency_numbers': [
           {'number': '911', 'label': 'Emergency Services', 'immune': true},

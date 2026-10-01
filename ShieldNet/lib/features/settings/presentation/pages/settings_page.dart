@@ -377,7 +377,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const SizedBox(height: 16),
 
           // Juridiction & Conformité Régionale (Loi 25 QC, PIPEDA, TCPA, CCPA)
-          _buildSectionHeader(l10n?.sectionJurisdiction ?? 'JURIDICTION & CONFORMITÉ RÉGIONALE'),
+          // Région & Confidentialité
+          _buildSectionHeader(l10n?.sectionJurisdiction ?? (currentLocale.languageCode == 'en' ? 'REGION & PRIVACY' : 'RÉGION & CONFIDENTIALITÉ')),
           _buildCard(
             cardBg: cardBg,
             borderColor: borderColor,
@@ -386,10 +387,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 builder: (context, ref, _) {
                   final regionalState = ref.watch(regionalComplianceProvider);
                   final isEn = currentLocale.languageCode == 'en';
-                  final norm = regionalState.getLocalizedNorm(currentLocale.languageCode);
-                  final normName = norm['norm_name'] as String? ?? (isEn ? 'Protection Standard' : 'Norme de protection');
-                  final regulator = norm['regulator'] as String? ?? 'CRTC / FCC';
-                  final retentionDays = norm['data_retention_days'] as int? ?? 30;
                   final countryName = regionalState.getLocalizedCountryName(currentLocale.languageCode);
                   final provinceName = regionalState.getLocalizedProvinceName(currentLocale.languageCode);
 
@@ -428,7 +425,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ],
                         ),
                         subtitle: Text(
-                          normName,
+                          isEn
+                              ? 'Local area codes and emergency numbers protected'
+                              : 'Indicatifs locaux et numéros d\'urgence protégés',
                           style: const TextStyle(fontSize: 12, color: AppTheme.accentGreen, fontWeight: FontWeight.w600),
                         ),
                         trailing: ElevatedButton(
@@ -440,38 +439,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: Text(isEn ? 'Edit' : 'Modifier', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          child: Text(isEn ? 'Change' : 'Modifier', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const Divider(height: 1, indent: 56),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(isEn ? 'Regulatory authority' : 'Organisme de régulation', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    regulator,
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                              child: Text(
+                                isEn
+                                    ? 'Your personal communications remain strictly private.'
+                                    : 'Vos communications personnelles restent strictement privées.',
+                                style: const TextStyle(fontSize: 11, color: Colors.grey),
                               ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentCyan.withValues(alpha: 0.12),
+                                color: AppTheme.accentGreen.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                isEn ? 'Auto-deleted after: $retentionDays d' : 'Effacé après : $retentionDays jours',
-                                style: const TextStyle(color: AppTheme.accentCyan, fontSize: 11, fontWeight: FontWeight.bold),
+                                isEn ? '100% Private' : '100% Confidentiel',
+                                style: const TextStyle(color: AppTheme.accentGreen, fontSize: 11, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],

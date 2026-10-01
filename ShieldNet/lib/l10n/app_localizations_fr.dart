@@ -917,14 +917,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminRefreshAll => 'Tout actualiser';
 
   @override
-  String get sectionJurisdiction => 'JURIDICTION & CONFORMITÉ RÉGIONALE';
+  String get sectionJurisdiction => 'RÉGION & CONFIDENTIALITÉ';
 
   @override
-  String get regionSelectionTitle => 'Pays & Juridiction Régionale';
+  String get regionSelectionTitle => 'Votre Région';
 
   @override
   String get regionSelectionSubtitle =>
-      'Application stricte des lois de protection de votre région';
+      'Protection adaptée à vos indicatifs et territoire';
 
   @override
   String get selectCountryPrompt => '1. SÉLECTIONNEZ VOTRE PAYS';
@@ -937,14 +937,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get selectStatePrompt => '2. SÉLECTIONNEZ VOTRE ÉTAT (STATE)';
 
   @override
-  String get applyRegionBtn => 'Appliquer cette juridiction';
+  String get applyRegionBtn => 'Appliquer cette région';
 
   @override
-  String get onboardingRegionTitle => 'Normes & Juridictions Locales';
+  String get onboardingRegionTitle => 'Protection Régionale';
 
   @override
   String get onboardingRegionDesc =>
-      'ShieldNet adapte automatiquement son niveau de protection selon votre région : Loi 25 au Québec, LPRPDE/CRTC au Canada ou TCPA & CCPA aux États-Unis.';
+      'ShieldNet adapte automatiquement son niveau de protection à votre territoire pour bloquer le spam local tout en protégeant vos urgences (911, 811, 988) et votre vie privée.';
 
   @override
   String get helpFaqTitle => 'Centre d\'Aide & FAQ';

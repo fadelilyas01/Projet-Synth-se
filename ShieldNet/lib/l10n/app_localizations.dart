@@ -1775,19 +1775,19 @@ abstract class AppLocalizations {
   /// No description provided for @sectionJurisdiction.
   ///
   /// In fr, this message translates to:
-  /// **'JURIDICTION & CONFORMITÉ RÉGIONALE'**
+  /// **'RÉGION & CONFIDENTIALITÉ'**
   String get sectionJurisdiction;
 
   /// No description provided for @regionSelectionTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Pays & Juridiction Régionale'**
+  /// **'Votre Région'**
   String get regionSelectionTitle;
 
   /// No description provided for @regionSelectionSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Application stricte des lois de protection de votre région'**
+  /// **'Protection adaptée à vos indicatifs et territoire'**
   String get regionSelectionSubtitle;
 
   /// No description provided for @selectCountryPrompt.
@@ -1811,19 +1811,19 @@ abstract class AppLocalizations {
   /// No description provided for @applyRegionBtn.
   ///
   /// In fr, this message translates to:
-  /// **'Appliquer cette juridiction'**
+  /// **'Appliquer cette région'**
   String get applyRegionBtn;
 
   /// No description provided for @onboardingRegionTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Normes & Juridictions Locales'**
+  /// **'Protection Régionale'**
   String get onboardingRegionTitle;
 
   /// No description provided for @onboardingRegionDesc.
   ///
   /// In fr, this message translates to:
-  /// **'ShieldNet adapte automatiquement son niveau de protection selon votre région : Loi 25 au Québec, LPRPDE/CRTC au Canada ou TCPA & CCPA aux États-Unis.'**
+  /// **'ShieldNet adapte automatiquement son niveau de protection à votre territoire pour bloquer le spam local tout en protégeant vos urgences (911, 811, 988) et votre vie privée.'**
   String get onboardingRegionDesc;
 
   /// No description provided for @helpFaqTitle.

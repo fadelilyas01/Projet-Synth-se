@@ -118,15 +118,15 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n?.regionSelectionTitle ?? 'Pays & Juridiction Régionale',
+                        l10n?.regionSelectionTitle ?? (isEn ? 'Your Region' : 'Votre Région'),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         l10n?.regionSelectionSubtitle ??
                             (isEn
-                                ? 'Strict enforcement of regional privacy laws'
-                                : 'Application stricte des lois de protection de votre région'),
+                                ? 'Protection tailored to your area code & territory'
+                                : 'Protection adaptée à vos indicatifs et territoire'),
                         style: const TextStyle(fontSize: 12, color: Colors.grey),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -200,7 +200,7 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                           return DropdownMenuItem<String>(
                             value: e.key,
                             child: Text(
-                              e.key == 'QC' ? (isEn ? '🇨🇦 ${e.value} (Law 25)' : '🇨🇦 ${e.value} (Loi 25)') : '🇨🇦 ${e.value}',
+                              '🇨🇦 ${e.value}',
                               style: TextStyle(
                                 fontWeight: e.key == 'QC' ? FontWeight.bold : FontWeight.w500,
                                 color: e.key == 'QC' ? AppTheme.primaryColor : null,
@@ -213,7 +213,7 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                           return DropdownMenuItem<String>(
                             value: e.key,
                             child: Text(
-                              e.key == 'CA' ? '🇺🇸 ${e.value} (CCPA)' : '🇺🇸 ${e.value}',
+                              '🇺🇸 ${e.value}',
                               style: TextStyle(
                                 fontWeight: e.key == 'CA' ? FontWeight.bold : FontWeight.w500,
                                 color: e.key == 'CA' ? AppTheme.accentOrange : null,
@@ -282,7 +282,7 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          isEn ? 'Max retention: $retentionDays days' : 'Rétention max\u00a0: $retentionDays jours',
+                          isEn ? 'Automatic purge: $retentionDays days' : 'Purge automatique\u00a0: $retentionDays jours',
                           style: const TextStyle(color: AppTheme.accentCyan, fontSize: 11, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -293,7 +293,7 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          isEn ? '911 / 811 / 988 immune' : 'Urgences 911\u00a0/ 811\u00a0/ 988 immunisées',
+                          isEn ? '911 / 811 / 988 guaranteed' : 'Urgences 911\u00a0/ 811\u00a0/ 988 garanties',
                           style: const TextStyle(color: AppTheme.accentGreen, fontSize: 11, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -330,8 +330,8 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                       SnackBar(
                         content: Text(
                           isEn
-                              ? 'Region applied: ${_selectedCountry == 'CA' ? '🇨🇦 Canada' : '🇺🇸 United States'} — $_selectedProvince. Standard activated.'
-                              : 'Région appliquée\u00a0: ${_selectedCountry == 'CA' ? '🇨🇦 Canada' : '🇺🇸 États-Unis'} — $_selectedProvince. Norme activée.',
+                              ? 'Region updated: ${_selectedCountry == 'CA' ? '🇨🇦 Canada' : '🇺🇸 United States'} — $_selectedProvince. Local protection active.'
+                              : 'Région mise à jour\u00a0: ${_selectedCountry == 'CA' ? '🇨🇦 Canada' : '🇺🇸 États-Unis'} — $_selectedProvince. Protection locale active.',
                         ),
                         backgroundColor: AppTheme.accentGreen,
                       ),
@@ -345,7 +345,7 @@ class _RegionSelectionSheetState extends ConsumerState<RegionSelectionSheet> {
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        l10n?.applyRegionBtn ?? (isEn ? 'Apply this jurisdiction' : 'Appliquer cette juridiction'),
+                        l10n?.applyRegionBtn ?? (isEn ? 'Apply this region' : 'Appliquer cette région'),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                         overflow: TextOverflow.ellipsis,
                       ),

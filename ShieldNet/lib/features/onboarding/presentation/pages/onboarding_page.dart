@@ -570,10 +570,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 ),
                 _buildPrivacyRow(
                   icon: Icons.verified_user_outlined,
-                  title: isEn ? 'Compliant Canada & US Standards' : 'Conforme Loi 25 & LPRPDE',
+                  title: isEn ? 'Certified Privacy' : 'Respect de la Vie Privée',
                   desc: isEn
-                      ? 'Privacy by design complying with North American privacy regulations.'
-                      : 'Confidentialité dès la conception respectant les lois canadiennes et nord-américaines.',
+                      ? 'Built from the ground up to keep your personal data secure and confidential.'
+                      : 'Conçu dès le départ pour protéger vos données personnelles et votre vie privée.',
                   color: AppTheme.accentCyan,
                 ),
               ],
@@ -607,10 +607,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final isEn = ref.watch(localeProvider).languageCode == 'en';
     final cardBg = isDark ? AppTheme.surfaceDark : Colors.white;
     final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
-    final norm = regionalState.complianceNorm;
-    final normName = norm['norm_name'] as String? ?? 'Norme de protection';
-    final normDesc = norm['description'] as String? ?? '';
-    final retentionDays = norm['data_retention_days'] as int? ?? 30;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -644,11 +640,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isEn ? 'Select your region' : 'Votre pays & territoire',
+                            isEn ? 'Your Region' : 'Votre Région',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                           Text(
-                            isEn ? 'Rules & privacy laws adapt dynamically' : 'Adaptation des normes et lois en direct',
+                            isEn ? 'Optimizes detection for your local area codes' : 'Optimise le filtrage selon vos indicatifs locaux',
                             style: const TextStyle(fontSize: 11, color: Colors.grey),
                           ),
                         ],
@@ -773,28 +769,28 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       isExpanded: true,
                       icon: const Icon(Icons.arrow_drop_down_rounded),
                       items: regionalState.country == 'CA'
-                          ? RegionalComplianceManager.canadianProvinces.entries.map((e) {
+                          ? (isEn ? RegionalComplianceManager.canadianProvincesEn : RegionalComplianceManager.canadianProvinces).entries.map((e) {
                               return DropdownMenuItem<String>(
                                 value: e.key,
                                 child: Text(
-                                  e.key == 'QC' ? '${e.value} (Loi 25 QC)' : e.value,
+                                  e.value,
                                   style: TextStyle(
                                     fontSize: 13,
-                                    fontWeight: e.key == 'QC' ? FontWeight.bold : FontWeight.normal,
-                                    color: e.key == 'QC' ? AppTheme.primaryColor : null,
+                                    fontWeight: e.key == regionalState.provinceOrState ? FontWeight.bold : FontWeight.normal,
+                                    color: e.key == regionalState.provinceOrState ? AppTheme.primaryColor : null,
                                   ),
                                 ),
                               );
                             }).toList()
-                          : RegionalComplianceManager.usStates.entries.map((e) {
+                          : (isEn ? RegionalComplianceManager.usStatesEn : RegionalComplianceManager.usStates).entries.map((e) {
                               return DropdownMenuItem<String>(
                                 value: e.key,
                                 child: Text(
-                                  e.key == 'CA' ? '${e.value} (CCPA)' : e.value,
+                                  e.value,
                                   style: TextStyle(
                                     fontSize: 13,
-                                    fontWeight: e.key == 'CA' ? FontWeight.bold : FontWeight.normal,
-                                    color: e.key == 'CA' ? AppTheme.accentOrange : null,
+                                    fontWeight: e.key == regionalState.provinceOrState ? FontWeight.bold : FontWeight.normal,
+                                    color: e.key == regionalState.provinceOrState ? AppTheme.accentOrange : null,
                                   ),
                                 ),
                               );
@@ -813,18 +809,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 ),
                 const SizedBox(height: 14),
 
-                // Étape 3 : Carte d'Adaptation & Norme Appliquée
+                // Étape 3 : Carte d'Adaptation Locale & Sérénité
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: regionalState.country == 'CA' && regionalState.provinceOrState == 'QC'
-                        ? const Color(0xFF0284C7).withValues(alpha: 0.1)
-                        : AppTheme.primaryColor.withValues(alpha: 0.08),
+                    color: AppTheme.accentGreen.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: regionalState.country == 'CA' && regionalState.provinceOrState == 'QC'
-                          ? const Color(0xFF0284C7).withValues(alpha: 0.3)
-                          : AppTheme.primaryColor.withValues(alpha: 0.25),
+                      color: AppTheme.accentGreen.withValues(alpha: 0.25),
                     ),
                   ),
                   child: Column(
@@ -832,11 +824,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.shield_outlined, size: 16, color: AppTheme.accentGreen),
+                          const Icon(Icons.verified_user_rounded, size: 16, color: AppTheme.accentGreen),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              normName,
+                              isEn ? 'Tailored Local Protection' : 'Protection Locale Calibrée',
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.accentGreen),
                             ),
                           ),
@@ -844,7 +836,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        normDesc,
+                        isEn
+                            ? 'ShieldNet recognizes your area codes to block suspicious spoofing, while ensuring legitimate callers and family reach you.'
+                            : 'ShieldNet reconnaît vos indicatifs régionaux pour bloquer les faux numéros locaux, tout en garantissant que vos proches puissent vous joindre.',
                         style: TextStyle(fontSize: 11, color: isDark ? Colors.white70 : Colors.black87, height: 1.35),
                       ),
                       const SizedBox(height: 8),
@@ -859,7 +853,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              isEn ? 'Retention: $retentionDays days' : 'Rétention : $retentionDays jours',
+                              isEn ? '100% Confidential' : 'Confidentialité Totale',
                               style: const TextStyle(color: AppTheme.accentCyan, fontSize: 10, fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -870,7 +864,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              isEn ? 'Immunity: 911 / 811 / 988' : 'Immunité : 911 / 811 / 988',
+                              isEn ? 'Emergencies: 911 / 811 / 988' : 'Urgences : 911 / 811 / 988',
                               style: const TextStyle(color: AppTheme.accentGreen, fontSize: 10, fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -884,15 +878,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           ),
           const SizedBox(height: 24),
           Text(
-            isEn ? 'Regional Protection & Standards' : 'Normes & Juridictions Locales',
+            isEn ? 'Local Security & Peace of Mind' : 'Sécurité Locale & Sérénité',
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             isEn
-                ? 'ShieldNet applies privacy regulations based on your location: Loi 25 in Québec, PIPEDA across Canada, or TCPA & CCPA in the United States.'
-                : 'ShieldNet adapte automatiquement son niveau de protection selon votre région : Loi 25 au Québec, LPRPDE/CRTC au Canada ou TCPA & CCPA aux États-Unis.',
+                ? 'Your regional selection helps ShieldNet detect local spoofing tactics while keeping all personal communication strictly confidential.'
+                : 'Votre région permet à ShieldNet de mieux cibler les techniques de démarchage de proximité, tout en assurant une confidentialité absolue.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
