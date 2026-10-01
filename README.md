@@ -1,159 +1,145 @@
-﻿# ShieldNet — Plateforme de Filtrage Télécom & Protection de la Vie Privée
+# ShieldNet — Filtrage d'appels indésirables et respect de la vie privée
 
-Solution d'ingénierie logicielle pour l'interception temps réel des appels indésirables et la détection des fraudes par SMS, conçue selon le principe de confidentialité dès la conception (*Privacy by Design*) en conformité avec la **Loi 25 du Québec** et la **LPRPDE canadienne**.
+ShieldNet est un projet de synthèse en génie logiciel dédié à la protection des utilisateurs contre les appels indésirables, les tentatives de fraude téléphonique et le démarchage automatisé (*robocalls*), principalement sur le plan de numérotation nord-américain (+1, Québec, Canada et États-Unis).
 
-Le système cible le plan de numérotation nord-américain (**NANP**, indicatif `+1`) au format international **E.164**.
-
----
-
-## 1. Vue d'Ensemble & Philosophie d'Ingénierie
-
-La majorité des applications commerciales de filtrage d'appels (telles que Truecaller ou Hiya) reposent sur un modèle d'aspiration systématique des carnets d'adresses vers des serveurs centraux, créant des risques majeurs de fuite de données et des non-conformités réglementaires.
-
-ShieldNet adopte une approche fondamentalement différente :
-
-1. **Zéro Collecte de Contacts** : Le carnet d'adresses personnel reste strictement confiné à la mémoire locale de l'appareil. Aucun contact n'est extrait, transmis ou indexé.
-2. **Zéro Numéro en Clair Côté Serveur** : Les signalements et synchronisations transitent exclusivement sous forme d'empreintes cryptographiques **HMAC-SHA256** calculées avec un sel d'infrastructure.
-3. **Interception Locale Déterministe (< 2 ms)** : La décision de bloquer ou d'autoriser un appel entrant est exécutée par le sous-système Android `CallScreeningService` et une base SQLite embarquée en mode WAL (*Write-Ahead Logging*), avant le premier coup de sonnerie et sans dépendance réseau.
-4. **Moteur d'Arbitrage des Faux Positifs** : Pour éviter l'interception injustifiée de services essentiels (hôpitaux, cliniques, services de livraison, pharmacies), la plateforme intègre un moteur de consensus démocratique et d'analyse contextuelle bilingue (FR/EN) prenant en compte les attestations télécom **STIR/SHAKEN**.
+Contrairement à la majorité des applications commerciales qui aspirent le carnet de contacts vers des serveurs distants, ShieldNet a été pensé selon le principe de **protection de la vie privée dès la conception** (*Privacy by Design*). Les décisions de blocage sont prises localement sur le téléphone et aucune donnée personnelle en clair n'est transmise ou stockée sur le serveur, en conformité avec la **Loi 25 du Québec** et la **LPRPDE** canadienne.
 
 ---
 
-## 2. Architecture du Référentiel
+## 1. Principes de fonctionnement
+
+1. **Aucune collecte de carnet d'adresses** : Les contacts personnels restent strictement dans la mémoire du téléphone. Aucun contact n'est extrait, transmis ou indexé sur un serveur.
+2. **Données anonymisées par empreinte (HMAC-SHA256)** : Les numéros signalés ne transitent jamais en clair. Ils sont convertis en empreintes cryptographiques avec un sel d'infrastructure avant tout échange réseau.
+3. **Interception locale instantanée** : Sur Android, le filtrage s'appuie sur le service système `CallScreeningService` et une base SQLite locale. La vérification prend moins de 2 millisecondes, ce qui permet de bloquer l'appel avant même qu'il ne commence à sonner.
+4. **Prévention des faux positifs** : Pour éviter de bloquer des numéros légitimes (hôpitaux, cliniques médicales, pharmacies, livreurs), le système combine les avis favorables de la communauté et les attestations télécom STIR/SHAKEN.
+5. **Immunité absolue des urgences** : Les numéros d'urgence (911, 811, 988, etc.) ainsi que les contacts favoris de l'utilisateur sont protégés et ne peuvent jamais être filtrés.
+
+---
+
+## 2. Structure du projet
+
+Le projet est divisé en deux grandes parties complémentaires :
 
 ```text
 Projet synthese/
-├── Jenkinsfile                       # Définition du pipeline d'intégration continue (150 tests et build APK)
-├── README.md                         # Documentation générale de la plateforme (ce fichier)
-├── docker-compose.yml                # Environnement conteneurisé (Django 5, PostgreSQL 16, Redis 7)
-├── docker-compose.jenkins.yml        # Instance Jenkins CI locale conteneurisée
-├── test-all.ps1                      # Automatisation de l'ensemble des suites de tests (backend et mobile)
-├── start-dev.ps1                     # Script de lancement rapide de l'environnement de développement
+├── ShieldNet/                # Application mobile Android (Flutter / Kotlin)
+│   ├── android/              # Service natif d'interception (CallScreeningService)
+│   ├── lib/                  # Code source Flutter (Clean Architecture, Riverpod)
+│   ├── l10n/                 # Fichiers de localisation bilingues (français / anglais)
+│   └── test/                 # Tests automatisés unitaires et d'intégration (35 tests)
 │
-├── docs/                             # Spécifications et documentation d'ingénierie :
-│   ├── ARCHITECTURE_ET_CONCEPTION.md # Clean Architecture, diagrammes UML et séquences d'interception
-│   ├── DEPLOIEMENT_ET_CI_CD.md       # Manuel d'exploitation, conteneurisation Docker et pipeline Jenkins
-│   └── SECURITY_AND_THREAT_MODEL.md  # Analyse d'entropie NANP, modèle STRIDE et conformité Loi 25
+├── shieldnet_backend/        # Serveur d'API et console de modération (Django)
+│   ├── shield_api/           # API REST, modèles, services de modération et consensus
+│   ├── shieldnet_backend/    # Configuration générale et routage Django
+│   ├── templates/            # Gabarits HTML de la console d'administration
+│   └── test/                 # Tests automatisés du backend (74 tests)
 │
-├── ShieldNet/                        # Client mobile Android (Flutter / Kotlin)
-│   ├── android/                      # Services natifs Android (CallScreeningService, AppWidget)
-│   ├── lib/                          # Code Dart structuré en Clean Architecture (Riverpod 2.x)
-│   ├── l10n/                         # Ressources de localisation bilingues (FR / EN)
-│   ├── test/                         # Suite de 86 tests automatisés (unitaires, widgets, mocks)
-│   └── README.md                     # Documentation technique du client mobile
+├── docs/                     # Documentation technique détaillée
+│   ├── ARCHITECTURE_ET_CONCEPTION.md
+│   ├── DEPLOIEMENT_ET_CI_CD.md
+│   └── SECURITY_AND_THREAT_MODEL.md
 │
-└── shieldnet_backend/                # Serveur d'API & Console d'Administration (Django)
-    ├── shield_api/                   # Applications DRF (modèles, vues, services d'arbitrage, métriques)
-    ├── shieldnet_backend/            # Configuration générale, routage et sécurité WSGI/ASGI
-    ├── templates/                    # Interfaces d'administration web personnalisées
-    └── README.md                     # Documentation technique du serveur backend
+├── start-dev.ps1             # Script de démarrage de l'environnement de développement
+└── test-all.ps1              # Script pour exécuter l'ensemble des 109 tests
 ```
 
 ---
 
-## 3. Composants Techniques
-
-### Client Mobile (ShieldNet)
-- **Framework & Langage** : Flutter 3.27+ (Dart) et Android natif (Kotlin).
-- **Interception Système** : `CallScreeningService` natif Android dialoguant directement avec la base SQLite locale.
-- **Stockage Embarqué** : SQLite configuré en mode WAL, index B-Tree optimisé sur les empreintes hexadécimales SHA-256.
-- **Fast-Path Mémoire** : Filtre de Bloom en mémoire vive pour évaluation en O(1) (< 0.02 ms).
-- **Résilience Réseau** : File d'attente hors-ligne (`OfflineSyncService`) stockant les signalements émis sans réseau pour synchronisation différée.
-- **Accessibilité & Ergonomie** : Mode Interface Simplifiée (Seniors), support bilingue complet, immunité inviolable des numéros d'urgence (911, 811, 988).
-
-### Serveur Backend (shieldnet_backend)
-- **Framework & Langage** : Python 3.12, Django 5.x et Django REST Framework.
-- **Bases de Données** : PostgreSQL 16 (production) / SQLite (développement local).
-- **Cache & Rate Limiting** : Redis 7 avec limitation stricte des requêtes par adresse IP.
-- **Contrôle d'Accès Basé sur les Rôles (RBAC)** : Séparation étanche entre les privilèges administrateur système (SOC / Superuser) et gestionnaire de modération (Staff restreint).
-- **Observabilité** : Endpoint `/api/v1/metrics/` conforme au standard OpenMetrics / Prometheus.
-
----
-
-## 4. Sécurité & Modèle Cryptographique
-
-### Justification du Choix HMAC-SHA256 vs Fonctions à Mémoire Lourde
-L'espace combinatoire des numéros nord-américains assignables (NANP +1) représente environ 780 millions de combinaisons (entropie d'environ 30 bits). Un hachage simple sans sel serait vulnérable aux attaques par dictionnaire ou tables pré-calculées.
-
-ShieldNet applique un **HMAC-SHA256** utilisant un sel secret d'infrastructure. Le recours à des algorithmes à coût mémoire élevé (comme Argon2id ou scrypt) a été écarté en raison du budget d'exécution temps réel strict imposé par Android :
-- **HMAC-SHA256** : Exécution sur matériel mobile en **~0.15 ms**, permettant une décision globale d'interception en moins de 2 ms.
-- **Argon2id** : Exécution requérant 300 à 800 ms sur processeur mobile standard, excédant la limite système et provoquant l'échec de l'interception.
-
-### Mesures de Durcissement
-- **Comparaison à Temps Constant** : Utilisation de `hmac.compare_digest` pour valider les jetons et clés d'API afin de prévenir les attaques par canal auxiliaire (*timing attacks*).
-- **Protection contre l'Injection CSV** : Neutralisation systématique des caractères de formules (`=`, `+`, `-`, `@`) lors de l'export des journaux d'audit.
-- **Validation Strictement Typée** : Contrôle systématique des formats E.164, assainissement des expressions régulières contre les dénis de service (ReDoS), et limitation de taille sur toutes les entrées utilisateur.
-
----
-
-## 5. Démarrage Rapide
+## 3. Guide de démarrage rapide
 
 ### Prérequis
-- Python 3.10 ou supérieur
-- Flutter SDK 3.27 ou supérieur
-- Docker & Docker Compose (optionnel pour exécution conteneurisée)
-- Android SDK (API 29+) pour les composants natifs
+- **Python 3.10 ou supérieur** (testé avec Python 3.12)
+- **Flutter SDK 3.27 ou supérieur**
+- **Android Studio** avec un émulateur configuré (API 29+) ou un appareil Android en mode débogage
 
-### Lancement du Backend
+---
 
-```bash
+### Étape 1 : Lancement du serveur backend (Django)
+
+Dans un premier terminal :
+
+```powershell
 cd shieldnet_backend
 
-# Création et activation de l'environnement virtuel
+# Créer et activer l'environnement virtuel
 python -m venv venv
-# Windows :
 .\venv\Scripts\Activate.ps1
-# Linux / macOS :
-source venv/bin/activate
 
-# Installation des dépendances et migration
+# Installer les dépendances
 pip install -r requirements.txt
+
+# Appliquer les migrations de base de données
 python manage.py migrate
 
-# Initialisation du compte administrateur et lancement
+# Initialiser les comptes administrateur et modérateur
 python manage.py ensure_admin
+python manage.py ensure_manager
+
+# Démarrer le serveur
 python manage.py runserver 0.0.0.0:8000
 ```
 
-- Console d'administration : `http://127.0.0.1:8000/admin/`
-- Documentation OpenAPI / Swagger : `http://127.0.0.1:8000/api/v1/docs/`
-
-### Lancement de l'Application Mobile
-
-```bash
-cd ShieldNet
-
-# Récupération des dépendances et génération i18n
-flutter pub get
-flutter gen-l10n
-
-# Lancement de l'application
-flutter run
-```
+Une fois le serveur en ligne :
+- **Console d'administration** : [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
+  - Administrateur : `admin` / `admin123`
+  - Gestionnaire : `manager` / `manager123`
+- **Documentation de l'API (Swagger)** : [http://127.0.0.1:8000/api/v1/docs/](http://127.0.0.1:8000/api/v1/docs/)
+- **Centre d'aide public** : [http://127.0.0.1:8000/help/](http://127.0.0.1:8000/help/)
 
 ---
 
-## 6. Assurance Qualité & Validation des Tests (150 Tests, 100% Succès)
+### Étape 2 : Lancement de l'application mobile (Flutter)
 
-La robustesse opérationnelle est validée par une suite continue de **150 tests automatisés** :
+Dans un second terminal :
 
-| Domaine | Composant | Nombre de Tests | Statut |
-|---|---|---|---|
-| **Backend** | Modèles, API REST, RBAC, Consensus & STIR/SHAKEN | 64 tests | Succès (100%) |
-| **Mobile** | SQLite WAL, Clean Architecture, Widgets & Cryptographie | 86 tests | Succès (100%) |
-| **Total** | **Ensemble de la plateforme ShieldNet** | **150 tests** | **Succès (100%)** |
+```powershell
+cd ShieldNet
 
-Pour exécuter l'ensemble des tests en une seule commande :
+# Télécharger les paquets Flutter et générer les traductions
+flutter pub get
+flutter gen-l10n
+
+# Lancer l'application
+flutter run
+```
+
+*Note : si vous utilisez l'émulateur standard Android, l'adresse de votre machine hôte est automatiquement configurée sur `10.0.2.2:8000`.*
+
+---
+
+## 4. Tests automatisés et qualité du code
+
+Le projet comprend **109 tests automatisés** qui valident le bon fonctionnement de l'ensemble de la solution :
+
+- **74 tests côté backend (Django)** : couvrent l'API REST, l'authentification JWT, les calculs de consensus citoyen, le filtrage par indicatif régional et les fonctionnalités de modération.
+- **35 tests côté mobile (Flutter)** : valident la logique de filtrage d'appels, la normalisation E.164, le masquage des numéros, la gestion du stockage sécurisé et les requêtes réseau.
+
+Pour exécuter tous les tests d'un seul coup :
 ```powershell
 .\test-all.ps1
 ```
 
+Pour les lancer séparément :
+```powershell
+# Tests du backend
+cd shieldnet_backend
+python manage.py test
+
+# Tests du client mobile
+cd ..\ShieldNet
+flutter test
+```
+
+L'analyse statique du code Dart peut être vérifiée avec :
+```powershell
+flutter analyze
+```
+
 ---
 
-## 7. Documentation d'Ingénierie Détaillée
+## 5. Choix technologiques et justification
 
-Pour approfondir les aspects d'architecture et de sécurité, consultez les documents du répertoire `docs/` :
-
-- [**Architecture & Modélisation UML**](docs/ARCHITECTURE_ET_CONCEPTION.md) : Diagrammes de classes, flux temporels d'interception et principes Clean Architecture.
-- [**Modèle de Menace & Sécurité Cryptographique**](docs/SECURITY_AND_THREAT_MODEL.md) : Analyse combinatoire NANP, évaluation STRIDE et conformité Loi 25.
-- [**Guide de Déploiement & Pipeline CI/CD**](docs/DEPLOIEMENT_ET_CI_CD.md) : Déploiement Docker en production, configuration Nginx/Gunicorn et pipeline Jenkins.
+- **Flutter et Kotlin** : Flutter permet de construire une interface réactive et moderne. Le module natif Kotlin est quant à lui indispensable pour communiquer avec l'API Android `CallScreeningService`, la seule capable d'intercepter les appels système au niveau du système d'exploitation.
+- **Django et Django REST Framework** : Offre une architecture solide, un système d'authentification robuste et une interface d'administration prête à l'emploi pour les modérateurs.
+- **SQLite local en mode WAL** : Sur le téléphone, SQLite en mode *Write-Ahead Logging* permet des lectures concurrentes extrêmement rapides (< 2 ms), garantissant une décision de filtrage instantanée sans figer l'interface.
+- **HMAC-SHA256 avec sel** : Choisi pour son ratio optimal entre sécurité et rapidité d'exécution sur mobile (~0.15 ms), là où des algorithmes comme Argon2id prendraient plusieurs centaines de millisecondes et feraient échouer le délai d'interception imposé par Android.
