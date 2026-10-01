@@ -236,8 +236,8 @@ class SmsPhishingDetector {
       // 1. Usurpation directe par sous-domaine ou nom composé frauduleux
       if (hostClean.contains(brand)) {
         return isEn
-            ? 'Domain impersonating official brand "$brand" outside verified infrastructure.'
-            : 'Domaine usurpant la marque officielle "$brand" hors de son infrastructure certifiée.';
+            ? 'The link imitates "$brand" but does not lead to their real, verified website.'
+            : 'Le lien utilise le nom de "$brand" mais ne mène pas à leur vrai site officiel.';
       }
 
       // 2. Typosquatting par substitution typographique (Levenshtein distance 1 ou 2)
@@ -246,8 +246,8 @@ class SmsPhishingDetector {
           final dist = _levenshtein(token, brand);
           if (dist > 0 && dist <= 2) {
             return isEn
-                ? 'Deceptive domain resembling "$brand" via typographical mutation (Typosquatting: "$token").'
-                : 'Domaine trompeur ressemblant à "$brand" par mutation typographique (Typosquatting : "$token").';
+                ? 'Deceptive link: "$token" imitates the official brand "$brand" with a slight spelling trick.'
+                : 'Lien trompeur : "$token" imite le vrai site de "$brand" avec une légère faute d\'orthographe volontaire.';
           }
         }
       }
@@ -360,8 +360,8 @@ class SmsPhishingDetector {
           hasShortener = true;
           totalRisk += 35;
           redFlags.add(isEn
-              ? 'Masked link via URL shortener service ($shortener).'
-              : 'Lien masqué via un raccourcisseur d\'URL ($shortener).');
+              ? 'Hidden destination: uses a link shortener ($shortener) to disguise where it leads.'
+              : 'Lien masqué : utilise un raccourcisseur ($shortener) pour cacher la véritable destination.');
           break;
         }
       }
@@ -371,8 +371,8 @@ class SmsPhishingDetector {
         hasIpUrl = true;
         totalRisk += 45;
         redFlags.add(isEn
-            ? 'Link pointing directly to a raw numeric IP address.'
-            : 'Lien pointant directement vers une adresse IP numérique brute.');
+            ? 'Suspicious link: uses numbers instead of a legitimate website address.'
+            : 'Lien suspect : utilise une suite de chiffres au lieu d\'un vrai nom de site web.');
       }
 
       // Extensions de complaisance fréquemment abusées
@@ -382,8 +382,8 @@ class SmsPhishingDetector {
           hasSuspiciousTld = true;
           totalRisk += 30;
           redFlags.add(isEn
-              ? 'Suspicious domain extension frequently abused for scams ($ext).'
-              : 'Extension de domaine suspecte souvent utilisée pour les escroqueries ($ext).');
+              ? 'Unusual website ending ($ext), commonly used to create short-lived scam traps.'
+              : 'Fin d\'adresse web inhabituelle ($ext), très souvent utilisée pour créer des faux sites pièges.');
           break;
         }
       }

@@ -271,7 +271,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const SizedBox(height: 16),
 
           // Résilience & File d'attente hors-ligne
-          _buildSectionHeader(l10n?.sectionOfflineResilience ?? 'RÉSILIENCE & HORS-LIGNE'),
+          _buildSectionHeader(l10n?.sectionOfflineResilience ?? (currentLocale.languageCode == 'en' ? 'OFFLINE SYNCHRONIZATION' : 'SYNCHRONISATION & HORS-LIGNE')),
           _buildCard(
             cardBg: cardBg,
             borderColor: borderColor,
@@ -287,13 +287,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       size: 24,
                     ),
                     title: Text(
-                      l10n?.settingOfflineQueue ?? 'File d\'attente hors-ligne',
+                      l10n?.settingOfflineQueue ?? (currentLocale.languageCode == 'en' ? 'Pending offline reports' : 'Envois en attente de connexion'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     subtitle: Text(
                       count > 0
-                          ? (l10n?.settingOfflineQueuePending(count) ?? '$count signalement(s) en attente de synchronisation')
-                          : (l10n?.settingOfflineQueueAllSynced ?? 'Tous les signalements et contestations sont synchronisés'),
+                          ? (l10n?.settingOfflineQueuePending(count) ?? (currentLocale.languageCode == 'en' ? '$count report(s) waiting to sync' : '$count signalement(s) en attente de réseau'))
+                          : (l10n?.settingOfflineQueueAllSynced ?? (currentLocale.languageCode == 'en' ? 'All reports and disputes are synchronized' : 'Toutes vos données sont synchronisées')),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     trailing: count > 0
@@ -470,7 +470,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                isEn ? 'Max retention: $retentionDays d' : 'Rétention max: $retentionDays j',
+                                isEn ? 'Auto-deleted after: $retentionDays d' : 'Effacé après : $retentionDays jours',
                                 style: const TextStyle(color: AppTheme.accentCyan, fontSize: 11, fontWeight: FontWeight.bold),
                               ),
                             ),

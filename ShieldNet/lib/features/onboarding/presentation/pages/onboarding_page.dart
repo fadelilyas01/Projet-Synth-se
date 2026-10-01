@@ -468,7 +468,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        isEn ? 'Rejected < 2 ms' : 'Rejeté < 2 ms',
+                        isEn ? 'Blocked instantly' : 'Bloqué instantanément',
                         style: const TextStyle(color: AppTheme.accentRed, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -521,10 +521,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   // Diapositive 2 : Confidentialité & Données locales
   Widget _buildSlide2(bool isDark, AppLocalizations? l10n) {
-    final title = l10n?.onboardingSlide2Title ?? 'Confidentialité Totale';
-    final desc = l10n?.onboardingSlide2Text ??
-        'Chaque numéro est chiffré et haché localement (SHA-256 avec sel cryptographique). Aucun répertoire n\'est transmis à nos serveurs.';
     final isEn = ref.watch(localeProvider).languageCode == 'en';
+    final title = l10n?.onboardingSlide2Title ?? (isEn ? 'Complete Privacy' : 'Confidentialité Totale');
+    final desc = l10n?.onboardingSlide2Text ??
+        (isEn
+            ? 'Your contacts stay strictly on your phone. Suspicious calls are checked anonymously without ever exposing your private address book.'
+            : 'Votre carnet d\'adresses ne quitte jamais votre appareil. Les numéros sont vérifiés de manière 100% anonyme sans transmettre vos contacts personnels.');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -544,10 +546,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               children: [
                 _buildPrivacyRow(
                   icon: Icons.contacts_outlined,
-                  title: isEn ? 'Local Address Book' : 'Carnet d\'adresses local',
+                  title: isEn ? 'Private Address Book' : 'Contacts 100% Privés',
                   desc: isEn
-                      ? 'Remains strictly on your device. Never uploaded to any server.'
-                      : 'Reste strictement sur l\'appareil. Jamais téléchargé sur un serveur.',
+                      ? 'Stored securely on your phone. Never sent to any server or third party.'
+                      : 'Restent en sécurité sur votre appareil. Jamais envoyés sur Internet.',
                   color: AppTheme.accentGreen,
                 ),
                 const Padding(
@@ -555,11 +557,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   child: Divider(height: 1),
                 ),
                 _buildPrivacyRow(
-                  icon: Icons.tag_rounded,
-                  title: isEn ? 'Cryptographic Signatures' : 'Empreintes cryptographiques',
+                  icon: Icons.lock_outline_rounded,
+                  title: isEn ? 'Anonymous Verification' : 'Anonymat Garanti',
                   desc: isEn
-                      ? 'Only anonymized HMAC-SHA256 hashes are used for lookups.'
-                      : 'Seules les signatures HMAC-SHA256 anonymisées transitent.',
+                      ? 'Phone numbers are securely anonymized so caller identities are never revealed.'
+                      : 'Les numéros sont convertis en codes anonymes chiffrés : vos appels restent confidentiels.',
                   color: AppTheme.primaryColor,
                 ),
                 const Padding(
@@ -927,28 +929,28 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               children: [
                 _buildPermissionRow(
                   icon: Icons.phone_in_talk_outlined,
-                  title: isEn ? 'Call Screening' : 'Interception Télécom',
+                  title: isEn ? 'Call Protection' : 'Filtrage des Appels',
                   desc: isEn
-                      ? 'CallScreening service to analyze incoming calls before they ring'
-                      : 'Rôle CallScreening pour analyser les appels avant sonnerie',
+                      ? 'Allows ShieldNet to silence and block unwanted calls before your phone rings'
+                      : 'Permet à ShieldNet de bloquer les appels indésirables avant même qu\'ils ne sonnent',
                   isDark: isDark,
                 ),
                 const SizedBox(height: 14),
                 _buildPermissionRow(
                   icon: Icons.emergency_outlined,
-                  title: isEn ? 'Emergency Immunity' : 'Protection Urgences',
+                  title: isEn ? 'Emergency Numbers Protected' : 'Numéros d\'Urgence Prioritaires',
                   desc: isEn
-                      ? 'Guaranteed immunity for 911, 988, 811 and personal contacts'
-                      : 'Immunité garantie pour le 911, 988, 811 et vos contacts personnels',
+                      ? 'Always guarantees your family and emergency services (911, 988, 811) reach you'
+                      : 'Vos proches et les services d\'urgence (911, 988, 811) peuvent toujours vous joindre',
                   isDark: isDark,
                 ),
                 const SizedBox(height: 14),
                 _buildPermissionRow(
                   icon: Icons.sms_outlined,
-                  title: isEn ? 'Local SMS Inspector' : 'Inspecteur SMS Local',
+                  title: isEn ? 'SMS & Link Inspector' : 'Inspecteur de SMS & Liens',
                   desc: isEn
-                      ? 'Phishing & scam text detection without server transfer'
-                      : 'Détection d\'arnaques par texto sans transfert de données',
+                      ? 'Warns you about suspicious delivery notices and scam links without reading private chats'
+                      : 'Vous alerte face aux faux colis et faux remboursements, sans jamais lire vos textos privés',
                   isDark: isDark,
                 ),
               ],

@@ -116,8 +116,8 @@ class ZenShieldCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       isActive
-                          ? (isEn ? 'Real-time filtering active (< 2 ms)' : 'Filtrage temps réel actif (< 2 ms)')
-                          : (isEn ? 'No calls blocked yet' : 'Aucun appel bloqué pour l\'instant'),
+                          ? (isEn ? 'Automatic protection active' : 'Protection automatique active')
+                          : (isEn ? 'Protection paused' : 'Protection en pause'),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
