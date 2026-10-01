@@ -1,142 +1,112 @@
-﻿# Modèle de Menace, Analyse Cryptographique & Sécurité — ShieldNet
+# Sécurité, modèle de menace et respect de la vie privée — ShieldNet
 
-Spécification de sécurité, évaluation formelle des risques selon la méthodologie **STRIDE**, analyse d'entropie combinatoire du plan de numérotation nord-américain et conformité aux cadres réglementaires de protection de la vie privée (**Loi 25 du Québec** et **LPRPDE fédérale canadienne**).
-
----
-
-## 1. Contexte Réglementaire & Principes de Confidentialité
-
-Les architectures classiques d'anti-spam téléphonique exfiltrent les carnets d'adresses complets des utilisateurs vers des bases de données centralisées. Ce mode de fonctionnement entre en conflit direct avec les standards modernes de protection des renseignements personnels :
-
-* **Loi 25 du Québec** : Impose la protection des renseignements personnels dès la conception (*Privacy by Design*), la limitation stricte de la collecte aux données indispensables et la transparence sur les traitements algorithmiques.
-* **LPRPDE (Canada)** : Principe de consentement explicite et interdiction de la collecte détournée de coordonnées de tiers sans autorisation préalable.
-
-### Postulat Architectural de ShieldNet :
-1. **Confinement Local Intégral** : Aucun contact du carnet d'adresses n'est lu, extrait ou transmis par l'application.
-2. **Absence de Numéros en Clair Côté Serveur** : Toutes les transactions de signalement et de consultation opèrent sur des empreintes cryptographiques **HMAC-SHA256**.
-3. **Interception Locale Déterministe** : Le filtrage est exécuté directement sur le terminal via une base SQLite embarquée, sans dépendance d'interrogation réseau au moment de l'appel.
+Ce document expose les principes de sécurité, l'évaluation des risques selon la méthodologie **STRIDE**, l'analyse mathématique de l'entropie des numéros téléphoniques et les mesures concrètes de conformité aux lois sur la protection des données (**Loi 25 du Québec** et **LPRPDE canadienne**).
 
 ---
 
-## 2. Analyse Combinatoire & Entropie du Plan Téléphonique (NANP +1)
+## 1. Contexte réglementaire et protection de la vie privée
 
-### 2.1. Espace Combinatoire du Plan Nord-Américain
+La majorité des applications d'identification d'appels existantes fonctionnent en téléversant l'intégralité du carnet d'adresses de leurs utilisateurs sur des serveurs distants. Cette pratique pose de sérieux problèmes de conformité avec la législation québécoise et canadienne :
 
-Le plan de numérotation nord-américain (**NANP - North American Numbering Plan**) régit les télécommunications au Canada, aux États-Unis et dans plusieurs territoires des Caraïbes sous l'indicatif international `+1`.
+* **Loi 25 du Québec** : Exige la protection des renseignements personnels dès la conception (*Privacy by Design*), la stricte minimisation de la collecte aux seules données indispensables et la transparence quant aux décisions automatisées.
+* **LPRPDE (Canada)** : Impose le consentement éclairé de la personne concernée. L'envoi automatique de contacts tiers qui n'ont jamais consenti à ce traitement est directement contraire à ce principe.
 
-Un numéro conforme à la recommandation UIT-T E.164 s'exprime selon le format :
+### Les choix de conception de ShieldNet :
+1. **Zéro accès au carnet d'adresses côté serveur** : Aucun contact n'est jamais lu, aspiré ou envoyé à un serveur.
+2. **Aucun numéro stocké en clair** : Toutes les requêtes et les enregistrements en base s'effectuent sur des empreintes cryptographiques **HMAC-SHA256**.
+3. **Filtrage local autonome** : L'interception et le contrôle des appels sont exécutés directement sur le téléphone via SQLite, sans requête réseau obligatoire lors de l'appel.
+
+---
+
+## 2. Analyse mathématique de l'espace des numéros (NANP +1)
+
+### 2.1. Taille de l'espace combinatoire
+Le plan de numérotation nord-américain (**NANP**) régit les indicatifs sous le code pays `+1` (Canada et États-Unis). 
+
+Chaque numéro suit la structure UIT-T E.164 :
 $$\text{+1 } [N_1 X_1 X_2] - [N_2 X_3 X_4] - [X_5 X_6 X_7 X_8]$$
 
-Sous les contraintes de normalisation de l'ATIS et du CRTC :
-* $N_1, N_2 \in \{2, 3, 4, 5, 6, 7, 8, 9\}$ (les chiffres 0 et 1 sont proscrits comme premier chiffre de l'indicatif régional ou du central téléphonique).
-* $X_i \in \{0, 1, 2, 3, 4, 5, 6, 7, 8, 9\}$.
+Selon les spécifications du CRTC et de l'ATIS :
+* Le premier chiffre de l'indicatif régional et du central ($N_1, N_2$) est compris entre 2 et 9 (les chiffres 0 et 1 étant réservés pour le routage d'opérateur).
+* Les autres chiffres ($X_i$) varient de 0 à 9.
 
-Le volume théorique d'adresses téléphoniques est de :
-$$N_{\text{théorique}} = 8 \times 10^2 \times 8 \times 10^2 \times 10^4 = 6.4 \times 10^9 \text{ combinaisons}$$
+Le nombre maximal théorique de combinaisons possibles est de :
+$$N_{\text{théorique}} = 8 \times 10^2 \times 8 \times 10^2 \times 10^4 = 6{,}4 \times 10^9 \text{ combinaisons}$$
 
-En excluant les indicatifs de service ($N11$ : 911, 811, 988, etc.), les tranches réservées de test et fiction ($555-0100$ à $555-0199$) et les indicatifs non attribués, l'espace réel de numéros exploitables est estimé à :
-$$N_{\text{effectif}} \approx 7.8 \times 10^8 \text{ numéros (environ 780 millions)}$$
+En retirant les numéros d'urgence et de services spéciaux (911, 811, 988, etc.), les plages réservées pour les tests (555-0100 à 555-0199) ainsi que les indicatifs régionaux non attribués, l'espace réel effectif s'élève à :
+$$N_{\text{effectif}} \approx 7{,}8 \times 10^8 \text{ numéros (soit environ 780 millions)}$$
 
-### 2.2. Entropie d'Information & Vulnérabilité aux Attaques par Dictionnaire
+### 2.2. Entropie d'information et risque d'attaque par dictionnaire
+L'entropie de Shannon associée à cet espace est de :
+$$H = \log_2(7{,}8 \times 10^8) \approx 29{,}54 \text{ bits}$$
 
-L'entropie de Shannon maximale associée à un numéro dans cet espace est :
-$$H = \log_2(7.8 \times 10^8) \approx 29.54 \text{ bits}$$
+Une entropie d'environ 30 bits est très faible face aux capacités des ordinateurs modernes. Une carte graphique actuelle peut calculer plus de 25 milliards d'empreintes SHA-256 par seconde.
 
-Une entropie de ~30 bits est techniquement faible au regard des capacités actuelles de calcul parallèle. Une station d'évaluation équipée d'un GPU standard calcule plus de 25 milliards d'itérations HMAC-SHA256 par seconde.
+Générer une table d'inversion (*rainbow table*) pour couvrir l'ensemble des numéros de téléphone nord-américains ne prendrait que :
+$$T = \frac{7{,}8 \times 10^8}{25 \times 10^9 \text{ calculs/sec}} \approx 31 \text{ millisecondes}$$
 
-Le calcul d'une table inversée (*rainbow table*) pour l'intégralité du plan nord-américain requerrait :
-$$T = \frac{7.8 \times 10^8}{25 \times 10^9 \text{ hashes/sec}} \approx 31 \text{ millisecondes}$$
-
-Par conséquent, **le simple hachage SHA-256 sans sel est formellement proscrit**. L'application d'un sel cryptographique secret d'infrastructure (**HMAC-SHA256**) est obligatoire pour empêcher la génération de dictionnaires pré-calculés universels.
+**Conclusion technique** : Un simple hachage SHA-256 sans sel est totalement inefficace pour protéger la vie privée des utilisateurs. L'emploi d'un code d'authentification de message avec clé secrète (**HMAC-SHA256**) est obligatoire pour rendre impossible la construction de dictionnaires précalculés hors du système.
 
 ---
 
-## 3. Justification du Choix HMAC-SHA256 vs Fonctions à Mémoire Dure
+## 3. Justification du choix HMAC-SHA256 face à Argon2id
 
-La sélection de la primitive cryptographique est gouvernée par le budget temporel imposé par l'API Android `CallScreeningService` :
+Dans le domaine de la sécurité des mots de passe, on recommande habituellement des fonctions à mémoire dure comme **Argon2id** ou **bcrypt**. Dans le cadre de ShieldNet, ce choix a été écarté en raison des contraintes temps réel imposées par Android :
 
 ```text
-Budget Temporel Android Telecom Framework :
+Budget temporel alloué par Android CallScreeningService :
 0 ms                  0.2 ms             1.7 ms                                100 ms
 |---------------------|------------------|---------------------------------------|
-[Appel Détecté]       [HMAC-SHA256]      [Requête SQLite WAL]  [Décision Télécom]
-                      (0.15 ms)          (1.5 ms)
+[Appel Détecté]       [HMAC-SHA256]      [Recherche SQLite WAL]  [Décision Télécom]
+                      (~0.15 ms)         (~1.5 ms)
 ```
 
-1. **Contrat Système Temps Réel** : L'OS alloue une fenêtre maximale de 100 à 200 ms pour qualifier un appel. Tout dépassement entraîne l'abandon du filtrage et le déclenchement de la sonnerie normale pour préserver la disponibilité du service téléphonique.
-2. **Mesures de Latence sur Processeur Mobile (ARMv8 / ARMv9)** :
-   - **HMAC-SHA256** : Temps d'exécution de **~0.15 ms**. La chaîne complète (normalisation E.164, hachage, contrôle d'urgence et requête SQLite WAL) s'exécute en **< 2 ms**.
-   - **Argon2id** (paramètres minimaux recommandés : 64 Mo RAM, 3 itérations) : Temps d'exécution de **350 à 800 ms** sur smartphone milieu de gamme. Ce délai est incompatible avec les exigences du système d'exploitation et conduirait à l'échec systématique de l'interception.
+1. **Délai système maximal** : L'API `CallScreeningService` d'Android accorde un délai très court (généralement moins de 100 à 200 ms) pour qualifier l'appel. Si l'application tarde à répondre, le système lève la main et fait sonner le téléphone pour ne pas bloquer les communications légitimes.
+2. **Mesures sur appareil mobile** :
+   - **HMAC-SHA256** : S'exécute en **~0,15 ms**. La chaîne complète (normalisation du numéro au format E.164, calcul de l'empreinte, vérification des numéros d'urgence et requête SQLite indexée) prend **moins de 2 ms au total**.
+   - **Argon2id** (avec 64 Mo de mémoire et 3 itérations) : Prend entre **350 et 800 ms** sur un smartphone de milieu de gamme. Ce temps d'attente dépasse largement le délai système et rendrait le filtrage inopérant.
+
+L'utilisation d'HMAC-SHA256 combinée à un sel secret d'infrastructure offre ainsi le juste équilibre entre vitesse d'exécution critique et résistance aux attaques par dictionnaire.
 
 ---
 
-## 4. Modèle de Menace STRIDE & Contre-Mesures
+## 4. Modèle de menace STRIDE et contre-mesures
 
-L'analyse STRIDE structure les défenses appliquées à chaque niveau de l'architecture :
+L'analyse des risques a été menée selon la méthodologie STRIDE pour chaque composant du système :
 
-```mermaid
-flowchart TD
-    subgraph Client ["Terminal Mobile (Zone Non Contrôlée)"]
-        User["Utilisateur"]
-        App["Application Flutter & Module Kotlin"]
-        Bloom["Filtre de Bloom en RAM"]
-        LocalDB[("Base SQLite Locale (WAL)")]
-    end
-
-    subgraph Reseau ["Canal Réseau Public"]
-        Transit["HTTPS / TLS 1.3 avec SSL Pinning"]
-    end
-
-    subgraph Serveur ["Zone Serveur Sécurisée"]
-        Gateway["Reverse Proxy Nginx & Rate Limiting"]
-        Django["API Django REST (JWT & RBAC)"]
-        Postgres[("Base PostgreSQL (Hashes HMAC)")]
-        Audit[("Journal d'Audit Immuable")]
-    end
-
-    User --> App
-    App -->|O 1 fast-path| Bloom
-    App -->|Lecture < 2ms| LocalDB
-    App -->|Transit HMAC| Transit
-    Transit --> Gateway
-    Gateway --> Django
-    Django --> Postgres
-    Django --> Audit
-```
-
-| Menace (STRIDE) | Scénario d'Attaque | Contre-Mesure Implémentée |
+| Menace STRIDE | Scénario envisagé | Contre-mesure mise en place |
 |---|---|---|
-| **Spoofing (Usurpation)** | Injection massive de faux signalements pour nuire à un numéro légitime (attaque Sybil). | **Moteur de Consensus & Quorum** : Exigence de 3 signalements provenant d'utilisateurs distincts, prise en compte des attestations télécom STIR/SHAKEN et pondération lexicale des contestations citoyennes. |
-| **Tampering (Altération)** | Falsification des scores de réputation ou interception en transit (attaque MitM). | **TLS 1.3 avec SSL/TLS Pinning** sur le client Dio mobile, validation de conformité stricte du format hexadécimal 64 caractères des hashes SHA-256. |
-| **Repudiation (Répudiation)** | Modification non documentée de la liste de blocage par un opérateur. | **Journal d'Audit Immuable (`AuditLog`)** traçant l'identité de l'opérateur, l'adresse IP source, l'horodatage UTC et l'état avant/après de chaque entité modifiée. |
-| **Information Disclosure (Fuite)** | Compromission de la base de données centrale exposant des coordonnées téléphoniques. | **Stockage Exclusif d'Empreintes HMAC** : Aucun numéro de téléphone en clair n'est présent dans les tables PostgreSQL. Masquage systématique à l'affichage (`+1 819 *** **99`). |
-| **Denial of Service (DDoS)** | Saturation de l'API de vérification par requêtes répétitives. | **Limitation de Débit (Rate Limiting via Redis)**, requêtes de vérification groupées (`POST /api/v1/check/batch/`) et synchronisation incrémentale par delta (`GET /api/v1/sync/delta`). |
-| **Elevation of Privilege (Élévation)** | Tentative d'accès aux fonctions d'administration ou de purge par un compte non habilité. | **Architecture RBAC Découplée** : Contrôle strict des permissions `is_staff` / `is_superuser`, interdiction formelle d'authentification OAuth sur les comptes à privilèges élevés. |
+| **Spoofing (Usurpation)** | Un utilisateur malveillant inonde l'API de faux signalements pour faire bloquer un numéro légitime (attaque Sybil). | **Moteur de consensus** : Seuil minimal de 3 signalements indépendants, prise en compte des contestations légitimes et pondération des utilisateurs. |
+| **Tampering (Altération)** | Interception ou falsification des listes de réputation lors de leur transit réseau (attaque MitM). | **Chiffrement TLS 1.3 / HTTPS** et validation stricte du format des empreintes reçues (chaîne hexadécimale de 64 caractères). |
+| **Repudiation (Répudiation)** | Un modérateur modifie ou retire un numéro de la liste sans laisser de trace. | **Journal d'audit (`AuditLog`)** traçant systématiquement l'auteur de l'action, son adresse IP, la date UTC et les valeurs modifiées. |
+| **Information Disclosure (Fuite)** | Vol ou fuite de la base de données PostgreSQL exposant les numéros des utilisateurs. | **Zéro numéro en clair** : Seules des empreintes HMAC-SHA256 sont stockées en base. Masquage systématique à l'affichage (`+1 819 *** **99`). |
+| **Denial of Service (DDoS)** | Tentative de saturation de l'API de consultation par des requêtes répétitives. | **Limitation du débit (Rate Limiting avec Redis)**, synchronisation différentielle (`/api/v1/sync/delta`) et consultations groupées par lots (`/api/v1/check/batch/`). |
+| **Elevation of Privilege (Élévation)** | Tentative d'un utilisateur ordinaire d'accéder aux fonctions de modération ou de purge. | **Contrôle d'accès RBAC** géré par Django avec vérification des drapeaux `is_staff` et `is_superuser`, sans accès OAuth pour les comptes sensibles. |
 
 ---
 
-## 5. Défense en Profondeur & Composants Avancés
+## 5. Mesures de sécurité complémentaires
 
-### 5.1. Fast-Path via Filtre de Bloom Décentralisé
-Pour optimiser les performances de consultation et réduire la charge d'E/S sur le stockage flash des terminaux mobiles :
-- Un **Filtre de Bloom** compact est généré et compressé côté serveur à partir des empreintes de réputation.
-- Le client évalue en mémoire vive (O(1), latence < 0.02 ms) la présence potentielle du numéro.
-- En cas d'absence certaine (propriété mathématique sans faux négatifs), l'appel est immédiatement autorisé sans sollicitation du disque SQLite.
+### 5.1. Comparaison à temps constant
+Pour éviter les attaques par canal auxiliaire basées sur le temps de réponse (*timing attacks*, CWE-208), toutes les vérifications de jetons et de clés API dans le backend utilisent la fonction `hmac.compare_digest` de Python au lieu d'une comparaison standard `==`.
 
-### 5.2. Comparaison à Temps Constant
-La validation des clés partagées d'API et des jetons d'authentification utilise systématiquement la méthode `hmac.compare_digest` en Python, neutralisant tout risque d'attaque temporelle par canal auxiliaire (*timing attack*, CWE-208).
+### 5.2. Filtre de Bloom pré-calculé
+Pour accélérer les consultations côté client et réduire l'usure de la mémoire de stockage :
+- Le serveur met à disposition un filtre de Bloom probabiliste généré à partir des numéros indésirables connus (`/api/v1/sync/bloom/`).
+- Le client peut tester la présence d'un hash en mémoire en temps constant $O(1)$.
+- Si le filtre indique que le numéro n'est pas présent (garantie mathématique sans faux négatifs), l'appel est validé immédiatement sans avoir à interroger le disque SQLite.
 
-### 5.3. Détection d'Altération Matérielle (Root Check)
-L'application mobile vérifie au démarrage l'intégrité de son environnement d'exécution (recherche des binaires `su`, vérification des permissions de répertoires système) pour avertir l'utilisateur des risques d'interception de secrets sur un terminal altéré.
+### 5.3. Détection des environnements altérés
+L'application mobile intègre une routine de vérification au démarrage pour détecter si l'appareil est déverrouillé (*root*) ou s'il utilise des binaires super-utilisateur (`su`), afin d'informer l'utilisateur des risques pour l'intégrité de ses données locales.
 
 ---
 
-## 6. Matrice de Conformité à la Loi 25 du Québec
+## 6. Matrice de conformité avec la Loi 25 du Québec
 
-| Disposition Légale (Loi 25) | Implémentation Concrète dans ShieldNet |
+| Exigence de la Loi 25 | Application dans ShieldNet |
 |---|---|
-| **Protection dès la conception (Art. 21.4)** | Traitement exclusif d'empreintes pseudonymisées irréversibles (HMAC-SHA256) dès la saisie sur le terminal. |
-| **Minimisation de la collecte (Art. 4)** | Confinement strict du carnet d'adresses personnel sur l'appareil. Aucune extraction de métadonnées non indispensables. |
-| **Droit à l'effacement & Rétention limitée** | Mécanisme de purge automatisé (`purge_stale_reports`) éliminant les données de signalement inactives au-delà de 90 jours. |
-| **Transparence & Droit de Rectification** | Mécanisme de contestation citoyenne permettant à tout détenteur de numéro légitime de soumettre une demande de réhabilitation arbitrée par consensus. |
-| **Gouvernance & Imputabilité** | Journalisation inaltérable de l'ensemble des opérations administratives dans `AuditLog`. |
+| **Protection dès la conception (Art. 21.4)** | Utilisation exclusive d'empreintes HMAC-SHA256 non réversibles dès la saisie du numéro sur le terminal. |
+| **Minimisation des données (Art. 4)** | Aucune lecture ni transfert du carnet de contacts personnels. Seules les données strictement utiles au filtrage sont manipulées. |
+| **Droit à l'effacement et rétention limitée** | Commande automatisée de purge (`purge_stale_reports`) supprimant les signalements inactifs au-delà de 90 jours. |
+| **Droit de rectification et contestation** | Possibilité pour tout détenteur d'un numéro légitime de soumettre une contestation citoyenne pour réhabiliter son numéro. |
+| **Imputabilité et traçabilité** | Journalisation complète et inaltérable des interventions des modérateurs dans la table `AuditLog`. |

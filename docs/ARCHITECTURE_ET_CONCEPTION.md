@@ -1,54 +1,54 @@
-﻿# Architecture Logicielle, Modélisation UML & Spécifications d'Ingénierie — ShieldNet
+# Architecture logicielle et conception — ShieldNet
 
-Spécification technique de l'architecture logicielle, des flux de données critiques et des interactions entre les composants du système **ShieldNet**.
+Ce document détaille l'architecture globale, la modélisation des composants et les flux de données du projet **ShieldNet**. Il présente les choix d'ingénierie retenus pour concilier réactivité en temps réel sur mobile, fonctionnement hors-ligne (*offline-first*) et protection rigoureuse de la vie privée.
 
 ---
 
-## 1. Principes d'Architecture (Clean Architecture & Séparation des Responsabilités)
+## 1. Principes d'architecture et séparation des responsabilités
 
-ShieldNet intègre trois environnements d'exécution distincts répondant à des contraintes opérationnelles différentes :
+Le système ShieldNet est articulé autour de trois environnements complémentaires :
 
-1. **Client Mobile (Flutter / Dart)** : Interface utilisateur réactive, gestion d'état déclarative via Riverpod et communication réseau résiliente (Dio avec gestion hors-ligne).
-2. **Module Natif Android (Kotlin)** : Service d'arrière-plan de niveau système d'exploitation (`CallScreeningService`) soumis à une contrainte de latence stricte (< 100 ms) pour l'interception temps réel.
-3. **Serveur Backend (Django / Python)** : API REST distribuée, moteur d'arbitrage contextuel, gestion des droits RBAC et journal d'audit immuable.
+1. **L'application mobile (Flutter / Dart)** : Fournit l'interface utilisateur réactive, la gestion d'état avec Riverpod et les appels réseau avec Dio en gérant le cache et les erreurs hors-ligne.
+2. **Le module natif Android (Kotlin)** : Implémente le `CallScreeningService` du système d'exploitation pour intercepter les appels entrants en temps réel, avec une contrainte de réponse rapide (< 100 ms).
+3. **Le backend (Django / Python)** : Propose une API REST, la gestion des comptes et permissions (RBAC), le moteur de réputation collaborative et un journal d'audit pour les actions administratives.
 
-Pour assurer la maintenabilité et l'indépendance vis-à-vis des bibliothèques externes, le code client adopte les préceptes de la **Clean Architecture** :
+Afin de faciliter la maintenance et d'éviter un couplage fort avec les bibliothèques externes, le code Flutter suit les principes de la **Clean Architecture** :
 
 ```mermaid
 graph TD
     subgraph Presentation_Layer ["Couche Présentation (lib/features/*/presentation)"]
         UI_Pages["Pages (Dashboard, Settings, SmsInspector, AdminConsole)"]
-        UI_Widgets["Widgets Réutilisables (Cartes, Boutons, Onglets)"]
-        Controllers["Gestion d'état (Riverpod Notifiers)"]
+        UI_Widgets["Composants graphiques réutilisables"]
+        Controllers["Contrôleurs d'état (Riverpod Notifiers)"]
     end
 
-    subgraph Domain_Layer ["Couche Domaine (lib/features/*/domain) - Purement Dart"]
-        UseCases["Cas d'Utilisation (AnalyzeSmsUseCase, CheckNumberUseCase)"]
-        Entities["Entités Métier (AdminStats, AuditLogEntry, PhishingResult)"]
-        RepoInterfaces["Contrats d'Interfaces (AdminRepository, BlacklistRepository)"]
+    subgraph Domain_Layer ["Couche Domaine (lib/features/*/domain) - Dart pur"]
+        UseCases["Cas d'utilisation (AnalyzeSmsUseCase, CheckNumberUseCase)"]
+        Entities["Entités métier (AdminStats, AuditLogEntry, PhishingResult)"]
+        RepoInterfaces["Interfaces de dépôts (AdminRepository, BlacklistRepository)"]
     end
 
     subgraph Data_Layer ["Couche Données (lib/features/*/data)"]
         RepoImpl["Implémentations (AdminRepositoryImpl, BlacklistRepositoryImpl)"]
-        DataSources["Sources de Données (ApiService, DatabaseHelper)"]
-        DTOs["Modèles de Données (BlacklistedNumber)"]
+        DataSources["Sources de données (ApiService, DatabaseHelper)"]
+        DTOs["Modèles de transfert de données (BlacklistedNumber)"]
     end
 
-    subgraph Core_Layer ["Socle Commun (lib/core)"]
-        Crypto["Cryptographie (HMAC-SHA256, masquage E.164)"]
-        Network["Client HTTP (Dio, SSL Pinning, intercepteurs)"]
-        Database["Gestionnaire SQLite (DatabaseHelper en mode WAL)"]
-        Services["Services d'Arrière-Plan & File Hors-Ligne (OfflineSyncService)"]
+    subgraph Core_Layer ["Socle transverse (lib/core)"]
+        Crypto["Cryptographie (HMAC-SHA256, normalisation E.164)"]
+        Network["Client HTTP (Dio, gestion des erreurs et intercepteurs)"]
+        Database["Base de données locale SQLite (DatabaseHelper en mode WAL)"]
+        Services["Services d'arrière-plan et synchronisation"]
     end
 
-    subgraph Native_Android ["Module Natif Android (android/app/src/main/kotlin)"]
-        CallScreening["ShieldNetCallScreeningService (Interception Telecom)"]
-        NativeDB["ShieldNetDatabaseHelper (Lecture SQLite directe)"]
+    subgraph Native_Android ["Module natif Android (android/app/src/main/kotlin)"]
+        CallScreening["ShieldNetCallScreeningService (Interception système)"]
+        NativeDB["ShieldNetDatabaseHelper (Lecture directe SQLite)"]
     end
 
     subgraph Backend_Django ["Serveur Backend (Django REST Framework)"]
         DjangoAPI["API REST (/api/v1/sync/delta, /check, /reports)"]
-        DjangoDB["Base de Données (PostgreSQL / SQLite)"]
+        DjangoDB["Base de données PostgreSQL / SQLite"]
     end
 
     UI_Widgets --> UI_Pages
@@ -60,67 +60,69 @@ graph TD
     RepoImpl --> DataSources
     DataSources --> Core_Layer
     Core_Layer -. Partage SQLite .-> Native_Android
-    DataSources -. HTTPS + HMAC .-> Backend_Django
+    DataSources -. Requêtes HTTPS (HMAC) .-> Backend_Django
 ```
 
-### Avantages de la Découplage
-- **Isolement des Règles Métier** : La logique de calcul du score de sérénité, de détection de phishing ou d'arbitrage ne dépend d'aucun framework graphique ou pilote de base de données.
-- **Testabilité Exhaustive** : Remplacement aisé des sources de données par des simulacres (*mocks*) dans la suite de 86 tests automatisés Flutter.
+### Avantages de ce découpage
+- **Indépendance des règles métier** : Le calcul du score de risque, l'analyse heuristique des SMS et les logiques de décision ne dépendent d'aucun framework graphique.
+- **Facilité des tests** : Les interfaces permettent d'injecter facilement des mocks lors des tests automatisés (35 tests côté Flutter et 74 tests côté Django, soit 109 tests au total).
 
 ---
 
-## 2. Diagramme de Composants Système
+## 2. Diagramme de composants du système
 
-Le système est conçu pour fonctionner de manière autonome en mode déconnecté (*Offline-First*), tout en maintenant une synchronisation différentielle efficace avec l'infrastructure centrale :
+L'application a été conçue selon une approche *offline-first*. Même en l'absence de réseau mobile ou Wi-Fi, le filtrage téléphonique reste 100 % opérationnel grâce à la base de données locale synchronisée.
 
 ```mermaid
-componentDiagram
-    package "Terminel Mobile Android (Utilisateur)" {
-        [Android Telecom Framework] as Telecom
-        component "Module Natif Kotlin" {
-            [ShieldNetCallScreeningService] as ScreenService
-            [Pont SQLite Natif] as NativeDB
-        }
-        database "Base Locale (shieldnet.db WAL)" as LocalDB
+flowchart TD
+    subgraph Mobile ["Téléphone Android (Utilisateur)"]
+        Telecom["Système Téléphonie Android (Telecom)"]
         
-        component "Application Client Flutter" {
-            [Gestionnaire d'État Riverpod] as StateMgr
-            [Interface Utilisateur] as UI
-            [Moteur Cryptographique HMAC] as CryptoEngine
-            [File Hors-Ligne & Sync] as OfflineQueue
-        }
-    }
+        subgraph Native_Kotlin ["Module Natif Kotlin"]
+            ScreenService["ShieldNetCallScreeningService"]
+            NativeDB["Accès SQLite Natif"]
+        end
+        
+        LocalDB[("Base locale (shieldnet.db en WAL)")]
+        
+        subgraph App_Flutter ["Application Mobile Flutter"]
+            UI["Interface Utilisateur"]
+            StateMgr["Gestion d'état Riverpod"]
+            CryptoEngine["Module HMAC-SHA256"]
+            OfflineQueue["Service de synchronisation"]
+        end
+    end
 
-    package "Infrastructure Serveur ShieldNet" {
-        component "API Django REST" {
-            [Authentification JWT & RBAC] as AuthAPI
-            [Moteur de Sync Différentielle] as DeltaAPI
-            [Moteur de Consensus Communautaire] as ConsensusAPI
-            [Journal d'Audit Immuable] as AuditAPI
-            [Moteur d'Arbitrage & Explicabilité] as AIEngine
-        }
-        database "Base de Données Centrale" as CentralDB
-    }
+    subgraph Backend ["Serveur Backend ShieldNet"]
+        subgraph Django ["API Django REST"]
+            AuthAPI["Authentification & Permissions RBAC"]
+            DeltaAPI["Synchronisation différentielle"]
+            ConsensusAPI["Gestion du consensus communautaire"]
+            AuditAPI["Journal d'audit administratif"]
+            RepEngine["Moteur de réputation"]
+        end
+        CentralDB[("Base de données centrale")]
+    end
 
-    Telecom --> ScreenService : Appel entrant détecté
-    ScreenService --> NativeDB : Vérification du hash (< 2 ms)
-    NativeDB --> LocalDB : Consultation index B-Tree
-    LocalDB <-- StateMgr : Mise à jour des règles (Dart)
+    Telecom -->|Appel entrant détecté| ScreenService
+    ScreenService -->|Vérification empreinte < 2 ms| NativeDB
+    NativeDB -->|Lecture indexée B-Tree| LocalDB
+    LocalDB <--|Mise à jour SQLite| StateMgr
     
-    UI --> StateMgr : Action utilisateur
-    StateMgr --> CryptoEngine : Hachage normalisé du numéro
-    OfflineQueue --> DeltaAPI : GET /sync/delta?since_version=v (périodique)
-    DeltaAPI --> CentralDB : Lecture des deltas et tombstones
-    ConsensusAPI --> CentralDB : Quorum de réhabilitation
-    AuditAPI --> CentralDB : Traçabilité des décisions
-    AIEngine --> CentralDB : Scoring contextuel et STIR/SHAKEN
+    UI -->|Action utilisateur| StateMgr
+    StateMgr -->|Hachage normalisé| CryptoEngine
+    OfflineQueue -->|GET /sync/delta| DeltaAPI
+    DeltaAPI -->|Lecture deltas| CentralDB
+    ConsensusAPI -->|Seuil de signalements| CentralDB
+    AuditAPI -->|Traçabilité| CentralDB
+    RepEngine -->|Calcul du score| CentralDB
 ```
 
 ---
 
-## 3. Diagramme de Classes UML (Client Mobile)
+## 3. Diagramme de classes UML (Client mobile)
 
-Structure des classes et interfaces principales du client mobile :
+Voici l'organisation des classes et interfaces principales du client Flutter :
 
 ```mermaid
 classDiagram
@@ -216,74 +218,74 @@ classDiagram
 
     %% Relations
     AdminRepository <|.. AdminRepositoryImpl : implémente
-    AdminRepositoryImpl --> ApiService : délègue à
-    AdminRepository --> AdminStats : produit
-    AdminRepository --> AuditLogEntry : produit
-    AnalyzeSmsUseCase --> PhishingResult : produit
+    AdminRepositoryImpl --> ApiService : utilise
+    AdminRepository --> AdminStats : renvoie
+    AdminRepository --> AuditLogEntry : renvoie
+    AnalyzeSmsUseCase --> PhishingResult : renvoie
     ApiService --> DatabaseHelper : synchronise
-    ApiService --> CryptoUtils : hache les numéros
-    ShieldNetCallScreeningService --> ShieldNetDatabaseHelper : interroge
+    ApiService --> CryptoUtils : calcule les empreintes
+    ShieldNetCallScreeningService --> ShieldNetDatabaseHelper : consulte
     ShieldNetDatabaseHelper ..> DatabaseHelper : partage shieldnet.db
 ```
 
 ---
 
-## 4. Application des Principes d'Ingénierie SOLID
+## 4. Application pratique des principes SOLID
 
-L'ensemble de la base de code applique rigoureusement les principes de conception orientée objet :
+La structure du code s'appuie sur les principes de conception orientée objet :
 
 | Principe | Application concrète dans ShieldNet |
 |---|---|
-| **Responsabilité Unique (SRP)** | Chaque composant assume un rôle unique. `CryptoUtils` se consacre exclusivement aux transformations cryptographiques, tandis que `AnalyzeSmsUseCase` isole l'évaluation heuristique des messages sans dépendance UI. |
-| **Ouvert / Fermé (OCP)** | Le système de filtrage accepte de nouvelles règles d'arbitrage (ex: seuils STIR/SHAKEN, plages régionales) par extension de stratégies sans altérer le schéma SQLite sous-jacent. |
-| **Substitution de Liskov (LSP)** | Les abstractions de référentiel (`AdminRepository`, `BlacklistRepository`) sont interchangeables avec des doubles de test (`MockAdminRepository`) sans modifier le comportement des contrôleurs d'affichage. |
-| **Ségrégation des Interfaces (ISP)** | Les interfaces client sont modulées par domaine fonctionnel (administration, filtrage d'appels, analyse SMS) évitant les contrats monolithiques. |
-| **Inversion des Dépendances (DIP)** | Les contrôleurs d'état consomment des abstractions de cas d'utilisation injectées par Riverpod, éliminant tout couplage direct avec les pilotes HTTP ou disques. |
+| **Responsabilité unique (SRP)** | Chaque classe a une tâche bien délimitée. Par exemple, `CryptoUtils` s'occupe exclusivement de la normalisation et du hachage, tandis que `AnalyzeSmsUseCase` gère l'évaluation de texte sans se soucier de l'affichage. |
+| **Ouvert / Fermé (OCP)** | Les règles d'évaluation peuvent être étendues (ajout de nouveaux critères, filtres par indicatif, etc.) sans altérer la logique centrale de stockage ou de présentation. |
+| **Substitution de Liskov (LSP)** | Les implémentations de dépôts (`AdminRepositoryImpl`) respectent strictement les contrats d'interface, ce qui permet de les remplacer par des simulacres (*mocks*) dans les tests sans surprise. |
+| **Ségrégation des interfaces (ISP)** | Les interfaces sont divisées par fonctionnalités (administration, vérification de numéros, analyse SMS) pour éviter que les composants ne dépendent de méthodes superflues. |
+| **Inversion des dépendances (DIP)** | Les contrôleurs d'affichage dépendent d'abstractions de cas d'utilisation injectées par Riverpod, plutôt que d'instancier directement des classes de bas niveau (comme les clients HTTP). |
 
 ---
 
-## 5. Flux Opérationnels Critiques
+## 5. Flux fonctionnels clés
 
-### 5.1. Interception d'un Appel Entrant (< 2 ms)
-Contrainte de latence absolue pour garantir la non-interruption du service télécom et l'immunité intégrale des numéros d'urgence :
+### 5.1. Interception d'un appel entrant en temps réel (< 2 ms)
+Lorsqu'un appel arrive, le système Android transmet le numéro au service d'interception. La priorité absolue est donnée à la non-interférence avec les numéros d'urgence :
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Appelant as Appelant
-    participant AndroidOS as Téléphonie Android (Telecom)
+    participant AndroidOS as Téléphonie Android
     participant NativeService as ShieldNetCallScreeningService (Kotlin)
-    participant NativeDB as Base SQLite Locale (shieldnet.db)
+    participant NativeDB as Base SQLite locale (shieldnet.db)
     actor Utilisateur as Destinataire
 
     Appelant->>AndroidOS: Appel entrant (+1 514-555-0199)
     AndroidOS->>NativeService: onScreenCall(callDetails)
     
-    %% Étape 0 : Contrôle d'urgence prioritaire
-    Note over NativeService,NativeDB: Contrôle d'immunité prioritaire (911, 811, 988, favoris)
+    %% Contrôle de priorité absolue : urgences
+    Note over NativeService,NativeDB: Vérification immédiate d'immunité (911, 811, 988, contacts favoris)
     NativeService->>NativeDB: isEmergencyNumber(rawNumber)
     alt Numéro d'urgence ou contact prioritaire
-        NativeDB-->>NativeService: VRAI
+        NativeDB-->>NativeService: Oui
         NativeService->>AndroidOS: respondToCall(ALLOW)
         AndroidOS->>Utilisateur: Sonnerie normale prioritaire
-    else Numéro standard
-        NativeDB-->>NativeService: FAUX
+    else Numéro ordinaire
+        NativeDB-->>NativeService: Non
         
-        %% Étape 1 : Normalisation & Hachage
+        %% Hachage et consultation de la liste
         Note over NativeService: Normalisation E.164 + HMAC-SHA256 (< 0.2 ms)
         NativeService->>NativeDB: isNumberBlocked(phoneHash)
         
-        alt Présent en liste de blocage active
-            NativeDB-->>NativeService: VRAI (Menace confirmée)
+        alt Numéro présent dans la liste de blocage
+            NativeDB-->>NativeService: Oui (numéro indésirable)
             NativeService->>AndroidOS: respondToCall(DISALLOW, rejet silencieux)
-            Note over AndroidOS: Appel rejeté sans sonnerie (< 2 ms)
+            Note over AndroidOS: Appel bloqué sans faire sonner le téléphone (< 2 ms)
             NativeService->>NativeDB: logBlockedCallEvent(phoneHash, date)
-        else Absent de la liste de blocage
-            NativeDB-->>NativeService: FAUX
+        else Numéro absent de la liste
+            NativeDB-->>NativeService: Non
             
-            alt Mode "Contacts Uniquement" activé & numéro inconnu
-                NativeService->>AndroidOS: respondToCall(SILENCE, boîte vocale)
-            else Mode Standard
+            alt Mode "Contacts uniquement" activé et numéro inconnu
+                NativeService->>AndroidOS: respondToCall(SILENCE, renvoi messagerie)
+            else Mode normal
                 NativeService->>AndroidOS: respondToCall(ALLOW)
                 AndroidOS->>Utilisateur: Sonnerie normale
             end
@@ -293,41 +295,41 @@ sequenceDiagram
 
 ---
 
-### 5.2. Synchronisation Différentielle (Delta Sync)
-Minimisation de la bande passante et des écritures disques par transmission exclusive des deltas et des suppressions (tombstones) :
+### 5.2. Synchronisation incrémentale (Delta Sync)
+Pour économiser la bande passante mobile et la batterie, le client ne télécharge pas l'ensemble de la base à chaque fois. Il demande uniquement les changements intervenus depuis sa dernière version connue :
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Scheduler as Tâche d'Arrière-Plan (WorkManager)
+    participant Scheduler as Tâche d'arrière-plan (WorkManager)
     participant SyncService as BackgroundSyncService
     participant ApiService as Client HTTP Dio
     participant DjangoAPI as API Backend (/api/v1/sync/delta)
-    participant LocalDB as Base SQLite Locale
+    participant LocalDB as Base SQLite locale
 
-    Scheduler->>SyncService: Déclenchement périodique
-    SyncService->>LocalDB: Lecture version locale courante (sync_version)
+    Scheduler->>SyncService: Déclenchement planifié
+    SyncService->>LocalDB: Récupération de la version locale (sync_version)
     LocalDB-->>SyncService: version = 142
     
     SyncService->>ApiService: syncDelta(since_version: 142)
     ApiService->>DjangoAPI: GET /api/v1/sync/delta?since_version=142
     DjangoAPI-->>ApiService: 200 OK { new_version: 145, active: [h1, h2], removed: [h3] }
     
-    Note over ApiService,LocalDB: Transaction atomique SQLite
-    ApiService->>LocalDB: beginTransaction()
-    ApiService->>LocalDB: Insertion / mise à jour (h1, h2)
-    ApiService->>LocalDB: Purge des numéros réhabilités (h3)
-    ApiService->>LocalDB: Mise à jour sync_version = 145
-    ApiService->>LocalDB: commitTransaction()
+    Note over ApiService,LocalDB: Transaction SQLite locale
+    ApiService->>LocalDB: Début de transaction
+    ApiService->>LocalDB: Ajout ou mise à jour des numéros (h1, h2)
+    ApiService->>LocalDB: Suppression des numéros réhabilités (h3)
+    ApiService->>LocalDB: Enregistrement nouvelle version = 145
+    ApiService->>LocalDB: Validation de transaction (commit)
     
-    ApiService-->>SyncService: Synchronisation complétée (+2 actifs, -1 réhabilité)
-    SyncService-->>Scheduler: Succès
+    ApiService-->>SyncService: Synchronisation réussie (+2 ajoutés, -1 retiré)
+    SyncService-->>Scheduler: Fin de la tâche
 ```
 
 ---
 
-### 5.3. Analyse Heuristique de SMS dans l'Inspecteur
-Évaluation locale du contenu textuel sans exfiltration de données personnelles :
+### 5.3. Analyse de SMS dans l'inspecteur
+L'utilisateur peut coller un message douteux pour obtenir une évaluation immédiate. Le texte reste analysé localement sur le terminal, préservant la confidentialité des correspondances privées :
 
 ```mermaid
 sequenceDiagram
@@ -335,64 +337,64 @@ sequenceDiagram
     actor Utilisateur as Utilisateur
     participant UI as Page SmsInspector
     participant UseCase as AnalyzeSmsUseCase
-    participant Detector as SmsPhishingDetector (Heuristique & Regex)
+    participant Detector as SmsPhishingDetector (Heuristique)
     participant ApiService as Client HTTP
     participant Backend as API Django
 
-    Utilisateur->>UI: Analyse du texte collé
+    Utilisateur->>UI: Coller le SMS et lancer l'analyse
     UI->>UseCase: call(smsText)
     
     UseCase->>Detector: analyzeText(smsText)
-    Note over Detector: Détection des motifs d'urgence, fiscalité, colis et faux liens
-    Detector-->>UseCase: Résultat préliminaire (Risque: 75%, URL extraite)
+    Note over Detector: Recherche de motifs (urgence financière, faux colis, usurpation)
+    Detector-->>UseCase: Résultat local (score de risque, URL détectée)
     
-    opt Si URL présente dans le SMS
+    opt Si une URL est présente dans le texte et le réseau disponible
         UseCase->>ApiService: checkUrlReputation(url)
         ApiService->>Backend: POST /api/v1/check-url/
         Backend-->>ApiService: { is_malicious: true, category: "PHISHING" }
-        ApiService-->>UseCase: Confirmation de menace URL
+        ApiService-->>UseCase: Confirmation de menace
     end
     
-    UseCase-->>UI: Résultat consolidé (Niveau de risque, marqueurs identifiés, conseils)
-    UI->>Utilisateur: Affichage du rapport d'analyse
+    UseCase-->>UI: Synthèse finale (niveau de risque, indicateurs et conseils)
+    UI->>Utilisateur: Affichage du rapport clair
 ```
 
 ---
 
-### 5.4. Signalement Collaboratif & Réhabilitation par Consensus
-Gestion décentralisée de la réputation évitant les abus et protégeant les services essentiels :
+### 5.4. Signalement participatif et modération par consensus
+Le modèle collaboratif permet aux utilisateurs de signaler les numéros indésirables, tout en prévenant les abus grâce à un seuil de consensus :
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Citoyen as Utilisateur
+    actor Utilisateur as Utilisateur
     participant App as Application ShieldNet
     participant Crypto as Module HMAC-SHA256
     participant Backend as API Django (/api/v1/reports/)
-    participant Consensus as Moteur de Consensus
-    participant Admin as Console Web de Modération
+    participant Consensus as Moteur de consensus
+    participant Admin as Interface de modération
 
-    Citoyen->>App: Soumission (Signalement de spam ou Contestation)
+    Utilisateur->>App: Signalement de spam ou contestation légitime
     App->>Crypto: Calcul de l'empreinte normalisée avec sel
-    Crypto-->>App: Hash HMAC-SHA256 (aucun numéro en clair)
+    Crypto-->>App: Hash HMAC-SHA256 (aucun numéro transmis en clair)
     
-    alt Signalement de Spam
+    alt Cas d'un signalement de spam
         App->>Backend: POST /api/v1/reports/ { phone_hash: h, category: "FRAUD" }
-        Backend-->>App: Signalement consigné
+        Backend-->>App: Signalement enregistré
         
-        Consensus->>Consensus: Évaluation du quorum (utilisateurs distincts)
-        alt Quorum atteint (>= 3 signalements indépendants)
-            Consensus->>Backend: Blocage automatique et enregistrement AuditLog
-        else Quorum non atteint
-            Consensus->>Backend: Conservation sous surveillance
+        Consensus->>Consensus: Vérification du seuil (utilisateurs distincts)
+        alt Seuil atteint (>= 3 signalements indépendants)
+            Consensus->>Backend: Ajout en liste de blocage et traçabilité dans l'AuditLog
+        else Seuil non atteint
+            Consensus->>Backend: Conservation en surveillance
         end
-    else Contestation Légitime (Service médical, livraison)
+    else Cas d'une contestation (numéro légitime signalé par erreur)
         App->>Backend: POST /api/v1/reports/safe/ { phone_hash: h, category: "HEALTH" }
-        Consensus->>Consensus: Examen du ratio contestations / signalements
-        Consensus->>Backend: Réhabilitation (is_whitelisted = True)
-        Consensus->>Backend: Journalisation (AUTO_WHITELIST)
-        Backend-->>App: Contestation validée
+        Consensus->>Consensus: Évaluation du ratio contestations / signalements
+        Consensus->>Backend: Réhabilitation du numéro (retrait du blocage)
+        Consensus->>Backend: Journalisation de l'action dans l'AuditLog
+        Backend-->>App: Contestation prise en compte
     end
     
-    Admin->>Backend: Supervision des décisions via la console de modération
+    Admin->>Backend: Suivi et ajustements manuels éventuels par les administrateurs
 ```

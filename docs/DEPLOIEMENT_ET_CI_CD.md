@@ -1,51 +1,51 @@
-﻿# Guide de Déploiement, Exploitation & Pipeline CI/CD — ShieldNet
+# Guide de déploiement et intégration continue (CI/CD) — ShieldNet
 
-Spécification des procédures d'infrastructure, de conteneurisation, de déploiement en production et d'automatisation des tests continus pour la plateforme **ShieldNet**.
+Ce guide explique comment installer, configurer et déployer les différents services de **ShieldNet**, aussi bien pour un environnement de développement local qu'en production, ainsi que le fonctionnement du pipeline d'intégration continue sous Jenkins.
 
 ---
 
-## 1. Architecture d'Infrastructure & Composants de Production
+## 1. Vue d'ensemble des composants
 
-L'infrastructure serveur est dimensionnée pour assurer une haute disponibilité, une faible latence de réponse (< 50 ms sur les vérifications de réputation) et une séparation étanche des couches logicielles :
+L'infrastructure s'articule autour de services éprouvés, simples à maintenir et à conteneuriser :
 
-| Composant | Rôle Technique | Justification Opérationnelle |
+| Composant | Rôle | Notes techniques |
 |---|---|---|
-| **Django 5 & DRF** | API REST & Administration | Framework mature, ORM performant, gestion fine des permissions RBAC et modèle de données transactionnel. |
-| **Gunicorn** | Serveur d'applications WSGI | Gestion des processus travailleurs concurrents (*workers*) avec recyclage automatique de mémoire. |
-| **Nginx** | Reverse Proxy & Terminaison TLS | Chiffrement TLS 1.3 (HTTPS), distribution optimisée des fichiers statiques et isolation de Gunicorn. |
-| **PostgreSQL 16** | Base de données relationnelle | Conformité ACID, index B-Tree optimisés sur les empreintes HMAC de 64 caractères hexadécimaux. |
-| **Redis 7** | Cache en mémoire & Limitation de débit | Limitation dynamique du taux de requêtes par adresse IP et gestion des verrous distribués. |
-| **Jenkins LTS** | Moteur d'intégration continue | Orchestration automatique du pipeline de validation (150 tests, analyse statique, build d'APK). |
+| **Django 5 & DRF** | API REST & Administration web | Gestion des utilisateurs, modération des signalements, calcul de réputation et journal d'audit. |
+| **Gunicorn** | Serveur d'application WSGI | Exécute les processus applicatifs Django en production derrière le proxy. |
+| **Nginx** | Serveur web & Reverse Proxy | Terminaison HTTPS (TLS 1.3), distribution directe des fichiers statiques et transmission des requêtes à Gunicorn. |
+| **PostgreSQL 16** | Base de données principale | Stockage relationnel optimisé avec index B-Tree sur les empreintes hexadécimales HMAC (SQLite utilisable en local). |
+| **Redis 7** | Cache et limitation de requêtes | Utilisé pour le cache applicatif et la limitation du débit de requêtes (*rate limiting*). |
+| **Jenkins LTS** | Intégration continue | Exécution automatique des 109 tests (74 backend, 35 mobile), vérification du linter et compilation de l'APK Android. |
 
 ---
 
-## 2. Configuration des Variables d'Environnement (.env)
+## 2. Configuration des variables d'environnement (.env)
 
-Avant initialisation des services, le fichier `shieldnet_backend/.env` doit être renseigné avec des paramètres sécurisés :
+Avant de lancer le serveur, créez ou ajustez le fichier `shieldnet_backend/.env` avec vos paramètres locaux :
 
 ```ini
-# Paramètres généraux d'exécution
+# Paramètres généraux
 DEBUG=False
-SECRET_KEY=generer_une_cle_secrete_django_robuste_pour_la_production
+SECRET_KEY=votre_cle_secrete_django_a_remplacer_ici
 ALLOWED_HOSTS=api.shieldnet.app,127.0.0.1,localhost
 
-# Base de données PostgreSQL
+# Base de données PostgreSQL (ou configuration SQLite pour le développement)
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=shieldnet_prod
 DB_USER=shieldnet_admin
-DB_PASSWORD=mot_de_passe_robuste_postgresql
+DB_PASSWORD=votre_mot_de_passe_base_de_donnees
 DB_HOST=127.0.0.1
 DB_PORT=5432
 
-# Sel cryptographique partagé (doit correspondre à la configuration client mobile)
-HMAC_SECRET_SALT=sel_cryptographique_hmac_sha256_long_et_securise
+# Sel cryptographique pour le hachage HMAC-SHA256 (doit être identique sur le client mobile)
+HMAC_SECRET_SALT=votre_sel_cryptographique_secret_et_robuste
 
-# Durée de validité des jetons d'authentification
+# Sécurité des sessions et jetons JWT
 JWT_ACCESS_TOKEN_LIFETIME_MINUTES=15
 JWT_REFRESH_TOKEN_LIFETIME_DAYS=7
 ADMIN_PASSWORD=mot_de_passe_administrateur_initial
 
-# Durcissement des en-têtes HTTP & Cookies de session
+# Sécurité HTTP en production (désactiver si test en HTTP local)
 SECURE_SSL_REDIRECT=True
 SESSION_COOKIE_SECURE=True
 CSRF_COOKIE_SECURE=True
@@ -55,22 +55,24 @@ CORS_ALLOWED_ORIGINS=https://admin.shieldnet.app
 
 ---
 
-## 3. Procédures de Déploiement
+## 3. Déploiement du serveur
 
-### Déploiement Conteneurisé avec Docker Compose (Recommandé)
+### Option A : Déploiement avec Docker Compose (Recommandé)
 
-1. **Démarrage des services d'infrastructure :**
+Cette méthode permet de démarrer l'ensemble des briques en quelques commandes :
+
+1. **Construire et lancer les conteneurs :**
    ```bash
    docker compose up -d --build
    ```
 
-2. **Application des schémas relationnels et collecte des actifs statiques :**
+2. **Appliquer les migrations de base de données et collecter les fichiers statiques :**
    ```bash
    docker compose exec web python manage.py migrate --noinput
    docker compose exec web python manage.py collectstatic --noinput
    ```
 
-3. **Provisionnement des comptes d'administration initiaux :**
+3. **Créer les comptes de départ nécessaires :**
    ```bash
    docker compose exec web python manage.py ensure_admin
    docker compose exec web python manage.py ensure_manager
@@ -78,14 +80,14 @@ CORS_ALLOWED_ORIGINS=https://admin.shieldnet.app
 
 ---
 
-### Déploiement Natif sur Hôte Linux (Ubuntu / Debian LTS)
+### Option B : Installation manuelle sur serveur Linux (Ubuntu / Debian)
 
-1. **Installation des dépendances système :**
+1. **Installer les paquets système :**
    ```bash
    sudo apt update && sudo apt install -y python3-venv python3-pip postgresql nginx certbot python3-certbot-nginx
    ```
 
-2. **Création de l'environnement virtuel Python :**
+2. **Configurer l'environnement virtuel Python :**
    ```bash
    cd /var/www/shieldnet_backend
    python3 -m venv venv
@@ -94,16 +96,16 @@ CORS_ALLOWED_ORIGINS=https://admin.shieldnet.app
    pip install -r requirements.txt
    ```
 
-3. **Application des migrations et génération des statiques :**
+3. **Préparer la base et les fichiers statiques :**
    ```bash
    python manage.py migrate
    python manage.py collectstatic --noinput
    ```
 
-4. **Configuration du service systemd (`/etc/systemd/system/shieldnet.service`) :**
+4. **Créer le service systemd (`/etc/systemd/system/shieldnet.service`) :**
    ```ini
    [Unit]
-   Description=ShieldNet Gunicorn Application Server
+   Description=Serveur applicatif Gunicorn pour ShieldNet
    After=network.target postgresql.service
 
    [Service]
@@ -123,14 +125,14 @@ CORS_ALLOWED_ORIGINS=https://admin.shieldnet.app
    WantedBy=multi-user.target
    ```
 
-5. **Activation du service système :**
+5. **Démarrer et activer le service :**
    ```bash
    sudo systemctl daemon-reload
    sudo systemctl enable shieldnet
    sudo systemctl start shieldnet
    ```
 
-6. **Configuration du reverse proxy Nginx (`/etc/nginx/sites-available/shieldnet`) :**
+6. **Exemple de configuration Nginx (`/etc/nginx/sites-available/shieldnet`) :**
    ```nginx
    server {
        server_name api.shieldnet.app;
@@ -151,66 +153,65 @@ CORS_ALLOWED_ORIGINS=https://admin.shieldnet.app
 
 ---
 
-## 4. Pipeline d'Intégration Continue (Jenkins)
+## 4. Pipeline d'intégration continue (Jenkins)
 
-L'automatisation des tests et de la compilation est formalisée dans le fichier déclaratif `Jenkinsfile`. Tout commit ou pull request déclenche l'exécution des 6 étapes de qualification logicielle :
+Le fichier `Jenkinsfile` automatise la validation de la qualité de code à chaque modification. Il enchaîne les étapes de tests et de construction pour vérifier qu'aucune régression n'a été introduite :
 
 ```mermaid
 flowchart TD
-    A["Événement Git (Commit / Pull Request)"] --> B["Étape 1 : Validation Environnement (Python 3.12, Flutter SDK)"]
-    B --> C["Étape 2 : Tests Backend Django (64 tests + vérification migrations)"]
-    C --> D["Étape 3 : Analyse Statique Flutter (flutter analyze — 0 erreur tolérée)"]
-    D --> E["Étape 4 : Tests Frontend Flutter (86 tests unitaires et widgets)"]
-    E --> F["Étape 5 : Compilation de l'APK Android (flutter build apk)"]
-    F --> G["Étape 6 : Archivage et Publication du Binaire"]
-    G --> H["Notification d'Intégrité de la Branche"]
+    A["Événement Git (Commit / Pull Request)"] --> B["Étape 1 : Vérification de l'environnement (Python, Flutter SDK)"]
+    B --> C["Étape 2 : Tests Backend Django (74 tests unitaires & migrations)"]
+    C --> D["Étape 3 : Analyse statique Flutter (flutter analyze)"]
+    D --> E["Étape 4 : Tests Frontend Flutter (35 tests unitaires et widgets)"]
+    E --> F["Étape 5 : Compilation de l'APK (flutter build apk)"]
+    F --> G["Étape 6 : Archivage de l'artefact APK"]
+    G --> H["Rapport de succès du pipeline"]
 ```
 
-### Détail des Étapes de Contrôle :
-1. **Environnement** : Détection multi-plateforme (Linux/Windows) et vérification des binaires de développement.
-2. **Backend Django** : Validation de l'intégrité des migrations (`makemigrations --check`) et passage de la suite de 64 tests (`python manage.py test shield_api`).
-3. **Analyse Statique Dart** : Contrôle du respect des règles du linter officiel avec blocage en cas d'avertissement non résolu.
-4. **Tests Frontend** : Exécution des 86 tests Flutter vérifiant l'interception, le chiffrement HMAC, la synchronisation hors-ligne et l'absence de régression d'overflow UI.
-5. **Compilation** : Production du package Android autonome (`app-release.apk`).
-6. **Archivage** : Mise à disposition des artefacts compilés pour déploiement ou validation en recette.
+### Détail des vérifications :
+1. **Environnement** : Détection des exécutables nécessaires (`python`, `flutter`, `git`) sur la machine de build.
+2. **Backend Django** : Exécution des 74 tests unitaires et d'API (`python manage.py test shield_api`) et vérification de la cohérence des migrations (`makemigrations --check`).
+3. **Analyse statique Dart** : Contrôle du respect des bonnes pratiques avec `flutter analyze` (aucun avertissement bloquant toléré).
+4. **Tests Frontend Mobile** : Exécution des 35 tests Flutter couvrant la cryptographie HMAC, le masquage des numéros, l'interception et le bon comportement des widgets d'affichage.
+5. **Compilation** : Génération du paquet d'installation Android (`app-release.apk`).
+6. **Archivage** : Mise à disposition du binaire compilé dans les artefacts de build de Jenkins.
 
-### Démarrage de l'Instance Jenkins Locale
+### Démarrage rapide de Jenkins en local :
 ```bash
 docker compose -f docker-compose.jenkins.yml up -d
 docker exec shieldnet_jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
-Accès console : `http://localhost:8080`
+Interface accessible à l'adresse : `http://localhost:8080`
 
 ---
 
-## 5. Exploitation & Télémétrie Opérationnelle
+## 5. Commandes utiles pour l'administration et l'exploitation
 
-### Diagnostic de Disponibilité
+### Vérification de l'état du serveur
 ```bash
-# Vérification d'état HTTP
+# Vérification du point de santé de l'API
 curl -I http://127.0.0.1:8000/api/v1/health/
 
-# Collecte des métriques d'observabilité (Prometheus)
+# Consultation des métriques de base
 curl http://127.0.0.1:8000/api/v1/metrics/
 ```
 
-### Tâches de Maintenance Planifiée
+### Tâches d'entretien régulier
 ```bash
-# Purge des signalements inactifs (durée de rétention maximale : 90 jours)
+# Nettoyage des signalements inactifs de plus de 90 jours
 python manage.py purge_stale_reports --days=90
 
-# Exécution du moteur d'audit de consensus
+# Réévaluation manuelle du consensus communautaire
 python manage.py run_consensus_audit
 ```
 
 ---
 
-## 6. Résilience & Continuité d'Activité
+## 6. Stratégie de résilience et sauvegarde
 
-Le modèle architectural repose sur le principe d'autonomie locale (*Offline-First*) :
-- En cas d'indisponibilité du serveur central ou de rupture de connexion Internet, le client mobile continue d'assurer le filtrage temps réel via sa base SQLite embarquée.
-- Dès rétablissement de la connectivité réseau, la synchronisation différentielle rattrape les deltas sans interruption de service pour l'utilisateur final.
-- Sauvegarde quotidienne automatisée de la base de données :
+- **Fonctionnement hors-ligne autonome** : L'application mobile n'a pas besoin d'une connexion permanente pour filtrer les appels. Sa base SQLite locale synchronisée lui permet de continuer à protéger l'utilisateur même en zone blanche ou en mode avion.
+- **Synchronisation automatique** : Dès que l'accès Internet est rétabli, l'application récupère les dernières modifications par incréments sans perturber l'expérience utilisateur.
+- **Sauvegarde de la base de données PostgreSQL** :
   ```bash
   pg_dump -U shieldnet_admin shieldnet_prod | gzip > /backups/shieldnet_$(date +%Y%m%d).sql.gz
   ```
