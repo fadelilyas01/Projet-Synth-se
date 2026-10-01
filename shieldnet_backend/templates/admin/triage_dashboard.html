@@ -54,7 +54,7 @@
 
     <div class="kpi-card">
       <div class="kpi-card-header">
-        <span class="kpi-label">Blanchis / Faux-Positifs</span>
+        <span class="kpi-label">Numéros Autorisés</span>
         <div class="kpi-icon-pill green">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
@@ -82,7 +82,7 @@
     <form method="get" class="filter-form">
       <div class="search-input-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" name="q" value="{{ search_query }}" placeholder="Filtrer par empreinte SHA-256..." class="search-field">
+        <input type="text" name="q" value="{{ search_query }}" placeholder="Filtrer par numéro..." class="search-field">
       </div>
       <select name="category" class="select-category-field" onchange="this.form.submit()">
         <option value="">Toutes les catégories</option>
@@ -150,7 +150,7 @@
           </td>
           <td>
             {% if item.is_whitelisted %}
-              <span class="badge-safe">Blanchi (Sain)</span>
+              <span class="badge-safe">Autorisé (Sain)</span>
             {% elif item.is_blocked %}
               <span class="badge-critical">Bloqué (Malveillant)</span>
             {% else %}
@@ -163,9 +163,9 @@
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
                 Bloquer
               </button>
-              <button type="button" class="triage-action-btn triage-btn-whitelist" title="Valider comme faux-positif" onclick="executeTriage('{{ item.report.id }}', 'dismiss_safe')">
+              <button type="button" class="triage-action-btn triage-btn-whitelist" title="Valider comme numéro de confiance" onclick="executeTriage('{{ item.report.id }}', 'dismiss_safe')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Blanchir
+                Autoriser
               </button>
             </div>
           </td>
@@ -241,7 +241,7 @@ function executeTriage(reportId, action) {
         if (data.is_blocked) {
           badgeCell.innerHTML = '<span class="badge-critical">Bloqué (Malveillant)</span>';
         } else if (data.is_whitelisted) {
-          badgeCell.innerHTML = '<span class="badge-safe">Blanchi (Sain)</span>';
+          badgeCell.innerHTML = '<span class="badge-safe">Autorisé (Sain)</span>';
         }
       }
     } else {

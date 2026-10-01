@@ -355,7 +355,7 @@
       </div>
       <div class="kpi-box">
         <div class="kpi-val" style="color: #10b981;">{{ kpi_whitelisted }}</div>
-        <div class="kpi-lbl">Blanchis / Consensus ({{ consensus_pct }}%)</div>
+        <div class="kpi-lbl">Numéros Autorisés ({{ consensus_pct }}%)</div>
       </div>
       <div class="kpi-box">
         <div class="kpi-val" style="color: #f59e0b;">{{ kpi_reports }}</div>
@@ -403,7 +403,7 @@
             {% if item.is_blocked %}
               <span class="badge badge-red">BLOQUÉ</span>
             {% elif item.is_whitelisted %}
-              <span class="badge badge-green">BLANCHI</span>
+              <span class="badge badge-green">AUTORISÉ</span>
             {% else %}
               <span class="badge badge-amber">SOUS VEILLE</span>
             {% endif %}
@@ -448,9 +448,9 @@
     <!-- Signatures & Attestation -->
     <div class="signature-section">
       <div class="sig-box">
-        <strong>Attestation de Conformité Cryptographique</strong>
+        <strong>Attestation de Confidentialité & Conformité</strong>
         <p style="margin: 8px 0 0 0; font-size: 11px;">
-          L'ensemble des numéros bloqués ou blanchis est protégé par salage HMAC-SHA256 non réversible. Aucun numéro en clair n'est diffusé aux flottes mobiles sans autorisation expresse.
+          L'ensemble des numéros bloqués ou autorisés est protégé de façon irréversible. Aucun numéro en clair n'est diffusé aux flottes mobiles sans autorisation expresse.
         </p>
         <div class="sig-line"></div>
         <p style="font-size: 10px; margin-top: 6px;">Sceau d'Intégrité Télécom — ShieldNet Security</p>

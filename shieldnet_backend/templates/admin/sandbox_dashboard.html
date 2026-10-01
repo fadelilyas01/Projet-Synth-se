@@ -61,7 +61,7 @@
         </button>
         <button type="button" id="sb-btn-whitelist" class="triage-action-btn triage-btn-whitelist" onclick="executeSandboxAction('whitelist')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Blanchir (Faux-Positif)
+          Autoriser (Certifier Sain)
         </button>
       </div>
     </div>
@@ -321,7 +321,7 @@ function runSandboxAudit() {
       let recText = ai.recommendation;
       let recColor = 'var(--text-main)';
       if (ai.recommendation === 'AUTO_WHITELIST') {
-        recText = 'Blanchiment Recommandé (Faux Positif)';
+        recText = 'Autorisation Recommandée (Numéro Légitime)';
         recColor = '#10b981';
       } else if (ai.recommendation === 'ESCALATE_BLOCK') {
         recText = 'Blocage Réseau Recommandé (Menace)';
@@ -374,7 +374,7 @@ function runSandboxAudit() {
         actionBtn.className = 'ops-btn ops-btn-primary';
         actionBtn.innerHTML = `
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
-          <span>Appliquer : Blanchir & Réhabiliter Immédiatement</span>
+          <span>Appliquer : Autoriser & Réhabiliter Immédiatement</span>
         `;
         actionBtn.onclick = () => executeSandboxAction('whitelist');
         actionText.textContent = `Confiance IA de ${ai.false_positive_confidence}% pour la réhabilitation immédiate de ce service essentiel.`;

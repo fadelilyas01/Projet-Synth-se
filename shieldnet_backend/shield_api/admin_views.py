@@ -44,7 +44,7 @@ def sandbox_check_view(request):
     record = BlacklistedNumber.objects.filter(phone_hash=phone_hash).first()
 
     if record:
-        status_label = "BLANCHI" if record.is_whitelisted else ("BLOQUÉ" if record.is_blocked else "AUTORISÉ")
+        status_label = "AUTORISÉ (DE CONFIANCE)" if record.is_whitelisted else ("BLOQUÉ" if record.is_blocked else "AUTORISÉ")
         return JsonResponse({
             'success': True,
             'phone_number': phone_number,
@@ -128,7 +128,7 @@ def sandbox_action_view(request):
         record.risk_score = 0
         record.save()
         audit_action = AuditLogAction.WHITELIST_UNBLOCK
-        detail_msg = f"Numéro {masked} blanchi et réhabilité depuis le simulateur Web SOC."
+        detail_msg = f"Numéro {masked} certifié conforme et autorisé depuis le simulateur Web SOC."
 
     # Enregistrement d'audit inaltérable
     AuditLog.objects.create(
@@ -142,7 +142,7 @@ def sandbox_action_view(request):
     return JsonResponse({
         'success': True,
         'message': detail_msg,
-        'status': "BLOQUÉ" if record.is_blocked else "BLANCHI",
+        'status': "BLOQUÉ" if record.is_blocked else "AUTORISÉ",
         'risk_score': record.risk_score,
         'is_blocked': record.is_blocked,
         'is_whitelisted': record.is_whitelisted,
@@ -180,7 +180,7 @@ def export_blacklist_csv_view(request):
         'Avis Sûrs',
         'Taux de Consensus (%)',
         'Statut Bloqué',
-        'Statut Blanchi',
+        'Statut Autorisé',
         'Dernière Mise à Jour'
     ])
 
@@ -302,11 +302,11 @@ def triage_action_view(request):
         AuditLog.objects.create(
             user=request.user,
             action=AuditLogAction.WHITELIST_UNBLOCK,
-            details=f"Signalement {report.id} réhabilité et blanchi (faux positif validé par l'admin).",
+            details=f"Signalement {report.id} réhabilité et autorisé (faux positif certifié par l'admin).",
             target_hash=record.phone_hash,
             source='WEB_ADMIN'
         )
-        msg = f"Numéro {record.masked_number or record.phone_hash[:10]} blanchi et réhabilité avec succès."
+        msg = f"Numéro {record.masked_number or record.phone_hash[:10]} autorisé et réhabilité avec succès."
     else:  # flag_watch
         AuditLog.objects.create(
             user=request.user,

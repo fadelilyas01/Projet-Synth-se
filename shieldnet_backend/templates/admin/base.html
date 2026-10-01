@@ -175,11 +175,11 @@
         </a>
         <a href="/admin/operations/triage/" class="nav-item {% if '/operations/triage/' in request.path %}active{% endif %}">
           <i data-lucide="filter" style="width:18px;height:18px;"></i>
-          <span>File de Triage & Arbitrage</span>
+          <span>File de Modération</span>
         </a>
         <a href="/admin/operations/sandbox/" class="nav-item {% if '/operations/sandbox/' in request.path %}active{% endif %}">
           <i data-lucide="search-check" style="width:18px;height:18px;"></i>
-          <span>Audit Rapide d'un Numéro</span>
+          <span>Vérifier un Numéro</span>
         </a>
 
         <div class="nav-section-label">Registres & Listes Noires</div>
@@ -193,7 +193,7 @@
         </a>
         <a href="{% url 'admin:shield_api_safereport_changelist' %}" class="nav-item {% if 'safereport' in request.path %}active{% endif %}">
           <i data-lucide="shield-check" style="width:18px;height:18px;"></i>
-          <span>Contestations & Avis Sûrs</span>
+          <span>Avis Citoyens & Confiance</span>
         </a>
         <a href="{% url 'admin:shield_api_auditlog_changelist' %}" class="nav-item {% if 'auditlog' in request.path %}active{% endif %}">
           <i data-lucide="scroll-text" style="width:18px;height:18px;"></i>

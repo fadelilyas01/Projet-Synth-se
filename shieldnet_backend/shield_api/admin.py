@@ -87,7 +87,7 @@ class BlacklistedNumberAdmin(admin.ModelAdmin):
     def status_badge(self, obj):
         if obj.is_whitelisted:
             reason_label = "CONSENSUS" if obj.whitelist_reason == 'auto_consensus' else "ADMIN"
-            return format_html('<span style="background-color: rgba(59,130,246,0.2); color: #60A5FA; border: 1px solid rgba(59,130,246,0.4); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">BLANCHI ({})</span>', reason_label)
+            return format_html('<span style="background-color: rgba(59,130,246,0.2); color: #60A5FA; border: 1px solid rgba(59,130,246,0.4); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">AUTORISÉ ({})</span>', reason_label)
         if obj.is_blocked:
             return format_html('<span style="background-color: rgba(239,68,68,0.2); color: #F87171; border: 1px solid rgba(239,68,68,0.4); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">BLOQUÉ</span>')
         return format_html('<span style="background-color: rgba(16,185,129,0.2); color: #34D399; border: 1px solid rgba(16,185,129,0.4); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">AUTORISÉ</span>')
@@ -108,7 +108,7 @@ class BlacklistedNumberAdmin(admin.ModelAdmin):
             )
         self.message_user(request, f"{count} numéros mis à jour avec le statut bloqué ({role_label}).")
 
-    @admin.action(description="Débloquer et blanchir les numéros sélectionnés (Faux positifs)")
+    @admin.action(description="Débloquer et autoriser les numéros sélectionnés (Faux positifs certifiés)")
     def unblock_number(self, request, queryset):
         source = 'WEB_ADMIN' if request.user.is_superuser else 'WEB_MANAGER'
         role_label = 'admin' if request.user.is_superuser else 'gestionnaire'
@@ -118,20 +118,20 @@ class BlacklistedNumberAdmin(admin.ModelAdmin):
             AuditLog.objects.create(
                 user=request.user,
                 action=AuditLogAction.WHITELIST_UNBLOCK,
-                details=f"Numéro blanchi: {obj.masked_number or obj.phone_hash[:10]} (décision {role_label})",
+                details=f"Numéro certifié de confiance et autorisé: {obj.masked_number or obj.phone_hash[:10]} (décision {role_label})",
                 target_hash=obj.phone_hash,
                 source=source
             )
-        self.message_user(request, f"{count} numéros réinitialisés, blanchis et autorisés (décision {role_label}).")
+        self.message_user(request, f"{count} numéros réhabilités et certifiés de confiance (décision {role_label}).")
 
-    @admin.action(description="Réévaluer la consensualité (Détection automatique faux positifs)")
+    @admin.action(description="Réévaluer le consensus citoyen (Détection automatique de numéros légitimes)")
     def reevaluate_consensus_action(self, request, queryset):
         from .services import FalsePositiveConsensusService
         rehabilitated = 0
         for item in queryset:
             if FalsePositiveConsensusService.apply_consensus_decision(item.phone_hash):
                 rehabilitated += 1
-        self.message_user(request, f"{queryset.count()} numéros réévalués. {rehabilitated} faux positif(s) auto-réhabilité(s) par consensus.")
+        self.message_user(request, f"{queryset.count()} numéros réévalués. {rehabilitated} numéro(s) légitime(s) auto-réhabilité(s) par consensus citoyen.")
 
 @admin.register(SpamReport)
 class SpamReportAdmin(admin.ModelAdmin):
@@ -338,15 +338,29 @@ def custom_admin_index(request, extra_context=None):
             cat_labels = ['Fraudes Détectées', 'Hameçonnage SMS', 'Robocalls']
             cat_data = [5, 3, 2]
 
-        # Données temporelles : Signalements des 7 derniers jours (Chart Bar)
+        # Données temporelles : Signalements & Blocages des 7 derniers jours (Chart Line)
         now = timezone.now()
         daily_labels = []
-        daily_data = []
+        daily_reports_data = []
+        daily_blocked_data = []
         for i in range(6, -1, -1):
             day = (now - timedelta(days=i)).date()
             daily_labels.append(day.strftime('%d/%m'))
-            cnt = SpamReport.objects.filter(created_at__date=day).count()
-            daily_data.append(cnt)
+            cnt_rep = SpamReport.objects.filter(created_at__date=day).count()
+            cnt_blk = BlacklistedNumber.objects.filter(is_blocked=True, updated_at__date=day).count()
+            daily_reports_data.append(cnt_rep)
+            daily_blocked_data.append(cnt_blk)
+
+        # Transformation des menaces récentes pour l'affichage du tableau d'arbitrage
+        recent_pending = []
+        for num in recent_threats:
+            recent_pending.append({
+                'phone_number': num.masked_number or f"{num.phone_hash[:12]}...",
+                'category': num.category,
+                'get_category_display': num.get_category_display(),
+                'risk_score': num.risk_score,
+                'reports_count': num.reports_count,
+            })
 
         # Taux de consensus et Score de Résilience Globale (Cyber Posture)
         total_rated = total_blocked + total_whitelisted
@@ -451,10 +465,17 @@ def custom_admin_index(request, extra_context=None):
             'resilience_score': resilience_score,
             'area_codes_stats': area_codes,
             'triage_items': triage_items,
+            'recent_pending': recent_pending,
             'recent_threats': recent_threats,
             'recent_audits': recent_audits,
+            'recent_audit_logs': recent_audits,
+            'trend_labels_json': json.dumps(daily_labels),
+            'trend_reports_json': json.dumps(daily_reports_data),
+            'trend_blocked_json': json.dumps(daily_blocked_data),
+            'category_labels_json': json.dumps(cat_labels),
+            'category_counts_json': json.dumps(cat_data),
             'chart_categories_json': json.dumps({'labels': cat_labels, 'data': cat_data}),
-            'chart_daily_json': json.dumps({'labels': daily_labels, 'data': daily_data}),
+            'chart_daily_json': json.dumps({'labels': daily_labels, 'data': daily_reports_data}),
         })
     except Exception:
         pass
