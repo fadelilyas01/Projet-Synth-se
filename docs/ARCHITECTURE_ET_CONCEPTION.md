@@ -56,7 +56,7 @@ graph TD
     Controllers --> UseCases
     UseCases --> RepoInterfaces
     UseCases --> Entities
-    RepoImpl ..> RepoInterfaces
+    RepoImpl -.-> RepoInterfaces
     RepoImpl --> DataSources
     DataSources --> Core_Layer
     Core_Layer -. Partage SQLite .-> Native_Android
